@@ -1,9 +1,9 @@
-'use client'
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { slides } from '@/data/slides';
+"use client";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { slides } from "@/data/slides";
 
 const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -11,7 +11,7 @@ const HeroSection = () => {
 
   useEffect(() => {
     if (!isAutoplay) return;
-    
+
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
@@ -23,7 +23,7 @@ const HeroSection = () => {
     setIsAutoplay(false);
     setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
-  
+
   const prevSlide = () => {
     setIsAutoplay(false);
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
@@ -40,9 +40,8 @@ const HeroSection = () => {
 
   return (
     <div className="relative h-[calc(100vh-80px)] min-h-[500px] flex items-center">
-      
       {/* Left Side - PREV Button (Hidden on small devices) */}
-      <div className="hidden md:block absolute left-4 md:left-8 z-50">
+      <div className="hidden md:block absolute left-4 md:left-8 z-40">
         <Button
           onClick={prevSlide}
           className="text-white border-2 border-gray-600 rounded px-5 py-3 md:px-7 md:py-3.5 hover:text-orange-500 hover:border-orange-500 transition-all flex items-center gap-2 bg-black/60 backdrop-blur-sm hover:bg-black/80 shadow-xl"
@@ -56,13 +55,12 @@ const HeroSection = () => {
       <div className="w-full h-full relative overflow-hidden">
         {/* Slides Container */}
         <div className="absolute inset-0 flex items-center justify-center">
-          
           {/* Previous Slide - Left Partial (Hidden on mobile) */}
           <div
             className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 transition-all duration-700 ease-out"
             style={{
-              width: '25%',
-              height: '70%',
+              width: "25%",
+              height: "70%",
               opacity: 0.3,
               zIndex: 10,
             }}
@@ -94,7 +92,7 @@ const HeroSection = () => {
               />
               {/* Subtle vignette */}
               <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-black/20"></div>
-            
+
               {/* Content Overlay - Bottom */}
               <div className="absolute bottom-4 sm:bottom-8 md:bottom-12 left-4 sm:left-8 md:left-12 right-4 sm:right-8 md:right-12 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
                 <div className="flex-1">
@@ -102,10 +100,13 @@ const HeroSection = () => {
                   <p className="text-orange-400 text-[10px] sm:text-xs font-semibold tracking-wider mb-2 sm:mb-3 drop-shadow-lg">
                     {slides[currentSlide].label}
                   </p>
-                  
+
                   {/* Main Heading */}
-                  <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-relaxed tracking-wide drop-shadow-2xl" style={{ fontFamily: 'Georgia, serif' }}>
-                    {slides[currentSlide].title.split('\n').map((line, i) => (
+                  <h1
+                    className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-relaxed tracking-wide drop-shadow-2xl"
+                    style={{ fontFamily: "Georgia, serif" }}
+                  >
+                    {slides[currentSlide].title.split("\n").map((line, i) => (
                       <span key={`${slides[currentSlide].title}-${line}`}>
                         {line}
                         {i === 0 && <br />}
@@ -126,8 +127,8 @@ const HeroSection = () => {
           <div
             className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 transition-all duration-700 ease-out"
             style={{
-              width: '25%',
-              height: '70%',
+              width: "25%",
+              height: "70%",
               opacity: 0.3,
               zIndex: 10,
             }}
@@ -146,7 +147,7 @@ const HeroSection = () => {
       </div>
 
       {/* Right Side - NEXT Button (Hidden on small devices) */}
-      <div className="hidden md:block absolute right-4 md:right-8 z-50">
+      <div className="hidden md:block absolute right-4 md:right-8 z-40">
         <Button
           onClick={nextSlide}
           className="text-white border-2 border-gray-600 rounded px-5 py-3 md:px-7 md:py-3.5 hover:text-orange-500 hover:border-orange-500 transition-all flex items-center gap-2 bg-black/60 backdrop-blur-sm hover:bg-black/80 shadow-xl"
@@ -157,15 +158,15 @@ const HeroSection = () => {
       </div>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 sm:gap-3">
+      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 sm:gap-3">
         {slides.map((slide, index) => (
           <Button
             key={slide.image}
             onClick={() => goToSlide(index)}
             className={`transition-all ${
               currentSlide === index
-                ? 'w-8 sm:w-12 h-1 sm:h-1.5 bg-orange-500 shadow-[0_0_10px_rgba(255,107,53,0.8)]'
-                : 'w-6 sm:w-8 h-1 sm:h-1.5 bg-gray-600 hover:bg-gray-400'
+                ? "w-8 sm:w-12 h-1 sm:h-1.5 bg-orange-500 shadow-[0_0_10px_rgba(255,107,53,0.8)]"
+                : "w-6 sm:w-8 h-1 sm:h-1.5 bg-gray-600 hover:bg-gray-400"
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />

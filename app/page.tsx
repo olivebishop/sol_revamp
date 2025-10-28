@@ -1,7 +1,7 @@
-'use client';
-import Navbar from '@/components/shared/navbar';
-import HeroSection from '@/components/shared/hero';
-import GrainOverlay from '@/components/shared/grain-overlay';
+"use client";
+import Navbar from "@/components/shared/navbar";
+import HeroSection from "@/components/shared/hero";
+import GrainOverlay from "@/components/shared/grain-overlay";
 
 const Page = () => {
   return (
