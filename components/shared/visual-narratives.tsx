@@ -17,7 +17,7 @@ const FeaturedExperiences = () => {
               <br />
               That Matter
             </h2>
-            <p className="text-gray-700 text-sm sm:text-base leading-relaxed max-w-md">
+            <p className="text-black text-sm sm:text-base leading-relaxed max-w-md">
               Unforgettable journeys across Africa's most breathtaking
               landscapes. From wildlife encounters to cultural immersion, each
               adventure is crafted to create memories that last a lifetime.
