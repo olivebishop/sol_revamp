@@ -2,6 +2,8 @@
 import Navbar from "@/components/shared/navbar";
 import HeroSection from "@/components/shared/hero";
 import GrainOverlay from "@/components/shared/grain-overlay";
+import VisualNarratives from "@/components/shared/visual-narratives";
+import Footer from "@/components/shared/footer";
 
 const Page = () => {
   return (
@@ -14,6 +16,9 @@ const Page = () => {
 
       {/* Hero Section */}
       <HeroSection />
+
+      <VisualNarratives />
+      <Footer />
     </div>
   );
 };

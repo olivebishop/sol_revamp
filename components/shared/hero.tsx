@@ -102,10 +102,7 @@ const HeroSection = () => {
                   </p>
 
                   {/* Main Heading */}
-                  <h1
-                    className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-relaxed tracking-wide drop-shadow-2xl"
-                    style={{ fontFamily: "Georgia, serif" }}
-                  >
+                  <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-relaxed tracking-wide drop-shadow-2xl">
                     {slides[currentSlide].title.split("\n").map((line, i) => (
                       <span key={`${slides[currentSlide].title}-${line}`}>
                         {line}

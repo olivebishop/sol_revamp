@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Search, ChevronDown, Menu, X } from "lucide-react";
+import { Search, ChevronDown, Menu, X, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "../ui/button";
@@ -76,7 +76,7 @@ const Navbar = () => {
           >
             <span className="hidden sm:inline">THE SOL</span>
             <span className="sm:hidden">SOL</span>
-            <span className="text-orange-500"> OF AFRICA</span>
+            <span className="text-orange-500"> OF AFRICAN</span>
           </div>
         </div>
 
@@ -178,8 +178,9 @@ const Navbar = () => {
                         <br />
                         MIGRATION.
                       </h3>
-                      <Button className="inline-flex items-center text-white text-sm font-medium border border-white px-4 py-2 rounded hover:bg-orange-500 hover:border-orange-500 transition-colors">
-                        EXPLORE NOW →
+                      <Button className="inline-flex items-center gap-2 text-white text-sm font-medium bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded transition-colors">
+                        EXPLORE NOW
+                        <ArrowUpRight className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -189,8 +190,8 @@ const Navbar = () => {
                 <div className="relative group cursor-pointer rounded-lg overflow-hidden border border-gray-200">
                   <div className="aspect-4/3 bg-linear-to-br from-orange-900/50 to-black relative">
                     <Image
-                      src="/images/beach.png"
-                      alt="Beach Paradise"
+                      src="/images/giraffe.png"
+                      alt="giraffe in park"
                       fill
                       className="object-cover opacity-80"
                     />
@@ -203,8 +204,9 @@ const Navbar = () => {
                         <br />
                         OCEAN.
                       </h3>
-                      <Button className="inline-flex items-center text-white text-sm font-medium border border-white px-4 py-2 rounded hover:bg-orange-500 hover:border-orange-500 transition-colors">
-                        DISCOVER MORE →
+                      <Button className="inline-flex items-center gap-2 text-white text-sm font-medium bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded transition-colors">
+                        DISCOVER MORE
+                        <ArrowUpRight className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -263,8 +265,9 @@ const Navbar = () => {
                         <br />
                         UNTAMED BEAUTY.
                       </h3>
-                      <Button className="inline-flex items-center text-white text-sm font-medium border border-white px-4 py-2 rounded hover:bg-orange-500 hover:border-orange-500 transition-colors">
-                        VIEW PACKAGES →
+                      <Button className="inline-flex items-center gap-2 text-white text-sm font-medium bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded transition-colors">
+                        VIEW PACKAGES
+                        <ArrowUpRight className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -288,8 +291,9 @@ const Navbar = () => {
                         <br />
                         BEACHES AWAIT.
                       </h3>
-                      <Button className="inline-flex items-center text-white text-sm font-medium border border-white px-4 py-2 rounded hover:bg-orange-500 hover:border-orange-500 transition-colors">
-                        BOOK NOW →
+                      <Button className="inline-flex items-center gap-2 text-white text-sm font-medium bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded transition-colors">
+                        BOOK NOW
+                        <ArrowUpRight className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
