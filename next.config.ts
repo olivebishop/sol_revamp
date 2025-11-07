@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   reactCompiler: true,
 
+  turbopack: {
+    root: process.cwd(),
+  } as any,
+
   experimental: {
     turbopackFileSystemCacheForDev: true,
   },

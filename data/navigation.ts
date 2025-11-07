@@ -1,15 +1,3 @@
-export const packages = [
-  { name: "Safari Adventures", route: "/packages/safari-adventures" as const },
-  { name: "Beach Getaways", route: "/packages/beach-getaways" as const },
-  { name: "Cultural Tours", route: "/packages/cultural-tours" as const },
-  {
-    name: "Wildlife Photography",
-    route: "/packages/wildlife-photography" as const,
-  },
-  { name: "Honeymoon Packages", route: "/packages/honeymoon" as const },
-  { name: "Family Safaris", route: "/packages/family-safaris" as const },
-];
-
 export const destinations = [
   { name: "Masai Mara", route: "/destinations/masai-mara" as const },
   {

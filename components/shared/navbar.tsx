@@ -2,9 +2,10 @@
 import { useState } from "react";
 import { Search, ChevronDown, Menu, X, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import type { UrlObject } from "url";
 import Image from "next/image";
 import { Button } from "../ui/button";
-import { packages, destinations } from "@/data/navigation";
+import { destinations } from "@/data/navigation";
 import SearchMenu from "./search-menu";
 
 const Navbar = () => {
@@ -52,8 +53,9 @@ const Navbar = () => {
         {/* Left Section - Desktop Only */}
         <div className="hidden lg:flex items-center gap-0 border border-gray-700 bg-black/30 backdrop-blur-sm">
           <Link
-            href="/#book"
+            href={"/#book" as unknown as UrlObject}
             className="border-r border-gray-700 px-3 xl:px-4 py-2 text-xs font-semibold tracking-wider hover:text-orange-500 transition-colors whitespace-nowrap"
+            onMouseEnter={handleMouseLeave}
           >
             BOOK NOW
           </Link>
@@ -83,31 +85,26 @@ const Navbar = () => {
         {/* Right Section - Desktop Menu */}
         <div className="hidden lg:flex items-center gap-0 border border-gray-700 bg-black/30 backdrop-blur-sm">
           <Link
-            href="/#about"
+            href={"/about" as unknown as UrlObject}
             className="border-r border-gray-700 px-3 xl:px-4 py-2 text-xs font-semibold tracking-wider hover:text-orange-500 transition-colors whitespace-nowrap"
+            onMouseEnter={handleMouseLeave}
           >
             ABOUT
           </Link>
-          <button
-            type="button"
-            className="relative border-r border-gray-700 bg-transparent text-inherit"
-            onMouseEnter={() => handleMouseEnter("packages")}
+          <Link
+            href={"/packages" as unknown as UrlObject}
+            className="border-r border-gray-700 px-3 xl:px-4 py-2 text-xs font-semibold tracking-wider hover:text-orange-500 transition-colors whitespace-nowrap"
+            onMouseEnter={handleMouseLeave}
           >
-            <Link
-              href="/#packages"
-              className="px-3 xl:px-4 py-2 text-xs font-semibold tracking-wider hover:text-orange-500 transition-colors flex items-center gap-1 whitespace-nowrap"
-            >
-              PACKAGES
-              <ChevronDown className="w-3 h-3" />
-            </Link>
-          </button>
+            PACKAGES
+          </Link>
           <button
             type="button"
             className="relative border-r border-gray-700 bg-transparent text-inherit"
             onMouseEnter={() => handleMouseEnter("destinations")}
           >
             <Link
-              href="/#destinations"
+              href={"/#destinations" as unknown as UrlObject}
               className="px-3 xl:px-4 py-2 text-xs font-semibold tracking-wider hover:text-orange-500 transition-colors flex items-center gap-1 whitespace-nowrap"
             >
               DESTINATIONS
@@ -115,8 +112,9 @@ const Navbar = () => {
             </Link>
           </button>
           <Link
-            href="/#gallery"
+            href={"/gallery" as unknown as UrlObject}
             className="border-r border-gray-700 px-3 xl:px-4 py-2 text-xs font-semibold tracking-wider hover:text-orange-500 transition-colors whitespace-nowrap"
+            onMouseEnter={handleMouseLeave}
           >
             GALLERY
           </Link>
@@ -132,172 +130,73 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Desktop Mega Menu - Packages */}
-      {activeDropdown === "packages" && !searchOpen && (
-        <div
-          className="hidden lg:block absolute left-0 top-full w-full bg-white border-t border-gray-200 shadow-2xl z-60"
-          onMouseEnter={() => handleMouseEnter("packages")}
-          onMouseLeave={handleMouseLeave}
-          role="menu"
-        >
-          <div className="max-w-7xl mx-auto px-8 py-8">
-            <div className="grid grid-cols-3 gap-8">
-              {/* Package Categories */}
-              {packages.map((pkg) => (
-                <div key={pkg.route} className="space-y-2">
-                  <Link
-                    // @ts-expect-error - Dynamic route from data file
-                    href={pkg.route}
-                    className="text-sm font-bold text-black uppercase tracking-wide hover:text-orange-500 transition-colors"
-                  >
-                    {pkg.name}
-                  </Link>
-                  <p className="text-gray-600 text-xs">Explore this package</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Bottom Promotional Sections */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <div className="grid grid-cols-2 gap-6">
-                {/* Left Promotional Section */}
-                <div className="relative group cursor-pointer rounded-lg overflow-hidden border border-gray-200">
-                  <div className="aspect-4/3 bg-linear-to-br from-orange-900/50 to-black relative">
-                    <Image
-                      src="/images/lion.png"
-                      alt="Safari Adventure"
-                      fill
-                      className="object-cover opacity-80"
-                    />
-                    <div className="absolute bottom-0 left-0 p-6">
-                      <p className="text-white text-xs font-bold uppercase tracking-wide mb-2">
-                        PREMIUM SAFARI EXPERIENCE
-                      </p>
-                      <h3 className="text-white text-xl font-bold leading-tight mb-4">
-                        WITNESS THE GREAT
-                        <br />
-                        MIGRATION.
-                      </h3>
-                      <Button className="inline-flex items-center gap-2 text-white text-sm font-medium bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded transition-colors">
-                        EXPLORE NOW
-                        <ArrowUpRight className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Promotional Section */}
-                <div className="relative group cursor-pointer rounded-lg overflow-hidden border border-gray-200">
-                  <div className="aspect-4/3 bg-linear-to-br from-orange-900/50 to-black relative">
-                    <Image
-                      src="/images/giraffe.png"
-                      alt="giraffe in park"
-                      fill
-                      className="object-cover opacity-80"
-                    />
-                    <div className="absolute bottom-0 left-0 p-6">
-                      <p className="text-white text-xs font-bold uppercase tracking-wide mb-2">
-                        COASTAL PARADISE
-                      </p>
-                      <h3 className="text-white text-xl font-bold leading-tight mb-4">
-                        RELAX BY THE INDIAN
-                        <br />
-                        OCEAN.
-                      </h3>
-                      <Button className="inline-flex items-center gap-2 text-white text-sm font-medium bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded transition-colors">
-                        DISCOVER MORE
-                        <ArrowUpRight className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Packages now link to /packages (no desktop mega menu) */}
 
       {/* Desktop Mega Menu - Destinations */}
       {activeDropdown === "destinations" && !searchOpen && (
         <div
-          className="hidden lg:block absolute left-0 top-full w-full bg-white border-t border-gray-200 shadow-2xl z-60"
+          className="hidden lg:block absolute left-0 top-full w-full z-60"
           onMouseEnter={() => handleMouseEnter("destinations")}
           onMouseLeave={handleMouseLeave}
           role="menu"
         >
-          <div className="max-w-7xl mx-auto px-8 py-8">
-            <div className="grid grid-cols-4 gap-6">
-              {/* Destination List */}
-              {destinations.map((dest) => (
-                <div key={dest.route} className="space-y-2">
-                  <Link
-                    // @ts-expect-error - Dynamic route from data file
-                    href={dest.route}
-                    className="block text-sm font-bold text-black hover:text-orange-500 transition-colors uppercase tracking-wide"
-                  >
-                    {dest.name}
-                  </Link>
-                  <p className="text-gray-600 text-xs">
-                    Explore this destination
-                  </p>
+          <div className="mx-3 sm:mx-6 bg-white border border-gray-200 shadow-2xl rounded">
+            <div className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-0">
+              {/* Left Side - Destination Links */}
+              <div className="py-5 px-5 xl:border-r border-gray-200">
+                <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">
+                  Popular Destinations
+                </h3>
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-x-4 lg:gap-x-6 gap-y-2.5">
+                  {destinations.map((dest) => (
+                    <Link
+                      key={dest.route}
+                      href={dest.route as unknown as UrlObject}
+                      className="block group py-1"
+                    >
+                      <div className="text-xs font-semibold text-black group-hover:text-orange-500 transition-colors uppercase tracking-wide flex items-center gap-1">
+                        {dest.name}
+                        <ArrowUpRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <p className="text-gray-500 text-[10px] mt-0.5">
+                        Explore now
+                      </p>
+                    </Link>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
 
-            {/* Bottom Promotional Sections */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <div className="grid grid-cols-2 gap-6">
-                {/* Left Promotional Section */}
-                <div className="relative group cursor-pointer rounded-lg overflow-hidden border border-gray-200">
-                  <div className="aspect-4/3 bg-linear-to-br from-orange-900/50 to-black relative">
+              {/* Right Side - Featured Destination */}
+              <div className="py-5 px-5 border-t xl:border-t-0 border-gray-200">
+                <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">
+                  Featured
+                </h3>
+                <Link
+                  href={"/destinations/masai-mara" as unknown as UrlObject}
+                  className="relative group cursor-pointer rounded overflow-hidden border border-gray-200 hover:border-orange-500 transition-colors block"
+                >
+                  <div className="aspect-video xl:aspect-square bg-linear-to-br from-orange-900/50 to-black relative">
                     <Image
                       src="/images/elephant.png"
                       alt="Masai Mara"
                       fill
-                      className="object-cover opacity-80"
+                      className="object-cover opacity-80 group-hover:opacity-90 transition-opacity"
                     />
-                    <div className="absolute bottom-0 left-0 p-6">
-                      <p className="text-white text-xs font-bold uppercase tracking-wide mb-2">
+                    <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
+                    <div className="absolute bottom-0 left-0 p-3 xl:p-4">
+                      <p className="text-white text-[9px] font-bold uppercase tracking-wide mb-1 opacity-90">
                         KENYA'S JEWEL
                       </p>
-                      <h3 className="text-white text-xl font-bold leading-tight mb-4">
-                        DISCOVER MASAI MARA'S
-                        <br />
-                        UNTAMED BEAUTY.
+                      <h3 className="text-white text-xs xl:text-sm font-bold leading-tight mb-2">
+                        Discover Masai Mara's Untamed Beauty
                       </h3>
-                      <Button className="inline-flex items-center gap-2 text-white text-sm font-medium bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded transition-colors">
-                        VIEW PACKAGES
-                        <ArrowUpRight className="w-4 h-4" />
-                      </Button>
+                      <div className="inline-flex items-center gap-1 text-white text-[10px] font-medium">
+                        EXPLORE
+                        <ArrowUpRight className="w-2.5 h-2.5" />
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Right Promotional Section */}
-                <div className="relative group cursor-pointer rounded-lg overflow-hidden border border-gray-200">
-                  <div className="aspect-4/3 bg-linear-to-br from-orange-900/50 to-black relative">
-                    <Image
-                      src="/images/sea.png"
-                      alt="Zanzibar"
-                      fill
-                      className="object-cover opacity-80"
-                    />
-                    <div className="absolute bottom-0 left-0 p-6">
-                      <p className="text-white text-xs font-bold uppercase tracking-wide mb-2">
-                        ISLAND PARADISE
-                      </p>
-                      <h3 className="text-white text-xl font-bold leading-tight mb-4">
-                        ZANZIBAR'S WHITE SAND
-                        <br />
-                        BEACHES AWAIT.
-                      </h3>
-                      <Button className="inline-flex items-center gap-2 text-white text-sm font-medium bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded transition-colors">
-                        BOOK NOW
-                        <ArrowUpRight className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                </Link>
               </div>
             </div>
           </div>
@@ -309,49 +208,24 @@ const Navbar = () => {
         <div className="lg:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-md border-t border-gray-700 z-60">
           <div className="flex flex-col">
             <Link
-              href="/#book"
+              href={"/#book" as unknown as UrlObject}
               className="px-6 py-4 text-sm font-semibold tracking-wider hover:text-orange-500 hover:bg-white/5 transition-colors border-b border-gray-800"
             >
               BOOK NOW
             </Link>
             <Link
-              href="/#about"
+              href={"/about" as unknown as UrlObject}
               className="px-6 py-4 text-sm font-semibold tracking-wider hover:text-orange-500 hover:bg-white/5 transition-colors border-b border-gray-800"
             >
               ABOUT
             </Link>
 
-            {/* Mobile Packages Dropdown */}
-            <div className="border-b border-gray-800">
-              <button
-                type="button"
-                onClick={() =>
-                  setActiveDropdown(
-                    activeDropdown === "packages" ? null : "packages",
-                  )
-                }
-                className="w-full px-6 py-4 text-sm font-semibold tracking-wider hover:text-orange-500 hover:bg-white/5 transition-colors flex items-center justify-between text-left"
-              >
-                PACKAGES
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform ${activeDropdown === "packages" ? "rotate-180" : ""}`}
-                />
-              </button>
-              {activeDropdown === "packages" && (
-                <div className="bg-black/50">
-                  {packages.map((pkg) => (
-                    <Link
-                      key={pkg.route}
-                      // @ts-expect-error - Dynamic route from data file
-                      href={pkg.route}
-                      className="block px-10 py-3 text-xs tracking-wide hover:text-orange-500 hover:bg-white/5 transition-colors border-t border-gray-800/50"
-                    >
-                      {pkg.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Link
+              href={"/packages" as unknown as UrlObject}
+              className="px-6 py-4 text-sm font-semibold tracking-wider hover:text-orange-500 hover:bg-white/5 transition-colors border-b border-gray-800"
+            >
+              PACKAGES
+            </Link>
 
             {/* Mobile Destinations Dropdown */}
             <div className="border-b border-gray-800">
@@ -374,8 +248,7 @@ const Navbar = () => {
                   {destinations.map((dest) => (
                     <Link
                       key={dest.route}
-                      // @ts-expect-error - Dynamic route from data file
-                      href={dest.route}
+                      href={dest.route as unknown as UrlObject}
                       className="block px-10 py-3 text-xs tracking-wide hover:text-orange-500 hover:bg-white/5 transition-colors border-t border-gray-800/50"
                     >
                       {dest.name}
@@ -386,7 +259,7 @@ const Navbar = () => {
             </div>
 
             <Link
-              href="/#gallery"
+              href="/gallery"
               className="px-6 py-4 text-sm font-semibold tracking-wider hover:text-orange-500 hover:bg-white/5 transition-colors"
             >
               GALLERY

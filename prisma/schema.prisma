@@ -1,0 +1,261 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================
+// BETTER AUTH CORE TABLES (Required)
+// ============================================
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+
+  // Admin role - only whitelisted admins
+  isAdmin       Boolean  @default(false)
+
+  // Relations
+  sessions     Session[]
+  accounts     Account[]
+  packages     Package[]
+  destinations Destination[]
+  bookings     Booking[]     @relation("BookingApprover")
+
+  @@map("user")
+}
+
+model Session {
+  id             String   @id @default(cuid())
+  expiresAt      DateTime @db.Timestamptz
+  token          String   @unique
+  createdAt      DateTime @default(now()) @db.Timestamptz
+  updatedAt      DateTime @updatedAt @db.Timestamptz
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  impersonatedBy String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime? @db.Timestamptz
+  refreshTokenExpiresAt DateTime? @db.Timestamptz
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz
+  updatedAt             DateTime  @updatedAt @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime @db.Timestamptz
+  createdAt  DateTime @default(now()) @db.Timestamptz
+  updatedAt  DateTime @updatedAt @db.Timestamptz
+
+  @@map("verification")
+}
+
+// ============================================
+// YOUR EXISTING BUSINESS MODELS (Updated)
+// ============================================
+
+// Whitelisted Admin Emails
+model WhitelistedEmail {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isUsed    Boolean  @default(false)
+  usedBy    String? // Better Auth user ID
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+// Destinations - Blog-style content about locations
+model Destination {
+  id          String   @id @default(cuid())
+  name        String   @unique // e.g., "Masai Mara"
+  slug        String   @unique
+  about       String   @db.Text // Rich text content about the destination
+  images      String[] // Array of image URLs
+  bestTime    String // Best time to travel (e.g., "July - October")
+  pricing     Float? // Optional general pricing info
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String // Better Auth user ID
+  admin       User     @relation(fields: [createdBy], references: [id])
+
+  // Relations
+  packages Package[]
+
+  @@index([slug])
+}
+
+// Tour Packages
+model Package {
+  id              String   @id @default(cuid())
+  name            String // Package name
+  slug            String   @unique
+  packageType     String // e.g., "safari", "beach", "cultural", "adventure", "luxury"
+  description     String   @db.Text // Package details
+  pricing         Float // Price for the package
+  daysOfTravel    Int // Number of days
+  images          String[] // Array of image URLs
+  availability    String   @default("open") // "open" or "booked"
+  maxCapacity     Int      @default(10) // Maximum number of travelers
+  currentBookings Int      @default(0) // Current number of bookings
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Destination relation
+  destinationId String
+  destination   Destination @relation(fields: [destinationId], references: [id])
+
+  // Admin who created it (Better Auth user ID)
+  createdBy String
+  admin     User   @relation(fields: [createdBy], references: [id])
+
+  // Relations
+  bookings         Booking[]
+  packageSchedules PackageSchedule[]
+
+  @@index([slug])
+  @@index([destinationId])
+  @@index([availability])
+}
+
+// Package Schedule/Calendar - Specific dates for packages
+model PackageSchedule {
+  id        String  @id @default(cuid())
+  packageId String
+  package   Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  startDate DateTime
+  endDate   DateTime
+  status    String   @default("available") // "available", "booked", "cancelled"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  bookings Booking[]
+
+  @@index([packageId])
+  @@index([startDate, endDate])
+}
+
+// Bookings - Users can book without login
+model Booking {
+  id               String @id @default(cuid())
+  bookingReference String @unique @default(cuid())
+
+  // Package details
+  packageId String
+  package   Package @relation(fields: [packageId], references: [id])
+
+  scheduleId String?
+  schedule   PackageSchedule? @relation(fields: [scheduleId], references: [id])
+
+  // Traveler contact info
+  contactName  String
+  contactEmail String
+  contactPhone String
+
+  // Booking details
+  numberOfTravelers Int
+  totalAmount       Float
+
+  // Status management
+  status        String @default("pending") // "pending", "confirmed", "cancelled"
+  paymentStatus String @default("pending") // "pending", "paid"
+  paymentMethod String @default("offline") // For future: "mpesa", "bank_transfer", etc.
+
+  specialRequests String? @db.Text
+
+  // Timestamps
+  bookingDate DateTime  @default(now())
+  confirmedAt DateTime?
+  cancelledAt DateTime?
+
+  // Admin who approved/managed (Better Auth user ID)
+  approvedBy String?
+  admin      User?   @relation("BookingApprover", fields: [approvedBy], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  travelers Traveler[]
+  emails    BookingEmail[]
+
+  @@index([bookingReference])
+  @@index([contactEmail])
+  @@index([packageId])
+  @@index([status])
+}
+
+// Individual Travelers in a booking
+model Traveler {
+  id        String  @id @default(cuid())
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+
+  isPrimary Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([bookingId])
+}
+
+// Email Log - Track automated and manual emails
+model BookingEmail {
+  id        String  @id @default(cuid())
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  emailType String // "booking_submitted", "booking_confirmed", "booking_cancelled", "admin_message"
+  subject   String
+  content   String @db.Text
+  recipient String
+
+  sentAt DateTime @default(now())
+  status String   @default("sent") // "sent", "failed"
+
+  @@index([bookingId])
+}

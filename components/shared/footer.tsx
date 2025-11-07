@@ -79,14 +79,12 @@ const Footer = () => {
           {/* Legal Links */}
           <div className="space-y-3 mb-12">
             <Link
-              // @ts-expect-error - Static legal page route
               href="/privacy"
               className="block text-xs text-gray-500 hover:text-orange-500 transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
-              // @ts-expect-error - Static legal page route
               href="/terms"
               className="block text-xs text-gray-500 hover:text-orange-500 transition-colors"
             >
