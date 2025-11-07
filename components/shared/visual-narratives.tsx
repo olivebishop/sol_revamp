@@ -8,7 +8,7 @@ import { experiences } from "@/data/visual";
 
 const FeaturedExperiences = () => {
   return (
-    <section className="relative py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-linear-to-b from-gray-50 via-[#36454F] to-black">
+    <section className="relative py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-linear-to-b from-gray-50 via-[#080808] to-black">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-12 lg:mb-16 gap-6">
@@ -29,7 +29,7 @@ const FeaturedExperiences = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-black text-sm sm:text-base leading-relaxed max-w-md"
+              className="text-black font-medium text-sm sm:text-base leading-relaxed max-w-md"
             >
               Unforgettable journeys across Africa's most breathtaking
               landscapes. From wildlife encounters to cultural immersion, each

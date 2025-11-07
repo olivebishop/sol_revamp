@@ -72,14 +72,16 @@ const Navbar = () => {
 
         {/* Center Section - Logo */}
         <div className="flex-1 lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 text-center lg:text-left">
-          <div
-            className="font-bold tracking-[0.15em] sm:tracking-[0.3em] text-sm sm:text-base md:text-lg xl:text-xl text-gray-50"
-            style={{ fontFamily: "Georgia, serif" }}
-          >
-            <span className="hidden sm:inline">THE SOL</span>
-            <span className="sm:hidden">SOL</span>
-            <span className="text-orange-500"> OF AFRICAN</span>
-          </div>
+          <Link href="/" className="inline-block">
+            <div
+              className="font-bold tracking-[0.15em] sm:tracking-[0.3em] text-sm sm:text-base md:text-lg xl:text-xl text-gray-50 hover:text-orange-500 transition-colors cursor-pointer"
+              style={{ fontFamily: "Georgia, serif" }}
+            >
+              <span className="hidden sm:inline">THE SOL</span>
+              <span className="sm:hidden">SOL</span>
+              <span className="text-orange-500"> OF AFRICAN</span>
+            </div>
+          </Link>
         </div>
 
         {/* Right Section - Desktop Menu */}
