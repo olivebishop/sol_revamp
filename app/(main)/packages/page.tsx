@@ -1,6 +1,6 @@
 import GrainOverlay from "@/components/shared/grain-overlay";
 import { packages } from "@/data/packages";
-import { PackagesClient } from "./packages-client";
+import { PackagesClient } from "../../../components/packages/packages-client";
 
 export const metadata = {
   title: "Tour Packages | Safari & Beach Adventures",
