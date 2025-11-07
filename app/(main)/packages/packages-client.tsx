@@ -1,0 +1,201 @@
+"use client";
+import { useState, useMemo } from "react";
+import { PackageCard } from "@/components/shared/package-card";
+import {
+  PackageFilters,
+  type FilterOptions,
+} from "@/components/shared/package-filters";
+import { Pagination } from "@/components/shared/pagination";
+import type { PackageData } from "@/data/packages";
+
+interface PackagesClientProps {
+  packages: PackageData[];
+}
+
+export function PackagesClient({ packages }: PackagesClientProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState<FilterOptions>({
+    category: "all",
+    priceRange: "all",
+    duration: "all",
+    sortBy: "popular",
+  });
+
+  const packagesPerPage = 9; // Changed to 9 for 3 columns
+
+  // Filter and sort packages
+  const filteredPackages = useMemo(() => {
+    const result = packages.filter((pkg) => {
+      // Category filter
+      if (filters.category !== "all") {
+        const categoryMap: Record<string, string[]> = {
+          wildlife: ["safari"],
+          beach: ["beach"],
+          adventure: ["adventure"],
+          cultural: ["cultural"],
+          luxury: ["luxury", "mixed"],
+        };
+
+        const allowedTypes = categoryMap[filters.category] || [
+          filters.category,
+        ];
+        if (!allowedTypes.includes(pkg.packageType)) return false;
+      }
+
+      // Price range filter
+      if (filters.priceRange !== "all") {
+        const [min, max] = filters.priceRange.split("-").map(Number);
+        if (max) {
+          if (pkg.pricing < min || pkg.pricing > max) return false;
+        } else {
+          // "5000+" case
+          if (pkg.pricing < min) return false;
+        }
+      }
+
+      // Duration filter
+      if (filters.duration !== "all") {
+        if (filters.duration.includes("+")) {
+          // "14+" case
+          const minDays = Number.parseInt(filters.duration);
+          if (pkg.daysOfTravel < minDays) return false;
+        } else {
+          // "1-3", "4-7" etc cases
+          const [minDays, maxDays] = filters.duration.split("-").map(Number);
+          if (pkg.daysOfTravel < minDays || pkg.daysOfTravel > maxDays)
+            return false;
+        }
+      }
+
+      return true;
+    });
+
+    // Sort packages
+    switch (filters.sortBy) {
+      case "price-low":
+        result.sort((a, b) => a.pricing - b.pricing);
+        break;
+      case "price-high":
+        result.sort((a, b) => b.pricing - a.pricing);
+        break;
+      case "newest":
+        result.reverse();
+        break;
+      case "popular":
+      default:
+        // Sort by currentBookings
+        result.sort((a, b) => b.currentBookings - a.currentBookings);
+        break;
+    }
+
+    return result;
+  }, [packages, filters]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredPackages.length / packagesPerPage);
+  const startIndex = (currentPage - 1) * packagesPerPage;
+  const endIndex = startIndex + packagesPerPage;
+  const currentPackages = filteredPackages.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleFilterChange = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+  };
+
+  return (
+    <>
+      {/* Header Section */}
+      <div className="relative pt-32 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1400px] mx-auto">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 tracking-tight">
+            Explore Our
+            <span className="text-orange-500"> Packages</span>
+          </h1>
+          <p className="text-gray-400 text-lg max-w-2xl">
+            Discover unforgettable adventures tailored to create memories that
+            last a lifetime
+          </p>
+        </div>
+      </div>
+
+      {/* Filters Section */}
+      <div className="relative px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="max-w-[1400px] mx-auto">
+          <PackageFilters onFilterChange={handleFilterChange} />
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative px-4 sm:px-6 lg:px-8 pb-20">
+        <div className="max-w-[1400px] mx-auto space-y-8">
+          {/* Results Info */}
+          <div className="flex items-center justify-between">
+            <p className="text-gray-400">
+              Showing{" "}
+              <span className="text-white font-semibold">
+                {filteredPackages.length > 0 ? startIndex + 1 : 0}-
+                {Math.min(endIndex, filteredPackages.length)}
+              </span>{" "}
+              of{" "}
+              <span className="text-white font-semibold">
+                {filteredPackages.length}
+              </span>{" "}
+              packages
+            </p>
+          </div>
+
+          {/* Package Cards Grid */}
+          {currentPackages.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {currentPackages.map((pkg) => (
+                <PackageCard key={pkg.id} package={pkg} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-orange-500/10 mb-6">
+                <svg
+                  className="w-10 h-10 text-orange-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <title>No packages</title>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                No packages found
+              </h3>
+              <p className="text-gray-400 text-lg">
+                Try adjusting your filters
+              </p>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="pt-8">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}

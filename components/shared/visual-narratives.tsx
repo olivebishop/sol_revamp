@@ -7,7 +7,7 @@ import { experiences } from "@/data/visual";
 
 const FeaturedExperiences = () => {
   return (
-    <section className="relative py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 via-gray-900 to-black">
+    <section className="relative py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-linear-to-b from-gray-50 via-white to-black">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-12 lg:mb-16 gap-6">
