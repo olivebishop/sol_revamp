@@ -56,7 +56,7 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
                   className="absolute inset-0"
                 >
                   <Image
-                    src="/images/beach.png"
+                    src="/images/our_story.png"
                     alt="Our Journey"
                     fill
                     className="object-cover"
@@ -139,7 +139,7 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
                   className="absolute inset-0"
                 >
                   <Image
-                    src="/images/sea.png"
+                    src="/images/tour_guide.png"
                     alt="Our Expertise"
                     fill
                     className="object-cover"
