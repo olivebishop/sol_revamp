@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { MapPin, Calendar, Users } from "lucide-react";
 import type { PackageData } from "@/data/packages";
@@ -10,15 +11,25 @@ interface PackageCardProps {
 
 export const PackageCard = ({ package: pkg }: PackageCardProps) => {
   return (
-    <div className="group relative bg-black/40 backdrop-blur-sm border border-white/10 rounded overflow-hidden hover:border-orange-500/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,107,53,0.3)]">
+    <motion.div
+      whileHover={{ y: -8 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="group relative bg-black/40 backdrop-blur-sm border border-white/10 rounded overflow-hidden hover:border-orange-500/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,107,53,0.3)]"
+    >
       {/* Image Container */}
       <div className="relative h-56 overflow-hidden">
-        <Image
-          src={pkg.images[0]}
-          alt={pkg.name}
-          fill
-          className="object-cover group-hover:scale-110 transition-transform duration-500"
-        />
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="w-full h-full"
+        >
+          <Image
+            src={pkg.images[0]}
+            alt={pkg.name}
+            fill
+            className="object-cover"
+          />
+        </motion.div>
         <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent opacity-60"></div>
       </div>
 
@@ -36,36 +47,61 @@ export const PackageCard = ({ package: pkg }: PackageCardProps) => {
 
         {/* Details Grid */}
         <div className="grid grid-cols-1 gap-2 text-sm">
-          <div className="flex items-center gap-2 text-gray-300">
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="flex items-center gap-2 text-gray-300"
+          >
             <MapPin className="w-4 h-4 text-orange-500" />
             <span>{pkg.destination.name}</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-300">
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="flex items-center gap-2 text-gray-300"
+          >
             <Calendar className="w-4 h-4 text-orange-500" />
             <span>
               {pkg.daysOfTravel} {pkg.daysOfTravel === 1 ? "Day" : "Days"}
             </span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-300">
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
+            className="flex items-center gap-2 text-gray-300"
+          >
             <Users className="w-4 h-4 text-orange-500" />
             <span>Up to {pkg.maxCapacity} people</span>
-          </div>
+          </motion.div>
         </div>
 
         {/* Price & CTA */}
         <div className="flex items-center justify-between pt-4 border-t border-white/10">
-          <div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
             <p className="text-gray-400 text-xs">Starting from</p>
             <p className="text-2xl font-bold text-white">
               ${pkg.pricing.toLocaleString()}
               <span className="text-sm text-gray-400 font-normal">/person</span>
             </p>
-          </div>
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded px-6 hover:shadow-[0_0_20px_rgba(255,107,53,0.5)] transition-all">
-            View Details
-          </Button>
+          </motion.div>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded px-6 hover:shadow-[0_0_20px_rgba(255,107,53,0.5)] transition-all">
+              View Details
+            </Button>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };

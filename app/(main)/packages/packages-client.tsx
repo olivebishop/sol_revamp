@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
+import { motion } from "motion/react";
 import { PackageCard } from "@/components/shared/package-card";
 import {
   PackageFilters,
@@ -112,23 +113,38 @@ export function PackagesClient({ packages }: PackagesClientProps) {
       {/* Header Section */}
       <div className="relative pt-32 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-[1400px] mx-auto">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 tracking-tight">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 tracking-tight"
+          >
             Explore Our
             <span className="text-orange-500"> Packages</span>
-          </h1>
-          <p className="text-gray-400 text-lg max-w-2xl">
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+            className="text-gray-400 text-lg max-w-2xl"
+          >
             Discover unforgettable adventures tailored to create memories that
             last a lifetime
-          </p>
+          </motion.p>
         </div>
       </div>
 
       {/* Filters Section */}
-      <div className="relative px-4 sm:px-6 lg:px-8 pb-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+        className="relative px-4 sm:px-6 lg:px-8 pb-8"
+      >
         <div className="max-w-[1400px] mx-auto">
           <PackageFilters onFilterChange={handleFilterChange} />
         </div>
-      </div>
+      </motion.div>
 
       {/* Main Content */}
       <div className="relative px-4 sm:px-6 lg:px-8 pb-20">
@@ -151,13 +167,35 @@ export function PackagesClient({ packages }: PackagesClientProps) {
 
           {/* Package Cards Grid */}
           {currentPackages.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {currentPackages.map((pkg) => (
-                <PackageCard key={pkg.id} package={pkg} />
+            <motion.div
+              key={currentPage}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {currentPackages.map((pkg, index) => (
+                <motion.div
+                  key={pkg.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: index * 0.1,
+                    ease: "easeOut",
+                  }}
+                >
+                  <PackageCard package={pkg} />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : (
-            <div className="text-center py-20">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="text-center py-20"
+            >
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-orange-500/10 mb-6">
                 <svg
                   className="w-10 h-10 text-orange-500"
@@ -181,7 +219,7 @@ export function PackagesClient({ packages }: PackagesClientProps) {
               <p className="text-gray-400 text-lg">
                 Try adjusting your filters
               </p>
-            </div>
+            </motion.div>
           )}
 
           {/* Pagination */}

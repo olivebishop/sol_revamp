@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -97,25 +98,46 @@ const HeroSection = () => {
               <div className="absolute bottom-4 sm:bottom-8 md:bottom-12 left-4 sm:left-8 md:left-12 right-4 sm:right-8 md:right-12 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
                 <div className="flex-1">
                   {/* Top Label */}
-                  <p className="text-orange-400 text-[10px] sm:text-xs font-semibold tracking-wider mb-2 sm:mb-3 drop-shadow-lg">
+                  <motion.p
+                    key={`label-${currentSlide}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="text-orange-400 text-[10px] sm:text-xs font-semibold tracking-wider mb-2 sm:mb-3 drop-shadow-lg"
+                  >
                     {slides[currentSlide].label}
-                  </p>
+                  </motion.p>
 
                   {/* Main Heading */}
-                  <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-relaxed tracking-wide drop-shadow-2xl">
+                  <motion.h1
+                    key={`title-${currentSlide}`}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.4 }}
+                    className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-relaxed tracking-wide drop-shadow-2xl"
+                  >
                     {slides[currentSlide].title.split("\n").map((line, i) => (
                       <span key={`${slides[currentSlide].title}-${line}`}>
                         {line}
                         {i === 0 && <br />}
                       </span>
                     ))}
-                  </h1>
+                  </motion.h1>
                 </div>
 
                 {/* CTA Button - Right Side */}
-                <Button className="bg-orange-500 hover:bg-orange-600 text-white font-bold tracking-wider rounded px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm transition-all hover:shadow-[0_0_30px_rgba(255,107,53,0.6)] shadow-xl hover:scale-105 whitespace-nowrap">
-                  BOOK NOW
-                </Button>
+                <motion.div
+                  key={`button-${currentSlide}`}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.6 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-white font-bold tracking-wider rounded px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm transition-all hover:shadow-[0_0_30px_rgba(255,107,53,0.6)] shadow-xl whitespace-nowrap">
+                    BOOK NOW
+                  </Button>
+                </motion.div>
               </div>
             </div>
           </div>

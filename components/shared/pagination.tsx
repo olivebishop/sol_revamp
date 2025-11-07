@@ -1,4 +1,5 @@
 "use client";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -50,16 +51,23 @@ export const Pagination = ({
   };
 
   return (
-    <div className="flex items-center justify-center gap-2 flex-wrap">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex items-center justify-center gap-2 flex-wrap"
+    >
       {/* Previous Button */}
-      <Button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="bg-black/40 border border-white/10 text-white hover:border-orange-500/50 hover:bg-orange-500/10 rounded px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-      >
-        <ChevronLeft className="w-4 h-4" />
-        <span className="hidden sm:inline ml-1">Previous</span>
-      </Button>
+      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <Button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="bg-black/40 border border-white/10 text-white hover:border-orange-500/50 hover:bg-orange-500/10 rounded px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span className="hidden sm:inline ml-1">Previous</span>
+        </Button>
+      </motion.div>
 
       {/* Page Numbers */}
       <div className="flex items-center gap-2">
@@ -79,30 +87,37 @@ export const Pagination = ({
           const isActive = pageNum === currentPage;
 
           return (
-            <Button
+            <motion.div
               key={pageNum}
-              onClick={() => onPageChange(pageNum)}
-              className={`min-w-10 h-10 rounded font-semibold transition-all ${
-                isActive
-                  ? "bg-orange-500 text-white shadow-[0_0_20px_rgba(255,107,53,0.4)] border-orange-500"
-                  : "bg-black/40 border border-white/10 text-gray-300 hover:border-orange-500/50 hover:bg-orange-500/10 hover:text-white"
-              }`}
+              whileHover={{ scale: isActive ? 1 : 1.1 }}
+              whileTap={{ scale: 0.9 }}
             >
-              {pageNum}
-            </Button>
+              <Button
+                onClick={() => onPageChange(pageNum)}
+                className={`min-w-10 h-10 rounded font-semibold transition-all ${
+                  isActive
+                    ? "bg-orange-500 text-white shadow-[0_0_20px_rgba(255,107,53,0.4)] border-orange-500"
+                    : "bg-black/40 border border-white/10 text-gray-300 hover:border-orange-500/50 hover:bg-orange-500/10 hover:text-white"
+                }`}
+              >
+                {pageNum}
+              </Button>
+            </motion.div>
           );
         })}
       </div>
 
       {/* Next Button */}
-      <Button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="bg-black/40 border border-white/10 text-white hover:border-orange-500/50 hover:bg-orange-500/10 rounded px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-      >
-        <span className="hidden sm:inline mr-1">Next</span>
-        <ChevronRight className="w-4 h-4" />
-      </Button>
-    </div>
+      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <Button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="bg-black/40 border border-white/10 text-white hover:border-orange-500/50 hover:bg-orange-500/10 rounded px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        >
+          <span className="hidden sm:inline mr-1">Next</span>
+          <ChevronRight className="w-4 h-4" />
+        </Button>
+      </motion.div>
+    </motion.div>
   );
 };
