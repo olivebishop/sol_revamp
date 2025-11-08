@@ -32,19 +32,19 @@ export const whyChooseUs: WhyChooseUs[] = [
   {
     title: "Local Expertise",
     description: "Deep knowledge of Africa's hidden gems and authentic experiences",
-    image: "/images/elephant.png",
+    image: "/images/mike.jpg",
     icon: Compass,
   },
   {
     title: "Premium Service",
     description: "Luxury accommodations and personalized attention to detail",
-    image: "/images/beach.png",
+    image: "/images/premium.jpg",
     icon: Star,
   },
   {
     title: "Cultural Connection",
     description: "Meaningful interactions with local communities and traditions",
-    image: "/images/birds.png",
+    image: "/images/culture.jpg",
     icon: Heart,
   },
 ];
