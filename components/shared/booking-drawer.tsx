@@ -72,7 +72,7 @@ ${formData.message}
       {/* Backdrop */}
       <button
         type="button"
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity cursor-pointer border-0 p-0"
+        className="fixed inset-0 bg-black/60 z-50 transition-opacity cursor-pointer border-0 p-0"
         onClick={onClose}
         onKeyDown={(e) => {
           if (e.key === "Escape") onClose();

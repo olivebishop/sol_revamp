@@ -47,7 +47,7 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.7 }}
-              className="md:col-span-2 bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden group"
+              className="md:col-span-2 bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden group"
             >
               <div className="relative h-[400px]">
                 <motion.div
@@ -82,7 +82,7 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="bg-orange-500/10 backdrop-blur-sm border border-orange-500/30 rounded-2xl p-8 space-y-6"
+              className="bg-orange-500/10 border border-orange-500/30 rounded-2xl p-8 space-y-6"
             >
               <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center">
                 <div className="w-8 h-8 text-orange-500">
@@ -106,7 +106,7 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl p-8 space-y-6"
+              className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 space-y-6"
             >
               <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center">
                 <div className="w-8 h-8 text-white">
@@ -130,7 +130,7 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.7, delay: 0.3 }}
-              className="md:col-span-2 bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden group"
+              className="md:col-span-2 bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden group"
             >
               <div className="relative h-[300px]">
                 <motion.div
@@ -185,7 +185,7 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.7, delay: index * 0.1 }}
                   whileHover={{ y: -8 }}
-                  className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-2xl overflow-hidden group"
+                  className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden group"
                 >
                   <div className="relative h-80 overflow-hidden">
                     <motion.div

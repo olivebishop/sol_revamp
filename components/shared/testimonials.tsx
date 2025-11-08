@@ -43,7 +43,7 @@ export default function Testimonials({ testimonials }: TestimonialsProps) {
                 ease: "easeOut",
               }}
               whileHover={{ y: -8 }}
-              className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded p-6 space-y-4"
+              className="bg-zinc-900/50 border border-zinc-800 rounded p-6 space-y-4"
             >
               {/* Rating */}
               <div className="flex gap-1">

@@ -36,7 +36,7 @@ const Navbar = () => {
   return (
     <nav className="relative z-50" onMouseLeave={handleMouseLeave}>
       {/* Nav Backdrop */}
-      <div className="absolute inset-0 bg-linear-to-b from-black/80 via-black/40 to-transparent backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-linear-to-b from-black/80 via-black/40 to-transparent"></div>
 
       <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 pb-4 sm:pb-6 relative z-10">
         {/* Mobile Menu Button - Left */}
@@ -88,7 +88,7 @@ const Navbar = () => {
         </div>
 
         {/* Right Section - Desktop Menu */}
-        <div className="hidden lg:flex items-center gap-0 border border-gray-700 bg-black/30 backdrop-blur-sm">
+        <div className="hidden lg:flex items-center gap-0 border border-gray-700 bg-black/30">
           <Link
             href={"/about" as unknown as UrlObject}
             className="border-r border-gray-700 px-3 xl:px-4 py-2 text-xs font-semibold tracking-wider hover:text-orange-500 transition-colors whitespace-nowrap"
@@ -210,7 +210,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && !searchOpen && (
-        <div className="lg:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-md border-t border-gray-700 z-60">
+        <div className="lg:hidden absolute top-full left-0 right-0 bg-black/95 border-t border-gray-700 z-60">
           <div className="flex flex-col">
             <button
               type="button"

@@ -14,7 +14,7 @@ export const PackageCard = ({ package: pkg }: PackageCardProps) => {
     <motion.div
       whileHover={{ y: -8 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="group relative bg-black/40 backdrop-blur-sm border border-white/10 rounded overflow-hidden hover:border-orange-500/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,107,53,0.3)]"
+      className="group relative bg-black/40 border border-white/10 rounded overflow-hidden hover:border-orange-500/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,107,53,0.3)]"
     >
       {/* Image Container */}
       <div className="relative h-56 overflow-hidden">

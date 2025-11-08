@@ -27,7 +27,7 @@ export default function CTASection({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.7 }}
-          className="relative overflow-hidden rounded border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm"
+          className="relative overflow-hidden rounded border border-zinc-800 bg-zinc-900/50"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
             {/* Content Side */}

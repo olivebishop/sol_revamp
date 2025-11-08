@@ -64,7 +64,7 @@ export const PackageFilters = ({ onFilterChange }: PackageFiltersProps) => {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3 bg-black/40 backdrop-blur-sm border border-white/10 rounded p-4">
+    <div className="flex flex-wrap items-center gap-3 bg-black/40 border border-white/10 rounded p-4">
       {/* Filter Icon & Label */}
       <div className="flex items-center gap-2 text-gray-300">
         <SlidersHorizontal className="w-4 h-4 text-orange-500" />
