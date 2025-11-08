@@ -41,7 +41,7 @@ export default function WhyChooseUs() {
                 y: -8,
                 transition: { duration: 0.3 },
               }}
-              className={`relative bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded overflow-hidden group ${
+              className={`relative bg-zinc-900/50 border border-zinc-800 rounded overflow-hidden group ${
                 index === 0 ? "md:mt-0" : index === 1 ? "md:mt-12" : "md:mt-24"
               }`}
             >
@@ -58,7 +58,7 @@ export default function WhyChooseUs() {
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-linear-to-t from-black via-black/80 to-black/40" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/50 to-transparent" />
                 </motion.div>
               </div>
 
