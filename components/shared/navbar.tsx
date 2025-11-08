@@ -7,11 +7,13 @@ import Image from "next/image";
 import { Button } from "../ui/button";
 import { destinations } from "@/data/navigation";
 import SearchMenu from "./search-menu";
+import BookingDrawer from "./booking-drawer";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleMouseEnter = (menu: string) => {
     setSearchOpen(false);
@@ -52,13 +54,14 @@ const Navbar = () => {
 
         {/* Left Section - Desktop Only */}
         <div className="hidden lg:flex items-center gap-0 border border-gray-700 bg-black/30 backdrop-blur-sm">
-          <Link
-            href={"/#book" as unknown as UrlObject}
+          <button
+            type="button"
+            onClick={() => setIsDrawerOpen(true)}
             className="border-r border-gray-700 px-3 xl:px-4 py-2 text-xs font-semibold tracking-wider hover:text-orange-500 transition-colors whitespace-nowrap"
             onMouseEnter={handleMouseLeave}
           >
             BOOK NOW
-          </Link>
+          </button>
           <Button
             variant="ghost"
             size="sm"
@@ -209,12 +212,16 @@ const Navbar = () => {
       {mobileMenuOpen && !searchOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-md border-t border-gray-700 z-60">
           <div className="flex flex-col">
-            <Link
-              href={"/#book" as unknown as UrlObject}
-              className="px-6 py-4 text-sm font-semibold tracking-wider hover:text-orange-500 hover:bg-white/5 transition-colors border-b border-gray-800"
+            <button
+              type="button"
+              onClick={() => {
+                setIsDrawerOpen(true);
+                setMobileMenuOpen(false);
+              }}
+              className="px-6 py-4 text-sm font-semibold tracking-wider hover:text-orange-500 hover:bg-white/5 transition-colors border-b border-gray-800 text-left"
             >
               BOOK NOW
-            </Link>
+            </button>
             <Link
               href={"/about" as unknown as UrlObject}
               className="px-6 py-4 text-sm font-semibold tracking-wider hover:text-orange-500 hover:bg-white/5 transition-colors border-b border-gray-800"
@@ -272,6 +279,9 @@ const Navbar = () => {
 
       {/* Search Menu */}
       <SearchMenu isOpen={searchOpen} onClose={closeSearch} />
+
+      {/* Booking Drawer */}
+      <BookingDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
     </nav>
   );
 };

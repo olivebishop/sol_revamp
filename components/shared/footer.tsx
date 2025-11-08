@@ -5,9 +5,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import BookingDrawer from "./booking-drawer";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleSubmit = () => {
     if (email?.includes("@")) {
@@ -65,12 +67,13 @@ const Footer = () => {
             >
               About
             </Link>
-            <Link
-              href="/#contact"
-              className="block text-sm text-gray-600 hover:text-orange-500 transition-colors"
+            <button
+              type="button"
+              onClick={() => setIsDrawerOpen(true)}
+              className="block text-sm text-gray-600 hover:text-orange-500 transition-colors text-left"
             >
               Contact
-            </Link>
+            </button>
           </nav>
 
           {/* Divider */}
@@ -95,34 +98,34 @@ const Footer = () => {
           {/* Social Links */}
           <div className="space-y-3 mb-12">
             <a
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-xs text-gray-500 hover:text-orange-500 transition-colors"
-            >
-              Twitter
-            </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-xs text-gray-500 hover:text-orange-500 transition-colors"
-            >
-              LinkedIn
-            </a>
-            <a
-              href="https://instagram.com"
+              href="https://www.instagram.com/sol_of_african"
               target="_blank"
               rel="noopener noreferrer"
               className="block text-xs text-gray-500 hover:text-orange-500 transition-colors"
             >
               Instagram
             </a>
+            <a
+              href="https://www.facebook.com/Sol.of.African.Tours?mibextid=LQQJ4d&rdid=p8l68MNu8DTmfZRl&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2FxJYd3ocdUWag4jsW%2F%3Fmibextid%3DLQQJ4d#"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-xs text-gray-500 hover:text-orange-500 transition-colors"
+            >
+              Facebook
+            </a>
+            <a
+              href="https://www.tiktok.com/@the_sol_of_african"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-xs text-gray-500 hover:text-orange-500 transition-colors"
+            >
+              TikTok
+            </a>
           </div>
 
           {/* Copyright */}
           <p className="text-[10px] text-gray-600 mb-3">
-            solofafrica.com 2025. All rights reserved.
+            thesolofafrican.com 2025. All rights reserved.
           </p>
 
           {/* Crafted By */}
@@ -193,6 +196,9 @@ const Footer = () => {
           </div>
         </div>
       </div>
+
+      {/* Booking Drawer */}
+      <BookingDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
     </footer>
   );
 };

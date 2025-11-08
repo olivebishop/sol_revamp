@@ -4,10 +4,12 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { slides } from "@/data/slides";
+import BookingDrawer from "@/components/shared/booking-drawer";
 
 const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoplay, setIsAutoplay] = useState(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
     if (!isAutoplay) return;
@@ -112,7 +114,10 @@ const HeroSection = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button className="bg-orange-500 hover:bg-orange-600 text-white font-bold tracking-wider rounded px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm transition-all hover:shadow-[0_0_30px_rgba(255,107,53,0.6)] shadow-xl whitespace-nowrap">
+                  <Button
+                    onClick={() => setIsDrawerOpen(true)}
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold tracking-wider rounded px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm transition-all hover:shadow-[0_0_30px_rgba(255,107,53,0.6)] shadow-xl whitespace-nowrap"
+                  >
                     BOOK NOW
                   </Button>
                 </motion.div>
@@ -158,6 +163,9 @@ const HeroSection = () => {
           />
         ))}
       </div>
+
+      {/* Booking Drawer */}
+      <BookingDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
     </div>
   );
 };
