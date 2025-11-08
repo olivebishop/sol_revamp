@@ -19,6 +19,7 @@ import PackageBookingDrawer from "@/components/packages/package-booking-drawer";
 import { packages } from "@/data/packages";
 import { PackageCard } from "@/components/shared/package-card";
 import CTASection from "@/components/shared/cta-section";
+import GrainOverlay from "@/components/shared/grain-overlay";
 
 interface PackageDetailsClientProps {
   package: PackageData;
@@ -66,12 +67,15 @@ export default function PackageDetailsClient({
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Grain Overlay */}
+      <GrainOverlay />
+      
       {/* Back Button */}
-      <div className="container mx-auto px-4 pt-24 pb-4">
+      <div className="container mx-auto px-3 sm:px-4 pt-20 sm:pt-24 pb-3 sm:pb-4">
         <Link href="/packages">
           <Button
             variant="ghost"
-            className="text-gray-400 hover:text-orange-500 transition-colors flex items-center gap-2"
+            className="text-gray-400 hover:text-orange-500 transition-colors flex items-center gap-2 text-sm"
           >
             <ChevronLeft className="w-4 h-4" />
             Back to Packages
@@ -80,8 +84,8 @@ export default function PackageDetailsClient({
       </div>
 
       {/* Hero Section with Image Gallery */}
-      <section className="container mx-auto px-4 pb-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <section className="container mx-auto px-3 sm:px-4 pb-8 sm:pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           {/* Main Image */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -89,7 +93,7 @@ export default function PackageDetailsClient({
             transition={{ duration: 0.6 }}
             className="space-y-4"
           >
-            <div className="relative h-96 lg:h-[500px] rounded overflow-hidden">
+            <div className="relative h-64 sm:h-80 md:h-96 lg:h-[500px] rounded overflow-hidden">
               <Image
                 src={pkg.images[selectedImage]}
                 alt={pkg.name}
@@ -101,13 +105,13 @@ export default function PackageDetailsClient({
 
             {/* Thumbnail Gallery */}
             {pkg.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
                 {pkg.images.map((image, index) => (
                   <button
                     key={image}
                     type="button"
                     onClick={() => setSelectedImage(index)}
-                    className={`relative h-20 rounded overflow-hidden transition-all ${
+                    className={`relative h-16 sm:h-20 rounded overflow-hidden transition-all ${
                       selectedImage === index
                         ? "ring-2 ring-orange-500 scale-105"
                         : "opacity-60 hover:opacity-100"
@@ -130,15 +134,15 @@ export default function PackageDetailsClient({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="space-y-6"
+            className="space-y-4 sm:space-y-6"
           >
             {/* Badge */}
-            <div className="flex items-center gap-3">
-              <span className="inline-block px-4 py-1.5 bg-orange-500/20 border border-orange-500/50 rounded text-orange-500 text-xs font-semibold tracking-wider uppercase">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <span className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 bg-orange-500/20 border border-orange-500/50 rounded text-orange-500 text-[10px] sm:text-xs font-semibold tracking-wider uppercase">
                 {pkg.packageType}
               </span>
               <span
-                className={`inline-block px-4 py-1.5 rounded text-xs font-semibold tracking-wider uppercase ${
+                className={`inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded text-[10px] sm:text-xs font-semibold tracking-wider uppercase ${
                   pkg.availability === "open"
                     ? "bg-green-500/20 border border-green-500/50 text-green-500"
                     : "bg-red-500/20 border border-red-500/50 text-red-500"
@@ -149,12 +153,12 @@ export default function PackageDetailsClient({
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl lg:text-4xl font-bold leading-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
               {pkg.name}
             </h1>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="flex items-center gap-2 text-gray-300">
                 <MapPin className="w-5 h-5 text-orange-500 flex-shrink-0" />
                 <div>
@@ -188,23 +192,23 @@ export default function PackageDetailsClient({
             </div>
 
             {/* Description */}
-            <div className="space-y-3">
-              <h2 className="text-xl font-semibold">About This Experience</h2>
-              <p className="text-gray-400 leading-relaxed">{pkg.description}</p>
+            <div className="space-y-2 sm:space-y-3">
+              <h2 className="text-lg sm:text-xl font-semibold">About This Experience</h2>
+              <p className="text-sm sm:text-base text-gray-400 leading-relaxed">{pkg.description}</p>
             </div>
 
             {/* Availability Badge */}
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded p-4">
-              <div className="flex items-center justify-between">
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded p-3 sm:p-4">
+              <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm text-gray-400">Availability</p>
-                  <p className="text-lg font-semibold">
+                  <p className="text-xs sm:text-sm text-gray-400">Availability</p>
+                  <p className="text-base sm:text-lg font-semibold">
                     {pkg.maxCapacity - pkg.currentBookings} spots remaining
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-400">Current bookings</p>
-                  <p className="text-lg font-semibold">
+                  <p className="text-xs sm:text-sm text-gray-400">Current bookings</p>
+                  <p className="text-base sm:text-lg font-semibold">
                     {pkg.currentBookings}/{pkg.maxCapacity}
                   </p>
                 </div>
@@ -212,17 +216,17 @@ export default function PackageDetailsClient({
             </div>
 
             {/* Pricing & CTA */}
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded p-6 space-y-4">
-              <div className="flex items-end justify-between">
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded p-4 sm:p-6 space-y-3 sm:space-y-4">
+              <div className="flex items-end justify-between gap-3">
                 <div>
-                  <p className="text-sm text-gray-400">Price per person</p>
-                  <p className="text-4xl font-bold text-white">
+                  <p className="text-xs sm:text-sm text-gray-400">Price per person</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-white">
                     ${pkg.pricing.toLocaleString()}
                   </p>
                 </div>
-                <div className="flex items-center gap-1 text-orange-500">
+                <div className="flex items-center gap-0.5 sm:gap-1 text-orange-500">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={`star-${i}`} className="w-4 h-4 fill-orange-500" />
+                    <Star key={`star-${i}`} className="w-3 h-3 sm:w-4 sm:h-4 fill-orange-500" />
                   ))}
                 </div>
               </div>
@@ -230,13 +234,13 @@ export default function PackageDetailsClient({
               <Button
                 onClick={() => setIsBookingDrawerOpen(true)}
                 disabled={pkg.availability !== "open"}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 text-lg rounded hover:shadow-[0_0_30px_rgba(255,107,53,0.6)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 sm:py-6 text-base sm:text-lg rounded hover:shadow-[0_0_30px_rgba(255,107,53,0.6)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {pkg.availability === "open"
                   ? "Book This Experience"
                   : "Currently Unavailable"}
               </Button>
-              <p className="text-xs text-gray-500 text-center">
+              <p className="text-[10px] sm:text-xs text-gray-500 text-center">
                 Free cancellation up to 48 hours before departure
               </p>
             </div>
@@ -245,21 +249,21 @@ export default function PackageDetailsClient({
       </section>
 
       {/* Bento Grid Section - What's Included & Details */}
-      <section className="container mx-auto px-4 py-12 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 auto-rows-auto">
+      <section className="container mx-auto px-3 sm:px-4 py-8 sm:py-12 pb-12 sm:pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 auto-rows-auto">
           {/* What's Included - Large Card (Spans 2 columns on lg) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="bg-zinc-900/30 border border-zinc-800 rounded p-6 lg:p-8 lg:col-span-2 lg:row-span-2"
+            className="bg-zinc-900/30 border border-zinc-800 rounded p-4 sm:p-6 lg:p-8 lg:col-span-2 lg:row-span-2"
           >
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <div className="w-1 h-6 bg-orange-500 rounded"></div>
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
+              <div className="w-1 h-5 sm:h-6 bg-orange-500 rounded"></div>
               What's Included
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4">
               {features.map((feature, index) => (
                 <motion.div
                   key={feature}
@@ -269,10 +273,10 @@ export default function PackageDetailsClient({
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   className="flex items-center gap-3 text-gray-300 group hover:text-white transition-colors"
                 >
-                  <div className="flex-shrink-0 w-8 h-8 bg-orange-500/20 rounded flex items-center justify-center group-hover:bg-orange-500/30 transition-colors">
-                    <Check className="w-5 h-5 text-orange-500" />
+                  <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 bg-orange-500/20 rounded flex items-center justify-center group-hover:bg-orange-500/30 transition-colors">
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
                   </div>
-                  <span className="text-sm lg:text-base">{feature}</span>
+                  <span className="text-xs sm:text-sm lg:text-base">{feature}</span>
                 </motion.div>
               ))}
             </div>
@@ -284,16 +288,16 @@ export default function PackageDetailsClient({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="bg-linear-to-br from-orange-500/10 via-zinc-900/30 to-zinc-900/30 border border-orange-500/30 rounded p-6 lg:p-8 lg:row-span-1 relative overflow-hidden group hover:border-orange-500/50 transition-colors"
+            className="bg-linear-to-br from-orange-500/10 via-zinc-900/30 to-zinc-900/30 border border-orange-500/30 rounded p-4 sm:p-6 lg:p-8 lg:row-span-1 relative overflow-hidden group hover:border-orange-500/50 transition-colors"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-orange-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <div className="relative z-10">
-              <Calendar className="w-8 h-8 text-orange-500 mb-4" />
-              <h3 className="text-xl font-bold mb-3">Best Time to Visit</h3>
-              <p className="text-orange-400 font-semibold mb-2">
+              <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500 mb-3 sm:mb-4" />
+              <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">Best Time to Visit</h3>
+              <p className="text-orange-400 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">
                 {pkg.destination.bestTime}
               </p>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
                 Weather conditions are optimal during these months, offering the
                 best wildlife viewing and comfortable temperatures for outdoor
                 activities.
@@ -307,44 +311,44 @@ export default function PackageDetailsClient({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-zinc-900/30 border border-zinc-800 rounded p-6 lg:p-8 md:col-span-2 lg:col-span-1 lg:row-span-1 hover:border-zinc-700 transition-colors"
+            className="bg-zinc-900/30 border border-zinc-800 rounded p-4 sm:p-6 lg:p-8 md:col-span-2 lg:col-span-1 lg:row-span-1 hover:border-zinc-700 transition-colors"
           >
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <div className="w-8 h-8 bg-orange-500/20 rounded flex items-center justify-center">
-                <Info className="w-5 h-5 text-orange-500" />
+            <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-500/20 rounded flex items-center justify-center">
+                <Info className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
               </div>
               Important Information
             </h3>
-            <ul className="space-y-3 text-gray-400">
-              <li className="flex items-start gap-3 group">
-                <div className="flex-shrink-0 w-5 h-5 bg-orange-500/20 rounded-md flex items-center justify-center mt-0.5 group-hover:bg-orange-500/30 transition-colors">
-                  <Check className="w-3 h-3 text-orange-500" />
+            <ul className="space-y-2 sm:space-y-3 text-gray-400">
+              <li className="flex items-start gap-2 sm:gap-3 group">
+                <div className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 bg-orange-500/20 rounded-md flex items-center justify-center mt-0.5 group-hover:bg-orange-500/30 transition-colors">
+                  <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-orange-500" />
                 </div>
-                <span className="text-sm group-hover:text-gray-300 transition-colors">
+                <span className="text-xs sm:text-sm group-hover:text-gray-300 transition-colors">
                   Valid passport required (6 months validity)
                 </span>
               </li>
-              <li className="flex items-start gap-3 group">
-                <div className="flex-shrink-0 w-5 h-5 bg-orange-500/20 rounded flex items-center justify-center mt-0.5 group-hover:bg-orange-500/30 transition-colors">
-                  <Check className="w-3 h-3 text-orange-500" />
+              <li className="flex items-start gap-2 sm:gap-3 group">
+                <div className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 bg-orange-500/20 rounded flex items-center justify-center mt-0.5 group-hover:bg-orange-500/30 transition-colors">
+                  <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-orange-500" />
                 </div>
-                <span className="text-sm group-hover:text-gray-300 transition-colors">
+                <span className="text-xs sm:text-sm group-hover:text-gray-300 transition-colors">
                   Travel insurance recommended
                 </span>
               </li>
-              <li className="flex items-start gap-3 group">
-                <div className="flex-shrink-0 w-5 h-5 bg-orange-500/20 rounded flex items-center justify-center mt-0.5 group-hover:bg-orange-500/30 transition-colors">
-                  <Check className="w-3 h-3 text-orange-500" />
+              <li className="flex items-start gap-2 sm:gap-3 group">
+                <div className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 bg-orange-500/20 rounded flex items-center justify-center mt-0.5 group-hover:bg-orange-500/30 transition-colors">
+                  <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-orange-500" />
                 </div>
-                <span className="text-sm group-hover:text-gray-300 transition-colors">
+                <span className="text-xs sm:text-sm group-hover:text-gray-300 transition-colors">
                   Moderate fitness level required
                 </span>
               </li>
-              <li className="flex items-start gap-3 group">
-                <div className="flex-shrink-0 w-5 h-5 bg-orange-500/20 rounded flex items-center justify-center mt-0.5 group-hover:bg-orange-500/30 transition-colors">
-                  <Check className="w-3 h-3 text-orange-500" />
+              <li className="flex items-start gap-2 sm:gap-3 group">
+                <div className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 bg-orange-500/20 rounded flex items-center justify-center mt-0.5 group-hover:bg-orange-500/30 transition-colors">
+                  <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-orange-500" />
                 </div>
-                <span className="text-sm group-hover:text-gray-300 transition-colors">
+                <span className="text-xs sm:text-sm group-hover:text-gray-300 transition-colors">
                   Suitable for ages 12 and above
                 </span>
               </li>
@@ -355,25 +359,25 @@ export default function PackageDetailsClient({
 
       {/* Related Packages Section */}
       {relatedPackages.length > 0 && (
-        <section className="container mx-auto px-4 pb-20">
+        <section className="container mx-auto px-3 sm:px-4 pb-12 sm:pb-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div>
-                <h2 className="text-3xl font-bold mb-2">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">
                   More Adventures <span className="text-orange-500">Await</span>
                 </h2>
-                <p className="text-gray-400">
+                <p className="text-sm sm:text-base text-gray-400">
                   Discover other extraordinary experiences crafted just for you
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {relatedPackages.map((relatedPkg, index) => (
                 <motion.div
                   key={relatedPkg.id}
