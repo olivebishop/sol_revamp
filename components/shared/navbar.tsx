@@ -53,7 +53,7 @@ const Navbar = () => {
         </Button>
 
         {/* Left Section - Desktop Only */}
-        <div className="hidden lg:flex items-center gap-0 border border-gray-700 bg-black/30 backdrop-blur-sm">
+        <div className="hidden lg:flex items-center gap-0 border border-gray-700 bg-black/30">
           <button
             type="button"
             onClick={() => setIsDrawerOpen(true)}

@@ -149,15 +149,15 @@ const HeroSection = () => {
       </div>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 sm:gap-3">
+      <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 sm:gap-2">
         {slides.map((slide, index) => (
           <Button
             key={slide.image}
             onClick={() => goToSlide(index)}
             className={`transition-all ${
               currentSlide === index
-                ? "w-8 sm:w-12 h-1 sm:h-1.5 bg-orange-500 shadow-[0_0_10px_rgba(255,107,53,0.8)]"
-                : "w-6 sm:w-8 h-1 sm:h-1.5 bg-gray-600 hover:bg-gray-400"
+                ? "w-6 sm:w-8 h-0.5 sm:h-1 bg-orange-500 shadow-[0_0_8px_rgba(255,107,53,0.7)]"
+                : "w-4 sm:w-6 h-0.5 sm:h-1 bg-gray-600 hover:bg-gray-400"
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
