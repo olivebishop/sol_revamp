@@ -7,6 +7,7 @@ import {
   type FilterOptions,
 } from "@/components/shared/package-filters";
 import { Pagination } from "@/components/shared/pagination";
+import CTASection from "@/components/shared/cta-section";
 import type { PackageData } from "@/data/packages";
 
 interface PackagesClientProps {
@@ -234,6 +235,17 @@ export function PackagesClient({ packages }: PackagesClientProps) {
           )}
         </div>
       </div>
+
+      {/* CTA Section */}
+      <CTASection
+        title="Want Something Unique?"
+        description="Don't see exactly what you're looking for? Let's craft a personalized safari experience tailored just for you"
+        image="/images/sol_car.jpg"
+        buttonText="Chat with Michael Kisangi"
+        buttonAction={() => {
+          window.open("https://wa.me/+254706294505", "_blank");
+        }}
+      />
     </>
   );
 }
