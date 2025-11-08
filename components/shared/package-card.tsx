@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { MapPin, Calendar, Users } from "lucide-react";
@@ -96,9 +97,11 @@ export const PackageCard = ({ package: pkg }: PackageCardProps) => {
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.2 }}
           >
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded px-6 hover:shadow-[0_0_20px_rgba(255,107,53,0.5)] transition-all">
-              View Details
-            </Button>
+            <Link href={`/packages/${pkg.slug}`}>
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded px-6 hover:shadow-[0_0_20px_rgba(255,107,53,0.5)] transition-all">
+                View Details
+              </Button>
+            </Link>
           </motion.div>
         </div>
       </div>
