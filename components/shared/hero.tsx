@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { slides } from "@/data/slides";
@@ -20,16 +19,6 @@ const HeroSection = () => {
     return () => clearInterval(interval);
   }, [isAutoplay]);
 
-  const nextSlide = () => {
-    setIsAutoplay(false);
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
-
-  const prevSlide = () => {
-    setIsAutoplay(false);
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
-
   const goToSlide = (index: number) => {
     setIsAutoplay(false);
     setCurrentSlide(index);
@@ -41,17 +30,6 @@ const HeroSection = () => {
 
   return (
     <div className="relative h-[calc(100vh-80px)] min-h-[500px] flex items-center">
-      {/* Left Side - PREV Button (Hidden on small devices) */}
-      <div className="hidden md:block absolute left-4 md:left-8 z-40">
-        <Button
-          onClick={prevSlide}
-          className="text-white border-2 border-gray-600 rounded px-5 py-3 md:px-7 md:py-3.5 hover:text-orange-500 hover:border-orange-500 transition-all flex items-center gap-2 bg-black/60 backdrop-blur-sm hover:bg-black/80 shadow-xl"
-        >
-          <ChevronLeft className="w-5 h-5" />
-          <span className="text-sm font-bold tracking-wider">PREV</span>
-        </Button>
-      </div>
-
       {/* Carousel Container - Full Width */}
       <div className="w-full h-full relative overflow-hidden">
         {/* Slides Container */}
@@ -61,7 +39,7 @@ const HeroSection = () => {
             className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 transition-all duration-700 ease-out"
             style={{
               width: "25%",
-              height: "70%",
+              height: "85%",
               opacity: 0.3,
               zIndex: 10,
             }}
@@ -79,7 +57,7 @@ const HeroSection = () => {
 
           {/* Current Slide - Center Full */}
           <div
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-700 ease-out w-[90%] h-[75%] sm:h-[85%] md:w-[50%]"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-700 ease-out w-[90%] h-[75%] sm:h-[85%] md:w-[60%]"
             style={{
               zIndex: 30,
             }}
@@ -147,7 +125,7 @@ const HeroSection = () => {
             className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 transition-all duration-700 ease-out"
             style={{
               width: "25%",
-              height: "70%",
+              height: "85%",
               opacity: 0.3,
               zIndex: 10,
             }}
@@ -163,17 +141,6 @@ const HeroSection = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Right Side - NEXT Button (Hidden on small devices) */}
-      <div className="hidden md:block absolute right-4 md:right-8 z-40">
-        <Button
-          onClick={nextSlide}
-          className="text-white border-2 border-gray-600 rounded px-5 py-3 md:px-7 md:py-3.5 hover:text-orange-500 hover:border-orange-500 transition-all flex items-center gap-2 bg-black/60 backdrop-blur-sm hover:bg-black/80 shadow-xl"
-        >
-          <span className="text-sm font-bold tracking-wider">NEXT</span>
-          <ChevronRight className="w-5 h-5" />
-        </Button>
       </div>
 
       {/* Slide Indicators */}
