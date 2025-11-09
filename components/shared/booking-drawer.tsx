@@ -110,7 +110,10 @@ ${formData.message}
             <div className="space-y-5">
               {/* Name Field */}
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="name"
+                  className="text-white text-sm font-medium"
+                >
                   Full Name <span className="text-orange-500">*</span>
                 </Label>
                 <Input
@@ -128,7 +131,10 @@ ${formData.message}
 
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="email"
+                  className="text-white text-sm font-medium"
+                >
                   Email Address
                 </Label>
                 <Input
@@ -145,7 +151,10 @@ ${formData.message}
 
               {/* Phone Field */}
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="phone"
+                  className="text-white text-sm font-medium"
+                >
                   WhatsApp Number <span className="text-orange-500">*</span>
                 </Label>
                 <Input
@@ -163,7 +172,10 @@ ${formData.message}
 
               {/* Message Field */}
               <div className="space-y-2">
-                <Label htmlFor="message" className="text-white text-sm font-medium">
+                <Label
+                  htmlFor="message"
+                  className="text-white text-sm font-medium"
+                >
                   Your Message <span className="text-orange-500">*</span>
                 </Label>
                 <Textarea

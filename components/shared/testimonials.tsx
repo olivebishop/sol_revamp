@@ -25,7 +25,8 @@ export default function Testimonials({ testimonials }: TestimonialsProps) {
             <span className="text-orange-500"> Say</span>
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Real stories from real travelers who experienced the magic of Africa with us
+            Real stories from real travelers who experienced the magic of Africa
+            with us
           </p>
         </motion.div>
 
@@ -47,12 +48,14 @@ export default function Testimonials({ testimonials }: TestimonialsProps) {
             >
               {/* Rating */}
               <div className="flex gap-1">
-                {Array.from({ length: testimonial.rating }).map((_, starIndex) => (
-                  <Star
-                    key={`${testimonial.id}-star-${starIndex}`}
-                    className="w-5 h-5 fill-orange-500 text-orange-500"
-                  />
-                ))}
+                {Array.from({ length: testimonial.rating }).map(
+                  (_, starIndex) => (
+                    <Star
+                      key={`${testimonial.id}-star-${starIndex}`}
+                      className="w-5 h-5 fill-orange-500 text-orange-500"
+                    />
+                  ),
+                )}
               </div>
 
               {/* Testimonial Text */}
@@ -73,7 +76,9 @@ export default function Testimonials({ testimonials }: TestimonialsProps) {
                   </div>
                   <div>
                     <h4 className="font-bold text-white">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-400">{testimonial.location}</p>
+                    <p className="text-sm text-gray-400">
+                      {testimonial.location}
+                    </p>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center justify-between text-xs text-gray-500">

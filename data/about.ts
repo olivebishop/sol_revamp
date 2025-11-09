@@ -1,4 +1,12 @@
-import { Globe, Users, Award, MapPin, Compass, Star, Heart } from "lucide-react";
+import {
+  Globe,
+  Users,
+  Award,
+  MapPin,
+  Compass,
+  Star,
+  Heart,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface Stat {
@@ -31,7 +39,8 @@ export const stats: Stat[] = [
 export const whyChooseUs: WhyChooseUs[] = [
   {
     title: "Local Expertise",
-    description: "Deep knowledge of Africa's hidden gems and authentic experiences",
+    description:
+      "Deep knowledge of Africa's hidden gems and authentic experiences",
     image: "/images/mike.jpg",
     icon: Compass,
   },
@@ -43,7 +52,8 @@ export const whyChooseUs: WhyChooseUs[] = [
   },
   {
     title: "Cultural Connection",
-    description: "Meaningful interactions with local communities and traditions",
+    description:
+      "Meaningful interactions with local communities and traditions",
     image: "/images/culture.jpg",
     icon: Heart,
   },
@@ -69,4 +79,3 @@ export const team: TeamMember[] = [
     image: "/images/jeniffer.jpg",
   },
 ];
-

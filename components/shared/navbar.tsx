@@ -109,7 +109,7 @@ const Navbar = () => {
             onMouseEnter={() => handleMouseEnter("destinations")}
           >
             <Link
-              href={"/#destinations" as unknown as UrlObject}
+              href={"/destinations" as unknown as UrlObject}
               className="px-3 xl:px-4 py-2 text-xs font-semibold tracking-wider hover:text-orange-500 transition-colors flex items-center gap-1 whitespace-nowrap"
             >
               DESTINATIONS
@@ -281,7 +281,10 @@ const Navbar = () => {
       <SearchMenu isOpen={searchOpen} onClose={closeSearch} />
 
       {/* Booking Drawer */}
-      <BookingDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
+      <BookingDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+      />
     </nav>
   );
 };

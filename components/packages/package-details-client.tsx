@@ -37,7 +37,7 @@ export default function PackageDetailsClient({
       (p) =>
         p.id !== pkg.id &&
         (p.destination.id === pkg.destination.id ||
-          p.packageType === pkg.packageType)
+          p.packageType === pkg.packageType),
     )
     .slice(0, 3);
 
@@ -69,7 +69,7 @@ export default function PackageDetailsClient({
     <div className="min-h-screen bg-black text-white">
       {/* Grain Overlay */}
       <GrainOverlay />
-      
+
       {/* Back Button */}
       <div className="container mx-auto px-3 sm:px-4 pt-20 sm:pt-24 pb-3 sm:pb-4">
         <Link href="/packages">
@@ -163,21 +163,27 @@ export default function PackageDetailsClient({
                 <MapPin className="w-5 h-5 text-orange-500 shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500">Destination</p>
-                  <p className="text-sm font-semibold">{pkg.destination.name}</p>
+                  <p className="text-sm font-semibold">
+                    {pkg.destination.name}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-300">
                 <Calendar className="w-5 h-5 text-orange-500 shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500">Duration</p>
-                  <p className="text-sm font-semibold">{pkg.daysOfTravel} Days</p>
+                  <p className="text-sm font-semibold">
+                    {pkg.daysOfTravel} Days
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-300">
                 <Users className="w-5 h-5 text-orange-500 shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500">Max Group</p>
-                  <p className="text-sm font-semibold">{pkg.maxCapacity} People</p>
+                  <p className="text-sm font-semibold">
+                    {pkg.maxCapacity} People
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-300">
@@ -193,21 +199,29 @@ export default function PackageDetailsClient({
 
             {/* Description */}
             <div className="space-y-2 sm:space-y-3">
-              <h2 className="text-lg sm:text-xl font-semibold">About This Experience</h2>
-              <p className="text-sm sm:text-base text-gray-400 leading-relaxed">{pkg.description}</p>
+              <h2 className="text-lg sm:text-xl font-semibold">
+                About This Experience
+              </h2>
+              <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
+                {pkg.description}
+              </p>
             </div>
 
             {/* Availability Badge */}
             <div className="bg-zinc-900/50 border border-zinc-800 rounded p-3 sm:p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs sm:text-sm text-gray-400">Availability</p>
+                  <p className="text-xs sm:text-sm text-gray-400">
+                    Availability
+                  </p>
                   <p className="text-base sm:text-lg font-semibold">
                     {pkg.maxCapacity - pkg.currentBookings} spots remaining
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs sm:text-sm text-gray-400">Current bookings</p>
+                  <p className="text-xs sm:text-sm text-gray-400">
+                    Current bookings
+                  </p>
                   <p className="text-base sm:text-lg font-semibold">
                     {pkg.currentBookings}/{pkg.maxCapacity}
                   </p>
@@ -219,14 +233,19 @@ export default function PackageDetailsClient({
             <div className="bg-zinc-900/50 border border-zinc-800 rounded p-4 sm:p-6 space-y-3 sm:space-y-4">
               <div className="flex items-end justify-between gap-3">
                 <div>
-                  <p className="text-xs sm:text-sm text-gray-400">Price per person</p>
+                  <p className="text-xs sm:text-sm text-gray-400">
+                    Price per person
+                  </p>
                   <p className="text-3xl sm:text-4xl font-bold text-white">
                     ${pkg.pricing.toLocaleString()}
                   </p>
                 </div>
                 <div className="flex items-center gap-0.5 sm:gap-1 text-orange-500">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={`${pkg.id}-rating-star-${i}`} className="w-3 h-3 sm:w-4 sm:h-4 fill-orange-500" />
+                    <Star
+                      key={`${pkg.id}-rating-star-${i}`}
+                      className="w-3 h-3 sm:w-4 sm:h-4 fill-orange-500"
+                    />
                   ))}
                 </div>
               </div>
@@ -276,7 +295,9 @@ export default function PackageDetailsClient({
                   <div className="shrink-0 w-6 h-6 sm:w-8 sm:h-8 bg-orange-500/20 rounded flex items-center justify-center group-hover:bg-orange-500/30 transition-colors">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
                   </div>
-                  <span className="text-xs sm:text-sm lg:text-base">{feature}</span>
+                  <span className="text-xs sm:text-sm lg:text-base">
+                    {feature}
+                  </span>
                 </motion.div>
               ))}
             </div>
@@ -293,7 +314,9 @@ export default function PackageDetailsClient({
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-orange-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <div className="relative z-10">
               <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500 mb-3 sm:mb-4" />
-              <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">Best Time to Visit</h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">
+                Best Time to Visit
+              </h3>
               <p className="text-orange-400 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">
                 {pkg.destination.bestTime}
               </p>

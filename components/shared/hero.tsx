@@ -165,7 +165,10 @@ const HeroSection = () => {
       </div>
 
       {/* Booking Drawer */}
-      <BookingDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
+      <BookingDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+      />
     </div>
   );
 };

@@ -56,6 +56,12 @@ const Footer = () => {
               About
             </Link>
             <Link
+              href="/destinations"
+              className="block text-sm text-gray-600 hover:text-orange-500 transition-colors"
+            >
+              Destinations
+            </Link>
+            <Link
               href="/packages"
               className="block text-sm text-gray-600 hover:text-orange-500 transition-colors"
             >
@@ -198,7 +204,10 @@ const Footer = () => {
       </div>
 
       {/* Booking Drawer */}
-      <BookingDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
+      <BookingDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+      />
     </footer>
   );
 };

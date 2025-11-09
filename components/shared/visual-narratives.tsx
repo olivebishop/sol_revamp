@@ -21,7 +21,8 @@ const FeaturedExperiences = () => {
             <span className="text-orange-500"> Matter</span>
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Unforgettable journeys across Africa's most breathtaking landscapes. From wildlife encounters to cultural immersion.
+            Unforgettable journeys across Africa's most breathtaking landscapes.
+            From wildlife encounters to cultural immersion.
           </p>
         </motion.div>
 

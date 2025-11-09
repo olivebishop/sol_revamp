@@ -1,7 +1,10 @@
 "use client";
 import { motion } from "motion/react";
 import Image from "next/image";
-import { MissionIcon, SustainabilityIcon } from "@/components/shared/about-icons";
+import {
+  MissionIcon,
+  SustainabilityIcon,
+} from "@/components/shared/about-icons";
 import CTASection from "@/components/shared/cta-section";
 import type { TeamMember } from "@/data/about";
 
@@ -30,7 +33,8 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
             className="text-gray-400 text-lg max-w-2xl"
           >
-            For over 15 years, we've been turning dreams into reality, one safari at a time.
+            For over 15 years, we've been turning dreams into reality, one
+            safari at a time.
           </motion.p>
         </div>
       </div>
@@ -38,7 +42,6 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
       {/* Main Content */}
       <div className="relative px-4 sm:px-6 lg:px-8 pb-20 space-y-24">
         <div className="max-w-[1400px] mx-auto space-y-24">
-
           {/* Bento Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Large Feature - Spans 2 columns */}
@@ -68,9 +71,11 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
                     Our Story
                   </h3>
                   <p className="text-gray-300 leading-relaxed">
-                    Born from a passion for Africa's untamed beauty, The Sol began as a dream to share
-                    the continent's most breathtaking experiences. Today, we're proud to be one of
-                    East Africa's premier safari operators, creating memories that last a lifetime.
+                    Born from a passion for Africa's untamed beauty, The Sol
+                    began as a dream to share the continent's most breathtaking
+                    experiences. Today, we're proud to be one of East Africa's
+                    premier safari operators, creating memories that last a
+                    lifetime.
                   </p>
                 </div>
               </div>
@@ -94,8 +99,8 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
                   Our Mission
                 </h3>
                 <p className="text-gray-400 leading-relaxed">
-                  To deliver authentic, sustainable safari experiences that connect travelers with
-                  Africa's wildlife and cultures.
+                  To deliver authentic, sustainable safari experiences that
+                  connect travelers with Africa's wildlife and cultures.
                 </p>
               </div>
             </motion.div>
@@ -118,8 +123,8 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
                   Sustainability
                 </h3>
                 <p className="text-gray-400 leading-relaxed">
-                  We're committed to responsible tourism, supporting local communities and wildlife
-                  conservation efforts.
+                  We're committed to responsible tourism, supporting local
+                  communities and wildlife conservation efforts.
                 </p>
               </div>
             </motion.div>
@@ -151,8 +156,9 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
                     Expert Guidance
                   </h3>
                   <p className="text-gray-300 leading-relaxed">
-                    Our team of experienced guides knows every trail, every watering hole, and every
-                    hidden gem across East Africa's most spectacular landscapes.
+                    Our team of experienced guides knows every trail, every
+                    watering hole, and every hidden gem across East Africa's
+                    most spectacular landscapes.
                   </p>
                 </div>
               </div>
@@ -172,7 +178,8 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
                 <span className="text-orange-500"> Team</span>
               </h2>
               <p className="text-gray-400 text-lg max-w-2xl">
-                The passionate experts behind your unforgettable African adventure
+                The passionate experts behind your unforgettable African
+                adventure
               </p>
             </motion.div>
 
@@ -207,7 +214,9 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
                       <h3 className="text-xl font-bold font-['Cal_Sans','Oswald',sans-serif]">
                         {member.name}
                       </h3>
-                      <p className="text-orange-500 text-sm font-semibold">{member.role}</p>
+                      <p className="text-orange-500 text-sm font-semibold">
+                        {member.role}
+                      </p>
                     </div>
                     <p className="text-gray-400 text-sm italic leading-relaxed">
                       "{member.quote}"

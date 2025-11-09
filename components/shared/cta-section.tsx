@@ -102,7 +102,7 @@ export default function CTASection({
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-linear-to-r from-black/60 via-black/30 to-transparent lg:bg-linear-to-l" />
                 <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent lg:hidden" />
-              </motion.div>  
+              </motion.div>
             </motion.div>
           </div>
 

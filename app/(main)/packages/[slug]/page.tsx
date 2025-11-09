@@ -21,7 +21,7 @@ export default async function PackageDetailsPage({ params }: PageProps) {
 
 export async function generateStaticParams() {
   const { packages } = await import("@/data/packages");
-  
+
   return packages.map((pkg) => ({
     slug: pkg.slug,
   }));

@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "The Sol Of African Tours",
-  description: "Experience the beauty of Africa with our curated safari tours and unforgettable adventures.",
+  description:
+    "Experience the beauty of Africa with our curated safari tours and unforgettable adventures.",
 };
 
 export default function RootLayout({

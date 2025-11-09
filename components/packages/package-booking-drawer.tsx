@@ -75,7 +75,8 @@ export default function PackageBookingDrawer({
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Format WhatsApp message
-      const whatsappMessage = `*Booking Request - ${pkg.name}*%0A%0A` +
+      const whatsappMessage =
+        `*Booking Request - ${pkg.name}*%0A%0A` +
         `*Package:* ${pkg.name}%0A` +
         `*Destination:* ${pkg.destination.name}%0A` +
         `*Duration:* ${pkg.daysOfTravel} days%0A` +
@@ -187,7 +188,10 @@ export default function PackageBookingDrawer({
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-gray-300 flex items-center gap-2">
+                  <Label
+                    htmlFor="name"
+                    className="text-gray-300 flex items-center gap-2"
+                  >
                     <User className="w-4 h-4 text-orange-500" />
                     Full Name *
                   </Label>
@@ -206,7 +210,10 @@ export default function PackageBookingDrawer({
 
                 {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-300 flex items-center gap-2">
+                  <Label
+                    htmlFor="email"
+                    className="text-gray-300 flex items-center gap-2"
+                  >
                     <Mail className="w-4 h-4 text-orange-500" />
                     Email Address *
                   </Label>
@@ -225,7 +232,10 @@ export default function PackageBookingDrawer({
 
                 {/* Phone */}
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-gray-300 flex items-center gap-2">
+                  <Label
+                    htmlFor="phone"
+                    className="text-gray-300 flex items-center gap-2"
+                  >
                     <Phone className="w-4 h-4 text-orange-500" />
                     Phone Number *
                   </Label>
@@ -267,8 +277,8 @@ export default function PackageBookingDrawer({
                     className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 focus:border-orange-500"
                   />
                   <p className="text-xs text-gray-500">
-                    Maximum {pkg.maxCapacity - pkg.currentBookings} travelers for
-                    this booking
+                    Maximum {pkg.maxCapacity - pkg.currentBookings} travelers
+                    for this booking
                   </p>
                 </div>
 
@@ -331,7 +341,10 @@ export default function PackageBookingDrawer({
                     <div className="flex justify-between items-center">
                       <span className="text-gray-300">Estimated Total</span>
                       <span className="text-2xl font-bold text-orange-500">
-                        ${(pkg.pricing * formData.numberOfTravelers).toLocaleString()}
+                        $
+                        {(
+                          pkg.pricing * formData.numberOfTravelers
+                        ).toLocaleString()}
                       </span>
                     </div>
                     <p className="text-xs text-gray-400 mt-2">
@@ -350,8 +363,9 @@ export default function PackageBookingDrawer({
                 </Button>
 
                 <p className="text-xs text-gray-500 text-center">
-                  By submitting this form, you agree to our terms and conditions.
-                  We'll contact you within 24 hours to confirm your booking.
+                  By submitting this form, you agree to our terms and
+                  conditions. We'll contact you within 24 hours to confirm your
+                  booking.
                 </p>
               </form>
             </div>

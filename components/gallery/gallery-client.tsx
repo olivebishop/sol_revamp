@@ -32,7 +32,8 @@ export function GalleryClient({ images }: GalleryClientProps) {
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
             className="text-gray-400 text-lg max-w-2xl"
           >
-            Explore the breathtaking moments captured during our safari adventures across East Africa
+            Explore the breathtaking moments captured during our safari
+            adventures across East Africa
           </motion.p>
         </div>
       </div>
@@ -47,32 +48,32 @@ export function GalleryClient({ images }: GalleryClientProps) {
             className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4"
           >
             {images.map((image, index) => (
-                <motion.div
-                  key={image.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{
-                    duration: 0.5,
-                    delay: index * 0.1,
-                    ease: "easeOut",
-                  }}
-                  whileHover={{ y: -8 }}
-                  className="break-inside-avoid mb-4 group cursor-pointer"
-                  onClick={() => setSelectedImage(image)}
-                >
-                  <div className="relative overflow-hidden rounded-2xl bg-zinc-900/50 border border-zinc-800">
-                    <div className="relative aspect-auto overflow-hidden">
-                      <Image
-                        src={image.src}
-                        alt={image.alt}
-                        width={600}
-                        height={400}
-                        className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                    </div>
+              <motion.div
+                key={image.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.1,
+                  ease: "easeOut",
+                }}
+                whileHover={{ y: -8 }}
+                className="break-inside-avoid mb-4 group cursor-pointer"
+                onClick={() => setSelectedImage(image)}
+              >
+                <div className="relative overflow-hidden rounded-2xl bg-zinc-900/50 border border-zinc-800">
+                  <div className="relative aspect-auto overflow-hidden">
+                    <Image
+                      src={image.src}
+                      alt={image.alt}
+                      width={600}
+                      height={400}
+                      className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
                   </div>
-                </motion.div>
-              ))}
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </div>
