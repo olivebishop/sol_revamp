@@ -59,7 +59,7 @@ export function PackagesClient({ packages }: PackagesClientProps) {
       if (filters.duration !== "all") {
         if (filters.duration.includes("+")) {
           // "14+" case
-          const minDays = Number.parseInt(filters.duration);
+          const minDays = Number.parseInt(filters.duration, 10);
           if (pkg.daysOfTravel < minDays) return false;
         } else {
           // "1-3", "4-7" etc cases
