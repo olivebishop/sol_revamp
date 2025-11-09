@@ -278,7 +278,7 @@ export default function PackageBookingDrawer({
                     <CalendarIcon className="w-4 h-4 text-orange-500" />
                     Travel Dates *
                   </Label>
-                  <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
+                  <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 sm:p-4">
                     <Calendar
                       mode="range"
                       selected={dateRange}
@@ -290,14 +290,7 @@ export default function PackageBookingDrawer({
                       }
                       numberOfMonths={1}
                       disabled={(date) => date < new Date()}
-                      className="w-full text-white"
-                      classNames={{
-                        months: "w-full",
-                        month: "w-full",
-                        table: "w-full border-collapse",
-                        head_row: "w-full",
-                        row: "w-full",
-                      }}
+                      className="mx-auto"
                     />
                     {dateRange.from && dateRange.to && (
                       <div className="mt-4 pt-4 border-t border-zinc-700 text-sm text-gray-300">
