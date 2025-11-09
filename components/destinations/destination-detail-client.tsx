@@ -71,7 +71,7 @@ export default function DestinationDetailClient({
                       key={animal.name}
                       className="flex items-center gap-2 sm:gap-3 text-gray-300"
                     >
-                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-orange-500 shrink-0"></div>
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded bg-orange-500 shrink-0"></div>
                       <span className="text-sm sm:text-base lg:text-lg">
                         {animal.name}
                       </span>
@@ -91,7 +91,7 @@ export default function DestinationDetailClient({
                       key={season.period}
                       className="flex items-start gap-2 sm:gap-3 text-gray-300"
                     >
-                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-orange-500 shrink-0 mt-1.5 sm:mt-2"></div>
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded bg-orange-500 shrink-0 mt-1.5 sm:mt-2"></div>
                       <span className="text-sm sm:text-base lg:text-lg">
                         {season.period} - {season.weather}
                       </span>
@@ -103,7 +103,7 @@ export default function DestinationDetailClient({
 
             {/* Right - Hero Image */}
             <div className="lg:col-span-5 order-first lg:order-last">
-              <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] rounded-lg overflow-hidden">
+              <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] rounded overflow-hidden">
                 <Image
                   src={destination.heroImage}
                   alt={destination.name}
