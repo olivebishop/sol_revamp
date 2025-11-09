@@ -44,28 +44,28 @@ const Footer = () => {
           {/* Navigation Links */}
           <nav className="space-y-4 mb-12">
             <Link
-              href="/#gallery"
+              href="/"
               className="block text-sm text-gray-600 hover:text-orange-500 transition-colors"
             >
-              Gallery
+              Home
             </Link>
             <Link
-              href="/#packages"
+              href="/about"
+              className="block text-sm text-gray-600 hover:text-orange-500 transition-colors"
+            >
+              About
+            </Link>
+            <Link
+              href="/packages"
               className="block text-sm text-gray-600 hover:text-orange-500 transition-colors"
             >
               Packages
             </Link>
             <Link
-              href="/#destinations"
+              href="/gallery"
               className="block text-sm text-gray-600 hover:text-orange-500 transition-colors"
             >
-              Destinations
-            </Link>
-            <Link
-              href="/#about"
-              className="block text-sm text-gray-600 hover:text-orange-500 transition-colors"
-            >
-              About
+              Gallery
             </Link>
             <button
               type="button"

@@ -160,28 +160,28 @@ export default function PackageDetailsClient({
             {/* Quick Stats */}
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="flex items-center gap-2 text-gray-300">
-                <MapPin className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                <MapPin className="w-5 h-5 text-orange-500 shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500">Destination</p>
                   <p className="text-sm font-semibold">{pkg.destination.name}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-300">
-                <Calendar className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                <Calendar className="w-5 h-5 text-orange-500 shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500">Duration</p>
                   <p className="text-sm font-semibold">{pkg.daysOfTravel} Days</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-300">
-                <Users className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                <Users className="w-5 h-5 text-orange-500 shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500">Max Group</p>
                   <p className="text-sm font-semibold">{pkg.maxCapacity} People</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-300">
-                <Clock className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                <Clock className="w-5 h-5 text-orange-500 shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500">Best Time</p>
                   <p className="text-sm font-semibold truncate">
@@ -226,7 +226,7 @@ export default function PackageDetailsClient({
                 </div>
                 <div className="flex items-center gap-0.5 sm:gap-1 text-orange-500">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={`star-${i}`} className="w-3 h-3 sm:w-4 sm:h-4 fill-orange-500" />
+                    <Star key={`${pkg.id}-rating-star-${i}`} className="w-3 h-3 sm:w-4 sm:h-4 fill-orange-500" />
                   ))}
                 </div>
               </div>
@@ -273,7 +273,7 @@ export default function PackageDetailsClient({
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   className="flex items-center gap-3 text-gray-300 group hover:text-white transition-colors"
                 >
-                  <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 bg-orange-500/20 rounded flex items-center justify-center group-hover:bg-orange-500/30 transition-colors">
+                  <div className="shrink-0 w-6 h-6 sm:w-8 sm:h-8 bg-orange-500/20 rounded flex items-center justify-center group-hover:bg-orange-500/30 transition-colors">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
                   </div>
                   <span className="text-xs sm:text-sm lg:text-base">{feature}</span>
@@ -321,7 +321,7 @@ export default function PackageDetailsClient({
             </h3>
             <ul className="space-y-2 sm:space-y-3 text-gray-400">
               <li className="flex items-start gap-2 sm:gap-3 group">
-                <div className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 bg-orange-500/20 rounded-md flex items-center justify-center mt-0.5 group-hover:bg-orange-500/30 transition-colors">
+                <div className="shrink-0 w-4 h-4 sm:w-5 sm:h-5 bg-orange-500/20 rounded-md flex items-center justify-center mt-0.5 group-hover:bg-orange-500/30 transition-colors">
                   <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-orange-500" />
                 </div>
                 <span className="text-xs sm:text-sm group-hover:text-gray-300 transition-colors">
@@ -329,7 +329,7 @@ export default function PackageDetailsClient({
                 </span>
               </li>
               <li className="flex items-start gap-2 sm:gap-3 group">
-                <div className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 bg-orange-500/20 rounded flex items-center justify-center mt-0.5 group-hover:bg-orange-500/30 transition-colors">
+                <div className="shrink-0 w-4 h-4 sm:w-5 sm:h-5 bg-orange-500/20 rounded flex items-center justify-center mt-0.5 group-hover:bg-orange-500/30 transition-colors">
                   <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-orange-500" />
                 </div>
                 <span className="text-xs sm:text-sm group-hover:text-gray-300 transition-colors">

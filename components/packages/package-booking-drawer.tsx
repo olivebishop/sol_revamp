@@ -290,7 +290,14 @@ export default function PackageBookingDrawer({
                       }
                       numberOfMonths={1}
                       disabled={(date) => date < new Date()}
-                      className="text-white"
+                      className="w-full text-white"
+                      classNames={{
+                        months: "w-full",
+                        month: "w-full",
+                        table: "w-full border-collapse",
+                        head_row: "w-full",
+                        row: "w-full",
+                      }}
                     />
                     {dateRange.from && dateRange.to && (
                       <div className="mt-4 pt-4 border-t border-zinc-700 text-sm text-gray-300">
