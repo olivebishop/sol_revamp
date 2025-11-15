@@ -4,19 +4,20 @@ import { Search, X } from "lucide-react";
 import Link from "next/link";
 import type { Route } from "next";
 import { Button } from "../ui/button";
-import { destinations } from "@/data/navigation";
+
 
 interface SearchItem {
   name: string;
   route: string;
 }
 
-interface SearchMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  destinations: { name: string; route: string }[];
 }
 
-const SearchMenu = ({ isOpen, onClose }: SearchMenuProps) => {
+
+const SearchMenu = ({ isOpen, onClose, destinations }: SearchMenuProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -30,7 +31,7 @@ const SearchMenu = ({ isOpen, onClose }: SearchMenuProps) => {
     return destinations.filter((dest) =>
       dest.name.toLowerCase().includes(query),
     );
-  }, [searchQuery]);
+  }, [searchQuery, destinations]);
 
   // Focus input when menu opens - use autoFocus or manual focus on render
   if (

@@ -191,7 +191,7 @@ const NavbarClient = ({ destinations, featured }: NavbarClientProps) => {
         </div>
       )}
       {/* Search Menu */}
-      <SearchMenu isOpen={searchOpen} onClose={closeSearch} />
+      <SearchMenu isOpen={searchOpen} onClose={closeSearch} destinations={destinations} />
       {/* Booking Drawer */}
       <BookingDrawer
         isOpen={isDrawerOpen}
