@@ -11,6 +11,7 @@ interface SearchItem {
   route: string;
 }
 
+interface SearchMenuProps {
   isOpen: boolean;
   onClose: () => void;
   destinations: { name: string; route: string }[];
