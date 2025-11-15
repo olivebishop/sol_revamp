@@ -50,6 +50,26 @@ export const testimonials: Testimonial[] = [
     tripType: "Luxury Safari",
     date: "August 2024",
   },
+  {
+    id: 4,
+    name: "David & Lisa Thompson",
+    location: "Sydney, Australia",
+    rating: 5,
+    text: "We've traveled extensively, but this was our best trip yet! The accommodations were luxurious, the food exceptional, and seeing gorillas in Uganda was a once-in-a-lifetime experience. Thank you, The Sol!",
+    image: "/images/gallery/buffalo.jpg",
+    tripType: "Luxury Safari",
+    date: "August 2024",
+  },
+  {
+    id: 4,
+    name: "David & Lisa Thompson",
+    location: "Sydney, Australia",
+    rating: 5,
+    text: "We've traveled extensively, but this was our best trip yet! The accommodations were luxurious, the food exceptional, and seeing gorillas in Uganda was a once-in-a-lifetime experience. Thank you, The Sol!",
+    image: "/images/gallery/buffalo.jpg",
+    tripType: "Luxury Safari",
+    date: "August 2024",
+  },
 ];
 
 export const stats = [

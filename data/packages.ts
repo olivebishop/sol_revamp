@@ -13,7 +13,6 @@ export interface PackageData {
   pricing: number;
   daysOfTravel: number;
   images: string[];
-  availability: "open" | "booked";
   maxCapacity: number;
   currentBookings: number;
   isActive: boolean;
@@ -36,7 +35,6 @@ export const packages: PackageData[] = [
     pricing: 3499,
     daysOfTravel: 7,
     images: ["/images/lion.png", "/images/elephant.png", "/images/giraffe.png"],
-    availability: "open",
     maxCapacity: 12,
     currentBookings: 8,
     isActive: true,
@@ -57,7 +55,6 @@ export const packages: PackageData[] = [
     pricing: 1899,
     daysOfTravel: 5,
     images: ["/images/beach.png", "/images/sea.png"],
-    availability: "open",
     maxCapacity: 8,
     currentBookings: 3,
     isActive: true,
@@ -78,7 +75,6 @@ export const packages: PackageData[] = [
     pricing: 2299,
     daysOfTravel: 4,
     images: ["/images/elephant.png", "/images/giraffe.png"],
-    availability: "open",
     maxCapacity: 10,
     currentBookings: 6,
     isActive: true,
@@ -99,7 +95,6 @@ export const packages: PackageData[] = [
     pricing: 5499,
     daysOfTravel: 10,
     images: ["/images/giraffe.png", "/images/elephant.png", "/images/lion.png"],
-    availability: "open",
     maxCapacity: 15,
     currentBookings: 12,
     isActive: true,
@@ -120,7 +115,6 @@ export const packages: PackageData[] = [
     pricing: 1299,
     daysOfTravel: 3,
     images: ["/images/sea.png", "/images/beach.png"],
-    availability: "open",
     maxCapacity: 6,
     currentBookings: 2,
     isActive: true,
@@ -141,7 +135,6 @@ export const packages: PackageData[] = [
     pricing: 1799,
     daysOfTravel: 5,
     images: ["/images/birds.png", "/images/giraffe.png"],
-    availability: "open",
     maxCapacity: 8,
     currentBookings: 5,
     isActive: true,
@@ -162,7 +155,6 @@ export const packages: PackageData[] = [
     pricing: 6999,
     daysOfTravel: 14,
     images: ["/images/lion.png", "/images/beach.png", "/images/elephant.png"],
-    availability: "open",
     maxCapacity: 10,
     currentBookings: 7,
     isActive: true,
@@ -183,7 +175,6 @@ export const packages: PackageData[] = [
     pricing: 2799,
     daysOfTravel: 6,
     images: ["/images/giraffe.png", "/images/elephant.png"],
-    availability: "open",
     maxCapacity: 12,
     currentBookings: 4,
     isActive: true,
@@ -204,7 +195,6 @@ export const packages: PackageData[] = [
     pricing: 1499,
     daysOfTravel: 4,
     images: ["/images/elephant.png", "/images/giraffe.png"],
-    availability: "open",
     maxCapacity: 15,
     currentBookings: 9,
     isActive: true,
@@ -225,7 +215,6 @@ export const packages: PackageData[] = [
     pricing: 4299,
     daysOfTravel: 8,
     images: ["/images/lion.png", "/images/giraffe.png", "/images/birds.png"],
-    availability: "open",
     maxCapacity: 8,
     currentBookings: 5,
     isActive: true,
@@ -246,7 +235,6 @@ export const packages: PackageData[] = [
     pricing: 2899,
     daysOfTravel: 6,
     images: ["/images/elephant.png", "/images/lion.png"],
-    availability: "open",
     maxCapacity: 20,
     currentBookings: 14,
     isActive: true,
@@ -267,7 +255,6 @@ export const packages: PackageData[] = [
     pricing: 5899,
     daysOfTravel: 9,
     images: ["/images/beach.png", "/images/lion.png", "/images/sea.png"],
-    availability: "open",
     maxCapacity: 4,
     currentBookings: 2,
     isActive: true,
@@ -286,7 +273,7 @@ export const getPackagesByType = (type: PackageData["packageType"]) => {
 };
 
 export const getAvailablePackages = () => {
-  return packages.filter((pkg) => pkg.availability === "open" && pkg.isActive);
+  return packages.filter((pkg) => pkg.isActive);
 };
 
 export const getPackageBySlug = (slug: string) => {

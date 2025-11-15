@@ -15,6 +15,8 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@lexical/react": "^0.38.2",
+    "@lexical/rich-text": "^0.38.2",
     "@prisma/client": "^6.19.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -52,6 +54,7 @@
     "dotenv": "^17.2.3",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
+    "lexical": "^0.38.2",
     "lucide-react": "^0.548.0",
     "motion": "^12.23.24",
     "next": "16.0.0",

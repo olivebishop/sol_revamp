@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   MapPin,
   Calendar,
-  Users,
   Clock,
   Check,
   ChevronLeft,
@@ -141,15 +140,6 @@ export default function PackageDetailsClient({
               <span className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 bg-orange-500/20 border border-orange-500/50 rounded text-orange-500 text-[10px] sm:text-xs font-semibold tracking-wider uppercase">
                 {pkg.packageType}
               </span>
-              <span
-                className={`inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded text-[10px] sm:text-xs font-semibold tracking-wider uppercase ${
-                  pkg.availability === "open"
-                    ? "bg-green-500/20 border border-green-500/50 text-green-500"
-                    : "bg-red-500/20 border border-red-500/50 text-red-500"
-                }`}
-              >
-                {pkg.availability === "open" ? "Available" : "Fully Booked"}
-              </span>
             </div>
 
             {/* Title */}
@@ -178,15 +168,6 @@ export default function PackageDetailsClient({
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-300">
-                <Users className="w-5 h-5 text-orange-500 shrink-0" />
-                <div>
-                  <p className="text-xs text-gray-500">Max Group</p>
-                  <p className="text-sm font-semibold">
-                    {pkg.maxCapacity} People
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-gray-300">
                 <Clock className="w-5 h-5 text-orange-500 shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500">Best Time</p>
@@ -207,27 +188,7 @@ export default function PackageDetailsClient({
               </p>
             </div>
 
-            {/* Availability Badge */}
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded p-3 sm:p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-400">
-                    Availability
-                  </p>
-                  <p className="text-base sm:text-lg font-semibold">
-                    {pkg.maxCapacity - pkg.currentBookings} spots remaining
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs sm:text-sm text-gray-400">
-                    Current bookings
-                  </p>
-                  <p className="text-base sm:text-lg font-semibold">
-                    {pkg.currentBookings}/{pkg.maxCapacity}
-                  </p>
-                </div>
-              </div>
-            </div>
+            
 
             {/* Pricing & CTA */}
             <div className="bg-zinc-900/50 border border-zinc-800 rounded p-4 sm:p-6 space-y-3 sm:space-y-4">
@@ -252,12 +213,9 @@ export default function PackageDetailsClient({
 
               <Button
                 onClick={() => setIsBookingDrawerOpen(true)}
-                disabled={pkg.availability !== "open"}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 sm:py-6 text-base sm:text-lg rounded hover:shadow-[0_0_30px_rgba(255,107,53,0.6)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 sm:py-6 text-base sm:text-lg rounded hover:shadow-[0_0_30px_rgba(255,107,53,0.6)] transition-all"
               >
-                {pkg.availability === "open"
-                  ? "Book This Experience"
-                  : "Currently Unavailable"}
+                Book This Experience
               </Button>
               <p className="text-[10px] sm:text-xs text-gray-500 text-center">
                 Free cancellation up to 48 hours before departure

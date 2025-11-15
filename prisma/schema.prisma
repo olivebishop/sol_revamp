@@ -104,18 +104,44 @@ model Destination {
   id          String   @id @default(cuid())
   name        String   @unique // e.g., "Masai Mara"
   slug        String   @unique
-  about       String   @db.Text // Rich text content about the destination
-  images      String[] // Array of image URLs
-  bestTime    String // Best time to travel (e.g., "July - October")
-  pricing     Float? // Optional general pricing info
+  tagline     String // Short catchy description
+  description String   @db.Text // Main description
+  heroImage   String // Main hero image URL
+  images      String[] // Array of additional image URLs
+  
+  // Location info stored as JSON
+  location    Json // { country, region, coordinates: { lat, lng } }
+  
+  // Overview stored as JSON
+  overview    Json // { title, content }
+  
+  // Wildlife info stored as JSON
+  wildlife    Json // { title, description, animals: [{ name, icon, description }] }
+  
+  // Best time to visit stored as JSON
+  bestTimeToVisit Json // { title, description, seasons: [{ period, weather, highlights, recommendation }] }
+  
+  // Things to know stored as JSON
+  thingsToKnow Json // { title, items: [{ category, tips[] }] }
+  
+  // What to pack stored as JSON
+  whatToPack Json // { title, categories: [{ name, items[] }] }
+  
+  // Accommodation info stored as JSON
+  accommodation Json // { title, description, types: [{ name, description, priceRange }] }
+  
+  // Activities stored as JSON
+  activities Json // { title, list: [{ name, description, duration }] }
+  
+  // Simple arrays
+  highlights String[] // Array of highlight strings
+  funFacts   String[] // Array of fun fact strings
+  
   isPublished Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdBy   String // Better Auth user ID
   admin       User     @relation(fields: [createdBy], references: [id])
-
-  // Relations
-  packages Package[]
 
   @@index([slug])
 }
@@ -125,21 +151,19 @@ model Package {
   id              String   @id @default(cuid())
   name            String // Package name
   slug            String   @unique
-  packageType     String // e.g., "safari", "beach", "cultural", "adventure", "luxury"
+  packageType     String // e.g., "safari", "beach", "cultural", "adventure", "luxury", "mixed"
   description     String   @db.Text // Package details
   pricing         Float // Price for the package
   daysOfTravel    Int // Number of days
   images          String[] // Array of image URLs
-  availability    String   @default("open") // "open" or "booked"
   maxCapacity     Int      @default(10) // Maximum number of travelers
   currentBookings Int      @default(0) // Current number of bookings
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  // Destination relation
-  destinationId String
-  destination   Destination @relation(fields: [destinationId], references: [id])
+  // Destination relation - stored as JSON to match your data structure
+  destination Json // { id, name, slug, bestTime }
 
   // Admin who created it (Better Auth user ID)
   createdBy String
@@ -150,8 +174,7 @@ model Package {
   packageSchedules PackageSchedule[]
 
   @@index([slug])
-  @@index([destinationId])
-  @@index([availability])
+  @@index([packageType])
 }
 
 // Package Schedule/Calendar - Specific dates for packages

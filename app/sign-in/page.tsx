@@ -13,7 +13,7 @@ export default function LoginPage() {
     try {
       await signIn.social({
         provider: "google",
-        callbackURL: "/", // Redirect to home page after sign-in, change as needed
+        callbackURL: "/auth/callback", // Redirect to admin-aware callback
       });
     } catch (error) {
       console.error("Sign-in error:", error);
