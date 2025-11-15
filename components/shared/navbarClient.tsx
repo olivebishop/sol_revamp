@@ -13,11 +13,22 @@ interface DestinationNav {
   route: string;
 }
 
-interface NavbarClientProps {
-  destinations: DestinationNav[];
+
+interface Destination {
+  id: string;
+  name: string;
+  slug: string;
+  tagline: string;
+  heroImage: string;
+  description: string;
 }
 
-const NavbarClient = ({ destinations }: NavbarClientProps) => {
+interface NavbarClientProps {
+  destinations: DestinationNav[];
+  featured?: Destination | null;
+}
+
+const NavbarClient = ({ destinations, featured }: NavbarClientProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -105,32 +116,36 @@ const NavbarClient = ({ destinations }: NavbarClientProps) => {
                 <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">
                   Featured
                 </h3>
-                <Link
-                  href={"/destinations/masai-mara" as unknown as UrlObject}
-                  className="relative group cursor-pointer rounded overflow-hidden border border-gray-200 hover:border-orange-500 transition-colors block"
-                >
-                  <div className="aspect-video xl:aspect-square bg-linear-to-br from-orange-900/50 to-black relative">
-                    <Image
-                      src="/images/elephant.png"
-                      alt="Masai Mara"
-                      fill
-                      className="object-cover opacity-80 group-hover:opacity-90 transition-opacity"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
-                    <div className="absolute bottom-0 left-0 p-3 xl:p-4">
-                      <p className="text-white text-[9px] font-bold uppercase tracking-wide mb-1 opacity-90">
-                        KENYA'S JEWEL
-                      </p>
-                      <h3 className="text-white text-xs xl:text-sm font-bold leading-tight mb-2">
-                        Discover Masai Mara's Untamed Beauty
-                      </h3>
-                      <div className="inline-flex items-center gap-1 text-white text-[10px] font-medium">
-                        EXPLORE
-                        <ArrowUpRight className="w-2.5 h-2.5" />
+                {featured ? (
+                  <Link
+                    href={`/destinations/${featured.slug}` as unknown as UrlObject}
+                    className="relative group cursor-pointer rounded overflow-hidden border border-gray-200 hover:border-orange-500 transition-colors block"
+                  >
+                    <div className="aspect-video xl:aspect-square bg-linear-to-br from-orange-900/50 to-black relative">
+                      <Image
+                        src={featured.heroImage || "/images/elephant.png"}
+                        alt={featured.name}
+                        fill
+                        className="object-cover opacity-80 group-hover:opacity-90 transition-opacity"
+                      />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
+                      <div className="absolute bottom-0 left-0 p-3 xl:p-4">
+                        <p className="text-white text-[9px] font-bold uppercase tracking-wide mb-1 opacity-90">
+                          {featured.tagline || featured.name}
+                        </p>
+                        <h3 className="text-white text-xs xl:text-sm font-bold leading-tight mb-2">
+                          {featured.description?.slice(0, 60) || featured.name}
+                        </h3>
+                        <div className="inline-flex items-center gap-1 text-white text-[10px] font-medium">
+                          EXPLORE
+                          <ArrowUpRight className="w-2.5 h-2.5" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                ) : (
+                  <div className="text-gray-400 text-xs">No featured destination yet.</div>
+                )}
               </div>
             </div>
           </div>

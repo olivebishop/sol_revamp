@@ -1,15 +1,19 @@
+
 import NavbarClient from "./navbarClient";
 import { getAllDestinations } from "@/lib/dal/destinationDAL";
 
 export default async function Navbar() {
   // Fetch latest destinations from DB
   const destinations = await getAllDestinations();
-  // Map to { name, route } for compatibility
-  const navDestinations = destinations.map((d) => ({
+  // Only published destinations for nav
+  const published = destinations.filter((d) => d.isPublished);
+  const navDestinations = published.map((d) => ({
     name: d.name,
     route: `/destinations/${d.slug}`,
   }));
-  return <NavbarClient destinations={navDestinations} />;
+  // Featured: most recently created published destination, fallback to null
+  const featured = published.length > 0 ? published[0] : null;
+  return <NavbarClient destinations={navDestinations} featured={featured} />;
 }
       {/* Nav Backdrop */}
       <div className="absolute inset-0 bg-linear-to-b from-black/80 via-black/40 to-transparent"></div>
