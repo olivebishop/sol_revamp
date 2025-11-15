@@ -1,84 +1,56 @@
-import NavbarClient from "./navbarClient";
-import { getAllDestinations } from "@/lib/dal/destinationDAL";
+"use client";
+import { useState } from "react";
+import { Search, ChevronDown, Menu, X, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+import type { UrlObject } from "url";
+import Image from "next/image";
+import { Button } from "../ui/button";
+import SearchMenu from "./search-menu";
+import BookingDrawer from "./booking-drawer";
 
-export default async function Navbar() {
-  // Fetch latest destinations from DB
-  const destinations = await getAllDestinations();
-  // Map to { name, route } for compatibility
-  const navDestinations = destinations.map((d) => ({
-    name: d.name,
-    route: `/destinations/${d.slug}`,
-  }));
-  return <NavbarClient destinations={navDestinations} />;
+interface DestinationNav {
+  name: string;
+  route: string;
 }
+
+interface NavbarClientProps {
+  destinations: DestinationNav[];
+}
+
+const NavbarClient = ({ destinations }: NavbarClientProps) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const handleMouseEnter = (menu: string) => {
+    setSearchOpen(false);
+    setActiveDropdown(menu);
+  };
+
+  const handleMouseLeave = () => {
+    setActiveDropdown(null);
+  };
+
+  const toggleSearch = () => {
+    setSearchOpen(!searchOpen);
+    setActiveDropdown(null);
+  };
+
+  const closeSearch = () => {
+    setSearchOpen(false);
+  };
+
+  return (
+    <nav className="relative z-50" onMouseLeave={handleMouseLeave}>
+      {/* ...existing code, but replace all 'destinations' with the prop... */}
       {/* Nav Backdrop */}
       <div className="absolute inset-0 bg-linear-to-b from-black/80 via-black/40 to-transparent"></div>
-
       <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 pb-4 sm:pb-6 relative z-10">
-        {/* Mobile Menu Button - Left */}
-        <Button
-          className="lg:hidden p-2 hover:text-orange-500 transition-colors"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? (
-            <X className="w-5 h-5" />
-          ) : (
-            <Menu className="w-5 h-5" />
-          )}
-        </Button>
-
-        {/* Left Section - Desktop Only */}
-        <div className="hidden lg:flex items-center gap-0 border border-gray-700 bg-black/30">
-          <button
-            type="button"
-            onClick={() => setIsDrawerOpen(true)}
-            className="border-r border-gray-700 px-3 xl:px-4 py-2 text-xs font-semibold tracking-wider hover:text-orange-500 transition-colors whitespace-nowrap"
-            onMouseEnter={handleMouseLeave}
-          >
-            BOOK NOW
-          </button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="px-2 xl:px-3 py-2 cursor-pointer hover:text-orange-500 transition-colors h-auto"
-            onClick={toggleSearch}
-            aria-label="Toggle search"
-          >
-            <Search className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {/* Center Section - Logo */}
-        <div className="flex-1 lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 text-center lg:text-left">
-          <Link href="/" className="inline-block">
-            <div
-              className="font-bold tracking-[0.15em] sm:tracking-[0.3em] text-sm sm:text-base md:text-lg xl:text-xl text-gray-50 hover:text-orange-500 transition-colors cursor-pointer"
-              style={{ fontFamily: "Georgia, serif" }}
-            >
-              <span className="hidden sm:inline">THE SOL</span>
-              <span className="sm:hidden">SOL</span>
-              <span className="text-orange-500"> OF AFRICAN</span>
-            </div>
-          </Link>
-        </div>
-
+        {/* ...existing code... */}
         {/* Right Section - Desktop Menu */}
         <div className="hidden lg:flex items-center gap-0 border border-gray-700 bg-black/30">
-          <Link
-            href={"/about" as unknown as UrlObject}
-            className="border-r border-gray-700 px-3 xl:px-4 py-2 text-xs font-semibold tracking-wider hover:text-orange-500 transition-colors whitespace-nowrap"
-            onMouseEnter={handleMouseLeave}
-          >
-            ABOUT
-          </Link>
-          <Link
-            href={"/packages" as unknown as UrlObject}
-            className="border-r border-gray-700 px-3 xl:px-4 py-2 text-xs font-semibold tracking-wider hover:text-orange-500 transition-colors whitespace-nowrap"
-            onMouseEnter={handleMouseLeave}
-          >
-            PACKAGES
-          </Link>
+          {/* ...existing code... */}
           <button
             type="button"
             className="relative border-r border-gray-700 bg-transparent text-inherit"
@@ -92,27 +64,9 @@ export default async function Navbar() {
               <ChevronDown className="w-3 h-3" />
             </Link>
           </button>
-          <Link
-            href={"/gallery" as unknown as UrlObject}
-            className="border-r border-gray-700 px-3 xl:px-4 py-2 text-xs font-semibold tracking-wider hover:text-orange-500 transition-colors whitespace-nowrap"
-            onMouseEnter={handleMouseLeave}
-          >
-            GALLERY
-          </Link>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="lg:hidden p-2 hover:text-orange-500 transition-colors cursor-pointer h-auto"
-            onClick={toggleSearch}
-            aria-label="Toggle search"
-          >
-            <Search className="w-5 h-5" />
-          </Button>
+          {/* ...existing code... */}
         </div>
       </div>
-
-      {/* Packages now link to /packages (no desktop mega menu) */}
-
       {/* Desktop Mega Menu - Destinations */}
       {activeDropdown === "destinations" && !searchOpen && (
         <div
@@ -146,8 +100,7 @@ export default async function Navbar() {
                   ))}
                 </div>
               </div>
-
-              {/* Right Side - Featured Destination */}
+              {/* ...existing code... */}
               <div className="py-5 px-5 border-t xl:border-t-0 border-gray-200">
                 <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">
                   Featured
@@ -183,35 +136,11 @@ export default async function Navbar() {
           </div>
         </div>
       )}
-
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && !searchOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 bg-black/95 border-t border-gray-700 z-60">
           <div className="flex flex-col">
-            <button
-              type="button"
-              onClick={() => {
-                setIsDrawerOpen(true);
-                setMobileMenuOpen(false);
-              }}
-              className="px-6 py-4 text-sm font-semibold tracking-wider hover:text-orange-500 hover:bg-white/5 transition-colors border-b border-gray-800 text-left"
-            >
-              BOOK NOW
-            </button>
-            <Link
-              href={"/about" as unknown as UrlObject}
-              className="px-6 py-4 text-sm font-semibold tracking-wider hover:text-orange-500 hover:bg-white/5 transition-colors border-b border-gray-800"
-            >
-              ABOUT
-            </Link>
-
-            <Link
-              href={"/packages" as unknown as UrlObject}
-              className="px-6 py-4 text-sm font-semibold tracking-wider hover:text-orange-500 hover:bg-white/5 transition-colors border-b border-gray-800"
-            >
-              PACKAGES
-            </Link>
-
+            {/* ...existing code... */}
             {/* Mobile Destinations Dropdown */}
             <div className="border-b border-gray-800">
               <button
@@ -242,20 +171,12 @@ export default async function Navbar() {
                 </div>
               )}
             </div>
-
-            <Link
-              href="/gallery"
-              className="px-6 py-4 text-sm font-semibold tracking-wider hover:text-orange-500 hover:bg-white/5 transition-colors"
-            >
-              GALLERY
-            </Link>
+            {/* ...existing code... */}
           </div>
         </div>
       )}
-
       {/* Search Menu */}
       <SearchMenu isOpen={searchOpen} onClose={closeSearch} />
-
       {/* Booking Drawer */}
       <BookingDrawer
         isOpen={isDrawerOpen}
@@ -265,4 +186,4 @@ export default async function Navbar() {
   );
 };
 
-export default Navbar;
+export default NavbarClient;
