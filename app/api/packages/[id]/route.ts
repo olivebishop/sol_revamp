@@ -4,11 +4,9 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 
 // GET single package by ID
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, context: any) {
   try {
+    const params = context?.params ? await context.params : {};
     const packageData = await prisma.package.findUnique({
       where: { id: params.id },
     });
@@ -28,11 +26,9 @@ export async function GET(
 }
 
 // PUT update package (admin only)
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, context: any) {
   try {
+    const params = context?.params ? await context.params : {};
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -80,11 +76,9 @@ export async function PUT(
 }
 
 // DELETE package (admin only)
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, context: any) {
   try {
+    const params = context?.params ? await context.params : {};
     const session = await auth.api.getSession({
       headers: await headers(),
     });
