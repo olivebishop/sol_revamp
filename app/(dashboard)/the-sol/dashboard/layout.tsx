@@ -3,11 +3,10 @@ import React from "react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-black text-white">
-      <DashboardSidebar />
-      <main className="flex-1 p-6 overflow-x-auto">
+    <DashboardSidebar>
+      <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-auto bg-black text-white">
         {children}
       </main>
-    </div>
+    </DashboardSidebar>
   );
 }

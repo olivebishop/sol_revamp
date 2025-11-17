@@ -8,20 +8,22 @@ import { Suspense } from "react";
 // Loading component for the skeleton UI
 function PackagesLoading() {
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="w-full">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Packages Management</h1>
-            <p className="text-gray-400">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+              Packages Management
+            </h1>
+            <p className="text-sm sm:text-base text-gray-400">
               Create and manage tour packages
             </p>
           </div>
         </div>
-        <div className="space-y-4">
-          <div className="h-32 bg-gray-800 rounded-lg animate-pulse" />
-          <div className="h-32 bg-gray-800 rounded-lg animate-pulse" />
-          <div className="h-32 bg-gray-800 rounded-lg animate-pulse" />
+        <div className="space-y-3 sm:space-y-4">
+          <div className="h-24 sm:h-32 bg-gray-800 rounded-lg animate-pulse" />
+          <div className="h-24 sm:h-32 bg-gray-800 rounded-lg animate-pulse" />
+          <div className="h-24 sm:h-32 bg-gray-800 rounded-lg animate-pulse" />
         </div>
       </div>
     </div>
@@ -63,12 +65,14 @@ async function PackagesContent() {
   });
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="w-full">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Packages Management</h1>
-            <p className="text-gray-400">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+              Packages Management
+            </h1>
+            <p className="text-sm sm:text-base text-gray-400">
               Create and manage tour packages
             </p>
           </div>
