@@ -12,7 +12,14 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+// import { Textarea } from "@/components/ui/textarea";
+// Dynamically import the rich text editor
+const Editor = dynamic(() => import("@/components/blocks/editor-00/editor").then(mod => ({ default: mod.Editor })), {
+  ssr: false,
+  loading: () => <div>Loading editor...</div>
+});
 import { Plus, Edit, Trash2, Eye, EyeOff, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -55,6 +62,14 @@ export default function DestinationsManager({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingDestination, setEditingDestination] =
     useState<Destination | null>(null);
+    name: "",
+    slug: "",
+    tagline: "",
+    description: "",
+    heroImage: "",
+    images: "",
+    isPublished: false,
+  });
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
@@ -64,8 +79,10 @@ export default function DestinationsManager({
     images: "",
     isPublished: false,
   });
+  const [editorState, setEditorState] = useState<any>(null);
+  const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
+  const [heroImagePreview, setHeroImagePreview] = useState<string>("");
 
-  const handleCreate = async () => {
     try {
       const response = await fetch("/api/destinations", {
         method: "POST",
@@ -86,6 +103,57 @@ export default function DestinationsManager({
         }),
       });
 
+      if (response.ok) {
+        const newDestination = await response.json();
+        setDestinations([newDestination, ...destinations]);
+        setIsCreateDialogOpen(false);
+        toast.success("Destination created successfully");
+        resetForm();
+      } else {
+        toast.error("Failed to create destination");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("An error occurred");
+    }
+  };
+  const handleCreate = async () => {
+    try {
+      let heroImageUrl = formData.heroImage;
+      // Handle hero image upload if a file is selected
+      if (heroImageFile) {
+        const uploadData = new FormData();
+        uploadData.append("file", heroImageFile);
+        // You should implement an API route to handle this upload and return the URL
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadData,
+        });
+        if (uploadRes.ok) {
+          const { url } = await uploadRes.json();
+          heroImageUrl = url;
+        }
+      }
+      const response = await fetch("/api/destinations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          description: editorState,
+          heroImage: heroImageUrl,
+          images: formData.images ? formData.images.split(",").map((img) => img.trim()).filter(Boolean) : [],
+          location: { country: "", region: "", coordinates: { lat: 0, lng: 0 } },
+          overview: { title: "Overview", content: "Destination overview content" },
+          wildlife: { title: "Wildlife", description: "Wildlife information", animals: [] },
+          bestTimeToVisit: { title: "Best Time to Visit", description: "Seasonal information", seasons: [] },
+          thingsToKnow: { title: "Things to Know", items: [] },
+          whatToPack: { title: "What to Pack", categories: [] },
+          accommodation: { title: "Accommodation", description: "Accommodation options", types: [] },
+          activities: { title: "Activities", list: [] },
+          highlights: [],
+          funFacts: [],
+        }),
+      });
       if (response.ok) {
         const newDestination = await response.json();
         setDestinations([newDestination, ...destinations]);
@@ -272,27 +340,37 @@ export default function DestinationsManager({
 
               <div>
                 <Label className="text-sm font-medium text-gray-200">Description *</Label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none"
-                  rows={4}
-                  placeholder="Detailed description of the destination"
-                />
+                <div className="bg-zinc-800 border border-zinc-700 rounded-md p-2">
+                  <Editor
+                    editorSerializedState={editorState}
+                    onSerializedChange={setEditorState}
+                  />
+                </div>
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-gray-200">Hero Image URL</Label>
+                <Label className="text-sm font-medium text-gray-200">Hero Image</Label>
                 <Input
-                  value={formData.heroImage}
-                  onChange={(e) =>
-                    setFormData({ ...formData, heroImage: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                  placeholder="/images/destination-hero.jpg"
+                  type="file"
+                  accept="image/*"
+                  onChange={e => {
+                    const file = e.target.files?.[0] || null;
+                    setHeroImageFile(file);
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = ev => setHeroImagePreview(ev.target?.result as string);
+                      reader.readAsDataURL(file);
+                    } else {
+                      setHeroImagePreview("");
+                    }
+                  }}
+                  className="bg-zinc-800 border-zinc-700 text-white"
                 />
+                {heroImagePreview && (
+                  <div className="mt-2">
+                    <Image src={heroImagePreview} alt="Preview" width={320} height={180} className="rounded-md object-cover" />
+                  </div>
+                )}
               </div>
 
               <div>
@@ -331,7 +409,7 @@ export default function DestinationsManager({
 
         {/* Edit Drawer */}
         <Drawer open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} direction="right">
-          <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[600px] fixed right-0 top-0">
+          <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full max-w-[700px] fixed right-0 top-0 px-0 sm:px-0">
             <DrawerHeader className="pb-6 border-b border-zinc-800 flex items-center justify-between px-8 pt-8">
               <DrawerTitle className="text-xl font-semibold">Edit Destination</DrawerTitle>
               <DrawerClose asChild>
@@ -340,7 +418,7 @@ export default function DestinationsManager({
                 </Button>
               </DrawerClose>
             </DrawerHeader>
-            <div className="space-y-6 overflow-y-auto px-8 py-6 flex-1">
+            <div className="space-y-6 overflow-y-auto px-6 sm:px-8 py-6 flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-gray-200">Name *</Label>

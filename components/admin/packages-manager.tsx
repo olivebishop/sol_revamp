@@ -12,7 +12,14 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+// import { Textarea } from "@/components/ui/textarea";
+// Dynamically import the rich text editor
+const Editor = dynamic(() => import("@/components/blocks/editor-00/editor").then(mod => ({ default: mod.Editor })), {
+  ssr: false,
+  loading: () => <div>Loading editor...</div>
+});
 import {
   Select,
   SelectContent,
@@ -55,6 +62,16 @@ export default function PackagesManager({
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
+    name: "",
+    slug: "",
+    packageType: "safari",
+    description: "",
+    pricing: 0,
+    daysOfTravel: 1,
+    images: "",
+    maxCapacity: 10,
+    isActive: true,
+  });
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
@@ -66,8 +83,10 @@ export default function PackagesManager({
     maxCapacity: 10,
     isActive: true,
   });
+  const [editorState, setEditorState] = useState<any>(null);
+  const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
+  const [heroImagePreview, setHeroImagePreview] = useState<string>("");
 
-  const handleCreate = async () => {
     try {
       const response = await fetch("/api/packages", {
         method: "POST",
@@ -84,6 +103,52 @@ export default function PackagesManager({
         }),
       });
 
+      if (response.ok) {
+        const newPackage = await response.json();
+        setPackages([newPackage, ...packages]);
+        setIsCreateDialogOpen(false);
+        toast.success("Package created successfully");
+        resetForm();
+      } else {
+        toast.error("Failed to create package");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("An error occurred");
+    }
+  };
+  const handleCreate = async () => {
+    try {
+      let heroImageUrl = formData.images;
+      // Handle hero image upload if a file is selected
+      if (heroImageFile) {
+        const uploadData = new FormData();
+        uploadData.append("file", heroImageFile);
+        // You should implement an API route to handle this upload and return the URL
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadData,
+        });
+        if (uploadRes.ok) {
+          const { url } = await uploadRes.json();
+          heroImageUrl = url;
+        }
+      }
+      const response = await fetch("/api/packages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          description: editorState,
+          images: heroImageUrl ? [heroImageUrl] : [],
+          destination: {
+            id: "temp_destination",
+            name: "Select Destination",
+            slug: "select-destination",
+            bestTime: "Year-round",
+          },
+        }),
+      });
       if (response.ok) {
         const newPackage = await response.json();
         setPackages([newPackage, ...packages]);
@@ -280,15 +345,12 @@ export default function PackagesManager({
               
               <div>
                 <Label className="text-sm font-medium text-gray-200">Description *</Label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none"
-                  rows={4}
-                  placeholder="Detailed description of the package"
-                />
+                <div className="bg-zinc-800 border border-zinc-700 rounded-md p-2">
+                  <Editor
+                    editorSerializedState={editorState}
+                    onSerializedChange={setEditorState}
+                  />
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -344,16 +406,28 @@ export default function PackagesManager({
               </div>
               
               <div>
-                <Label className="text-sm font-medium text-gray-200">Package Images</Label>
+                <Label className="text-sm font-medium text-gray-200">Package Image</Label>
                 <Input
-                  value={formData.images}
-                  onChange={(e) =>
-                    setFormData({ ...formData, images: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                  placeholder="/images/package1.jpg, /images/package2.jpg"
+                  type="file"
+                  accept="image/*"
+                  onChange={e => {
+                    const file = e.target.files?.[0] || null;
+                    setHeroImageFile(file);
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = ev => setHeroImagePreview(ev.target?.result as string);
+                      reader.readAsDataURL(file);
+                    } else {
+                      setHeroImagePreview("");
+                    }
+                  }}
+                  className="bg-zinc-800 border-zinc-700 text-white"
                 />
-                <p className="text-xs text-gray-500 mt-1">Separate multiple URLs with commas</p>
+                {heroImagePreview && (
+                  <div className="mt-2">
+                    <Image src={heroImagePreview} alt="Preview" width={320} height={180} className="rounded-md object-cover" />
+                  </div>
+                )}
               </div>
               <div className="flex items-center space-x-2">
                 <input
@@ -379,7 +453,7 @@ export default function PackagesManager({
 
         {/* Edit Drawer */}
         <Drawer open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} direction="right">
-          <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[600px] fixed right-0 top-0">
+          <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full max-w-[700px] fixed right-0 top-0 px-0 sm:px-0">
             <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between">
               <DrawerTitle className="text-xl font-semibold">Edit Package</DrawerTitle>
               <DrawerClose asChild>
@@ -388,7 +462,7 @@ export default function PackagesManager({
                 </Button>
               </DrawerClose>
             </DrawerHeader>
-            <div className="space-y-6 overflow-y-auto p-6 flex-1">
+            <div className="space-y-6 overflow-y-auto px-6 sm:px-8 py-6 flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-gray-200">Package Name *</Label>
