@@ -12,14 +12,7 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import dynamic from "next/dynamic";
-import Image from "next/image";
-// import { Textarea } from "@/components/ui/textarea";
-// Dynamically import the rich text editor
-const Editor = dynamic(() => import("@/components/blocks/editor-00/editor").then(mod => ({ default: mod.Editor })), {
-  ssr: false,
-  loading: () => <div>Loading editor...</div>
-});
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -27,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Eye, EyeOff, X } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, X, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 interface Package {
@@ -39,9 +32,6 @@ interface Package {
   pricing: number;
   daysOfTravel: number;
   images: string[];
-  maxCapacity: number;
-  currentBookings: number;
-  destination: any;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -62,6 +52,7 @@ export default function PackagesManager({
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
+  const [imageFiles, setImageFiles] = useState<FileList | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
@@ -69,78 +60,37 @@ export default function PackagesManager({
     description: "",
     pricing: 0,
     daysOfTravel: 1,
-    images: [],
-    maxCapacity: 10,
     isActive: true,
   });
-  const [editorState, setEditorState] = useState<any>(null);
-  const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
-  const [heroImagePreview, setHeroImagePreview] = useState<string>("");
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
-    try {
-      const response = await fetch("/api/packages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          images: formData.images ? formData.images.split(",").map((img) => img.trim()).filter(Boolean) : [],
-          destination: {
-            id: "temp_destination",
-            name: "Select Destination",
-            slug: "select-destination",
-            bestTime: "Year-round",
-          },
-        }),
-      });
-
-      if (response.ok) {
-        const newPackage = await response.json();
-        setPackages([newPackage, ...packages]);
-        setIsCreateDialogOpen(false);
-        toast.success("Package created successfully");
-        resetForm();
-      } else {
-        toast.error("Failed to create package");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("An error occurred");
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setImageFiles(e.target.files);
     }
   };
+
   const handleCreate = async () => {
     try {
-      let heroImageUrl = formData.images;
-      // Handle hero image upload if a file is selected
-      if (heroImageFile) {
-        const uploadData = new FormData();
-        uploadData.append("file", heroImageFile);
-        // You should implement an API route to handle this upload and return the URL
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: uploadData,
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("slug", formData.slug);
+      formDataToSend.append("packageType", formData.packageType);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("pricing", formData.pricing.toString());
+      formDataToSend.append("daysOfTravel", formData.daysOfTravel.toString());
+      formDataToSend.append("isActive", formData.isActive.toString());
+
+      if (imageFiles) {
+        Array.from(imageFiles).forEach((file) => {
+          formDataToSend.append("images", file);
         });
-        if (uploadRes.ok) {
-          const { url } = await uploadRes.json();
-          heroImageUrl = url;
-        }
       }
+
       const response = await fetch("/api/packages", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          description: editorState,
-          images: heroImageUrl ? [heroImageUrl] : [],
-          destination: {
-            id: "temp_destination",
-            name: "Select Destination",
-            slug: "select-destination",
-            bestTime: "Year-round",
-          },
-        }),
+        body: formDataToSend,
       });
+
       if (response.ok) {
         const newPackage = await response.json();
         setPackages([newPackage, ...packages]);
@@ -160,14 +110,24 @@ export default function PackagesManager({
     if (!editingPackage) return;
 
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("slug", formData.slug);
+      formDataToSend.append("packageType", formData.packageType);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("pricing", formData.pricing.toString());
+      formDataToSend.append("daysOfTravel", formData.daysOfTravel.toString());
+      formDataToSend.append("isActive", formData.isActive.toString());
+
+      if (imageFiles) {
+        Array.from(imageFiles).forEach((file) => {
+          formDataToSend.append("images", file);
+        });
+      }
+
       const response = await fetch(`/api/packages/${editingPackage.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...editingPackage,
-          ...formData,
-          images: formData.images ? formData.images.split(",").map((img) => img.trim()).filter(Boolean) : [],
-        }),
+        body: formDataToSend,
       });
 
       if (response.ok) {
@@ -197,10 +157,9 @@ export default function PackagesManager({
       description: pkg.description,
       pricing: pkg.pricing,
       daysOfTravel: pkg.daysOfTravel,
-      images: pkg.images?.join(", ") || "",
-      maxCapacity: pkg.maxCapacity,
       isActive: pkg.isActive,
     });
+    setImageFiles(null);
     setIsEditDialogOpen(true);
   };
 
@@ -258,11 +217,139 @@ export default function PackagesManager({
       description: "",
       pricing: 0,
       daysOfTravel: 1,
-      images: "",
-      maxCapacity: 10,
       isActive: true,
     });
+    setImageFiles(null);
   };
+
+  const FormFields = () => (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label className="text-sm font-medium text-gray-200">Package Name *</Label>
+          <Input
+            value={formData.name}
+            onChange={(e) =>
+              setFormData({ ...formData, name: e.target.value })
+            }
+            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+            placeholder="Enter package name"
+          />
+        </div>
+        <div>
+          <Label className="text-sm font-medium text-gray-200">Slug *</Label>
+          <Input
+            value={formData.slug}
+            onChange={(e) =>
+              setFormData({ ...formData, slug: e.target.value })
+            }
+            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+            placeholder="e.g., ultimate-safari-experience"
+          />
+        </div>
+      </div>
+      
+      <div>
+        <Label className="text-sm font-medium text-gray-200">Package Type *</Label>
+        <Select
+          value={formData.packageType}
+          onValueChange={(value) =>
+            setFormData({ ...formData, packageType: value })
+          }
+        >
+          <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+            <SelectValue placeholder="Select package type" />
+          </SelectTrigger>
+          <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+            <SelectItem value="safari">Safari</SelectItem>
+            <SelectItem value="beach">Beach</SelectItem>
+            <SelectItem value="cultural">Cultural</SelectItem>
+            <SelectItem value="adventure">Adventure</SelectItem>
+            <SelectItem value="luxury">Luxury</SelectItem>
+            <SelectItem value="mixed">Mixed</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div>
+        <Label className="text-sm font-medium text-gray-200">Description *</Label>
+        <Textarea
+          value={formData.description}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
+          className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none"
+          rows={4}
+          placeholder="Detailed description of the package"
+        />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label className="text-sm font-medium text-gray-200">Pricing ($) *</Label>
+          <Input
+            type="number"
+            min="0"
+            step="0.01"
+            value={formData.pricing}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                pricing: Number(e.target.value),
+              })
+            }
+            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+            placeholder="0.00"
+          />
+        </div>
+        <div>
+          <Label className="text-sm font-medium text-gray-200">Days of Travel *</Label>
+          <Input
+            type="number"
+            min="1"
+            value={formData.daysOfTravel}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                daysOfTravel: Number(e.target.value),
+              })
+            }
+            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+            placeholder="1"
+          />
+        </div>
+      </div>
+      
+      <div>
+        <Label className="text-sm font-medium text-gray-200">Package Images</Label>
+        <div className="relative">
+          <Input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleImageChange}
+            className="bg-zinc-800 border-zinc-700 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600"
+          />
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          {imageFiles ? `${imageFiles.length} file(s) selected` : "Select one or multiple images"}
+        </p>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id="isActive"
+          checked={formData.isActive}
+          onChange={(e) =>
+            setFormData({ ...formData, isActive: e.target.checked })
+          }
+          className="w-4 h-4"
+        />
+        <Label htmlFor="isActive">Active</Label>
+      </div>
+    </>
+  );
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6">
@@ -288,151 +375,7 @@ export default function PackagesManager({
               </DrawerClose>
             </DrawerHeader>
             <div className="space-y-6 overflow-y-auto p-6 flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Package Name *</Label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="Enter package name"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Slug *</Label>
-                  <Input
-                    value={formData.slug}
-                    onChange={(e) =>
-                      setFormData({ ...formData, slug: e.target.value })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="e.g., ultimate-safari-experience"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Package Type *</Label>
-                <Select
-                  value={formData.packageType}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, packageType: value })
-                  }
-                >
-                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
-                    <SelectValue placeholder="Select package type" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                    <SelectItem value="safari">Safari</SelectItem>
-                    <SelectItem value="beach">Beach</SelectItem>
-                    <SelectItem value="cultural">Cultural</SelectItem>
-                    <SelectItem value="adventure">Adventure</SelectItem>
-                    <SelectItem value="luxury">Luxury</SelectItem>
-                    <SelectItem value="mixed">Mixed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Description *</Label>
-                <div className="bg-zinc-800 border border-zinc-700 rounded-md p-2">
-                  <Editor
-                    editorSerializedState={editorState}
-                    onSerializedChange={setEditorState}
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Pricing ($) *</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.pricing}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        pricing: Number(e.target.value),
-                      })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Days of Travel *</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={formData.daysOfTravel}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        daysOfTravel: Number(e.target.value),
-                      })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Max Capacity *</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={formData.maxCapacity}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        maxCapacity: Number(e.target.value),
-                      })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="10"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Package Image</Label>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={e => {
-                    const file = e.target.files?.[0] || null;
-                    setHeroImageFile(file);
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = ev => setHeroImagePreview(ev.target?.result as string);
-                      reader.readAsDataURL(file);
-                    } else {
-                      setHeroImagePreview("");
-                    }
-                  }}
-                  className="bg-zinc-800 border-zinc-700 text-white"
-                />
-                {heroImagePreview && (
-                  <div className="mt-2">
-                    <Image src={heroImagePreview} alt="Preview" width={320} height={180} className="rounded-md object-cover" />
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={formData.isActive}
-                  onChange={(e) =>
-                    setFormData({ ...formData, isActive: e.target.checked })
-                  }
-                  className="w-4 h-4"
-                />
-                <Label htmlFor="isActive">Activate immediately</Label>
-              </div>
+              <FormFields />
               <Button
                 onClick={handleCreate}
                 className="w-full bg-orange-500 hover:bg-orange-600"
@@ -443,9 +386,8 @@ export default function PackagesManager({
           </DrawerContent>
         </Drawer>
 
-        {/* Edit Drawer */}
         <Drawer open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} direction="right">
-          <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full max-w-[700px] fixed right-0 top-0 px-0 sm:px-0">
+          <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[600px] fixed right-0 top-0">
             <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between">
               <DrawerTitle className="text-xl font-semibold">Edit Package</DrawerTitle>
               <DrawerClose asChild>
@@ -454,175 +396,8 @@ export default function PackagesManager({
                 </Button>
               </DrawerClose>
             </DrawerHeader>
-            <div className="space-y-6 overflow-y-auto px-6 sm:px-8 py-6 flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Package Name *</Label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="Enter package name"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Slug *</Label>
-                  <Input
-                    value={formData.slug}
-                    onChange={(e) =>
-                      setFormData({ ...formData, slug: e.target.value })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="e.g., ultimate-safari-experience"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Package Type *</Label>
-                <Select
-                  value={formData.packageType}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, packageType: value })
-                  }
-                >
-                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
-                    <SelectValue placeholder="Select package type" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                    <SelectItem value="safari">Safari</SelectItem>
-                    <SelectItem value="beach">Beach</SelectItem>
-                    <SelectItem value="cultural">Cultural</SelectItem>
-                    <SelectItem value="adventure">Adventure</SelectItem>
-                    <SelectItem value="luxury">Luxury</SelectItem>
-                    <SelectItem value="mixed">Mixed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Description *</Label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none"
-                  rows={4}
-                  placeholder="Detailed description of the package"
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Pricing ($) *</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.pricing}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        pricing: Number(e.target.value),
-                      })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Days of Travel *</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={formData.daysOfTravel}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        daysOfTravel: Number(e.target.value),
-                      })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Max Capacity *</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={formData.maxCapacity}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        maxCapacity: Number(e.target.value),
-                      })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="10"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Package Images</Label>
-                <Input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={async (e) => {
-                    const files = Array.from(e.target.files || []);
-                    setImageFiles(files);
-                    // Preview
-                    const previews = files.map((file) => URL.createObjectURL(file));
-                    setImagePreviews(previews);
-                    // Upload images to server (implement /api/upload)
-                    const uploadedUrls: string[] = [];
-                    for (const file of files) {
-                      const formData = new FormData();
-                      formData.append("file", file);
-                      const res = await fetch("/api/upload", {
-                        method: "POST",
-                        body: formData,
-                      });
-                      const data = await res.json();
-                      if (data.url) uploadedUrls.push(data.url);
-                    }
-                    setFormData((prev) => ({ ...prev, images: uploadedUrls }));
-                  }}
-                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                />
-                {imagePreviews.length > 0 && (
-                  <div className="flex gap-2 mt-2 flex-wrap">
-                    {imagePreviews.map((src, idx) => (
-                      <Image
-                        key={idx}
-                        src={src}
-                        alt={`Preview ${idx + 1}`}
-                        width={80}
-                        height={80}
-                        className="rounded object-cover border border-zinc-700"
-                      />
-                    ))}
-                  </div>
-                )}
-                <p className="text-xs text-gray-500 mt-1">Upload one or more images. First image will be used as the main image.</p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="editIsActive"
-                  checked={formData.isActive}
-                  onChange={(e) =>
-                    setFormData({ ...formData, isActive: e.target.checked })
-                  }
-                  className="w-4 h-4"
-                />
-                <Label htmlFor="editIsActive">Active</Label>
-              </div>
+            <div className="space-y-6 overflow-y-auto p-6 flex-1">
+              <FormFields />
               <Button
                 onClick={handleEdit}
                 className="w-full bg-orange-500 hover:bg-orange-600"
@@ -666,17 +441,6 @@ export default function PackagesManager({
                   </span>
                   <span className="text-gray-500">•</span>
                   <span className="text-gray-400">{pkg.daysOfTravel} days</span>
-                  <span className="text-gray-500">•</span>
-                  <span className="text-gray-400">
-                    {pkg.currentBookings}/{pkg.maxCapacity} booked
-                  </span>
-                </div>
-                <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
-                  <span>By: {pkg.admin.name}</span>
-                  <span>•</span>
-                  <span>
-                    Created: {new Date(pkg.createdAt).toLocaleDateString()}
-                  </span>
                 </div>
               </div>
               <div className="flex items-center gap-2 ml-4">

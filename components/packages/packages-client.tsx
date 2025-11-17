@@ -10,6 +10,7 @@ import { Pagination } from "@/components/shared/pagination";
 import CTASection from "@/components/shared/cta-section";
 // import type { PackageData } from "@/data/packages";
 
+interface PackagesClientProps {
   packages: any[];
 }
 

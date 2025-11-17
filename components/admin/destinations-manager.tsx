@@ -12,14 +12,7 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import dynamic from "next/dynamic";
-import Image from "next/image";
-// import { Textarea } from "@/components/ui/textarea";
-// Dynamically import the rich text editor
-const Editor = dynamic(() => import("@/components/blocks/editor-00/editor").then(mod => ({ default: mod.Editor })), {
-  ssr: false,
-  loading: () => <div>Loading editor...</div>
-});
+import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit, Trash2, Eye, EyeOff, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -31,16 +24,6 @@ interface Destination {
   description: string;
   heroImage: string;
   images: string[];
-  location: any;
-  overview: any;
-  wildlife: any;
-  bestTimeToVisit: any;
-  thingsToKnow: any;
-  whatToPack: any;
-  accommodation: any;
-  activities: any;
-  highlights: string[];
-  funFacts: string[];
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
@@ -60,92 +43,53 @@ export default function DestinationsManager({
   const [destinations, setDestinations] = useState(initialDestinations);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingDestination, setEditingDestination] =
-    useState<Destination | null>(null);
+  const [editingDestination, setEditingDestination] = useState<Destination | null>(null);
+  const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<FileList | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
     tagline: "",
     description: "",
-    heroImage: "",
-    images: "",
     isPublished: false,
   });
-  const [editorState, setEditorState] = useState<any>(null);
-  const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
-  const [heroImagePreview, setHeroImagePreview] = useState<string>("");
 
-    try {
-      const response = await fetch("/api/destinations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          images: formData.images ? formData.images.split(",").map((img) => img.trim()).filter(Boolean) : [],
-          location: { country: "", region: "", coordinates: { lat: 0, lng: 0 } },
-          overview: { title: "Overview", content: "Destination overview content" },
-          wildlife: { title: "Wildlife", description: "Wildlife information", animals: [] },
-          bestTimeToVisit: { title: "Best Time to Visit", description: "Seasonal information", seasons: [] },
-          thingsToKnow: { title: "Things to Know", items: [] },
-          whatToPack: { title: "What to Pack", categories: [] },
-          accommodation: { title: "Accommodation", description: "Accommodation options", types: [] },
-          activities: { title: "Activities", list: [] },
-          highlights: [],
-          funFacts: [],
-        }),
-      });
-
-      if (response.ok) {
-        const newDestination = await response.json();
-        setDestinations([newDestination, ...destinations]);
-        setIsCreateDialogOpen(false);
-        toast.success("Destination created successfully");
-        resetForm();
-      } else {
-        toast.error("Failed to create destination");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("An error occurred");
+  const handleHeroImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setHeroImageFile(e.target.files[0]);
     }
   };
+
+  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setImageFiles(e.target.files);
+    }
+  };
+
   const handleCreate = async () => {
     try {
-      let heroImageUrl = formData.heroImage;
-      // Handle hero image upload if a file is selected
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("slug", formData.slug);
+      formDataToSend.append("tagline", formData.tagline);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("isPublished", formData.isPublished.toString());
+
       if (heroImageFile) {
-        const uploadData = new FormData();
-        uploadData.append("file", heroImageFile);
-        // You should implement an API route to handle this upload and return the URL
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: uploadData,
-        });
-        if (uploadRes.ok) {
-          const { url } = await uploadRes.json();
-          heroImageUrl = url;
-        }
+        formDataToSend.append("heroImage", heroImageFile);
       }
+
+      if (imageFiles) {
+        Array.from(imageFiles).forEach((file) => {
+          formDataToSend.append("images", file);
+        });
+      }
+
       const response = await fetch("/api/destinations", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          description: editorState,
-          heroImage: heroImageUrl,
-          images: formData.images ? formData.images.split(",").map((img) => img.trim()).filter(Boolean) : [],
-          location: { country: "", region: "", coordinates: { lat: 0, lng: 0 } },
-          overview: { title: "Overview", content: "Destination overview content" },
-          wildlife: { title: "Wildlife", description: "Wildlife information", animals: [] },
-          bestTimeToVisit: { title: "Best Time to Visit", description: "Seasonal information", seasons: [] },
-          thingsToKnow: { title: "Things to Know", items: [] },
-          whatToPack: { title: "What to Pack", categories: [] },
-          accommodation: { title: "Accommodation", description: "Accommodation options", types: [] },
-          activities: { title: "Activities", list: [] },
-          highlights: [],
-          funFacts: [],
-        }),
+        body: formDataToSend,
       });
+
       if (response.ok) {
         const newDestination = await response.json();
         setDestinations([newDestination, ...destinations]);
@@ -165,14 +109,26 @@ export default function DestinationsManager({
     if (!editingDestination) return;
 
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("slug", formData.slug);
+      formDataToSend.append("tagline", formData.tagline);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("isPublished", formData.isPublished.toString());
+
+      if (heroImageFile) {
+        formDataToSend.append("heroImage", heroImageFile);
+      }
+
+      if (imageFiles) {
+        Array.from(imageFiles).forEach((file) => {
+          formDataToSend.append("images", file);
+        });
+      }
+
       const response = await fetch(`/api/destinations/${editingDestination.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...editingDestination,
-          ...formData,
-          images: formData.images ? formData.images.split(",").map((img) => img.trim()).filter(Boolean) : [],
-        }),
+        body: formDataToSend,
       });
 
       if (response.ok) {
@@ -202,10 +158,10 @@ export default function DestinationsManager({
       slug: destination.slug,
       tagline: destination.tagline || "",
       description: destination.description,
-      heroImage: destination.heroImage || "",
-      images: destination.images?.join(", ") || "",
       isPublished: destination.isPublished,
     });
+    setHeroImageFile(null);
+    setImageFiles(null);
     setIsEditDialogOpen(true);
   };
 
@@ -263,11 +219,105 @@ export default function DestinationsManager({
       slug: "",
       tagline: "",
       description: "",
-      heroImage: "",
-      images: "",
       isPublished: false,
     });
+    setHeroImageFile(null);
+    setImageFiles(null);
   };
+
+  const FormFields = () => (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label className="text-sm font-medium text-gray-200">Name *</Label>
+          <Input
+            value={formData.name}
+            onChange={(e) =>
+              setFormData({ ...formData, name: e.target.value })
+            }
+            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+            placeholder="Enter destination name"
+          />
+        </div>
+        <div>
+          <Label className="text-sm font-medium text-gray-200">Slug *</Label>
+          <Input
+            value={formData.slug}
+            onChange={(e) =>
+              setFormData({ ...formData, slug: e.target.value })
+            }
+            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+            placeholder="e.g., maasai-mara"
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label className="text-sm font-medium text-gray-200">Tagline</Label>
+        <Input
+          value={formData.tagline}
+          onChange={(e) =>
+            setFormData({ ...formData, tagline: e.target.value })
+          }
+          className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+          placeholder="Short catchy description"
+        />
+      </div>
+
+      <div>
+        <Label className="text-sm font-medium text-gray-200">Description *</Label>
+        <Textarea
+          value={formData.description}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
+          className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none"
+          rows={4}
+          placeholder="Detailed description of the destination"
+        />
+      </div>
+
+      <div>
+        <Label className="text-sm font-medium text-gray-200">Hero Image</Label>
+        <Input
+          type="file"
+          accept="image/*"
+          onChange={handleHeroImageChange}
+          className="bg-zinc-800 border-zinc-700 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          {heroImageFile ? heroImageFile.name : "Select a hero image"}
+        </p>
+      </div>
+
+      <div>
+        <Label className="text-sm font-medium text-gray-200">Additional Images</Label>
+        <Input
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={handleImagesChange}
+          className="bg-zinc-800 border-zinc-700 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          {imageFiles ? `${imageFiles.length} file(s) selected` : "Select one or multiple images"}
+        </p>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id="isPublished"
+          checked={formData.isPublished}
+          onChange={(e) =>
+            setFormData({ ...formData, isPublished: e.target.checked })
+          }
+          className="w-4 h-4"
+        />
+        <Label htmlFor="isPublished">Published</Label>
+      </div>
+    </>
+  );
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6">
@@ -284,7 +334,7 @@ export default function DestinationsManager({
             </Button>
           </DrawerTrigger>
           <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[600px] fixed right-0 top-0">
-            <DrawerHeader className="pb-6 border-b border-zinc-800 flex items-center justify-between px-8 pt-8">
+            <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between">
               <DrawerTitle className="text-xl font-semibold">Create New Destination</DrawerTitle>
               <DrawerClose asChild>
                 <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
@@ -292,103 +342,8 @@ export default function DestinationsManager({
                 </Button>
               </DrawerClose>
             </DrawerHeader>
-            <div className="space-y-6 overflow-y-auto px-8 py-6 flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Name *</Label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="Enter destination name"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Slug *</Label>
-                  <Input
-                    value={formData.slug}
-                    onChange={(e) =>
-                      setFormData({ ...formData, slug: e.target.value })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="e.g., maasai-mara"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Tagline</Label>
-                <Input
-                  value={formData.tagline}
-                  onChange={(e) =>
-                    setFormData({ ...formData, tagline: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                  placeholder="Short catchy description"
-                />
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Description *</Label>
-                <div className="bg-zinc-800 border border-zinc-700 rounded-md p-2">
-                  <Editor
-                    editorSerializedState={editorState}
-                    onSerializedChange={setEditorState}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Hero Image</Label>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={e => {
-                    const file = e.target.files?.[0] || null;
-                    setHeroImageFile(file);
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = ev => setHeroImagePreview(ev.target?.result as string);
-                      reader.readAsDataURL(file);
-                    } else {
-                      setHeroImagePreview("");
-                    }
-                  }}
-                  className="bg-zinc-800 border-zinc-700 text-white"
-                />
-                {heroImagePreview && (
-                  <div className="mt-2">
-                    <Image src={heroImagePreview} alt="Preview" width={320} height={180} className="rounded-md object-cover" />
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Additional Images</Label>
-                <Input
-                  value={formData.images}
-                  onChange={(e) =>
-                    setFormData({ ...formData, images: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                  placeholder="/images/1.jpg, /images/2.jpg, /images/3.jpg"
-                />
-                <p className="text-xs text-gray-500 mt-1">Separate multiple URLs with commas</p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="isPublished"
-                  checked={formData.isPublished}
-                  onChange={(e) =>
-                    setFormData({ ...formData, isPublished: e.target.checked })
-                  }
-                  className="w-4 h-4"
-                />
-                <Label htmlFor="isPublished">Publish immediately</Label>
-              </div>
+            <div className="space-y-6 overflow-y-auto p-6 flex-1">
+              <FormFields />
               <Button
                 onClick={handleCreate}
                 className="w-full bg-orange-500 hover:bg-orange-600"
@@ -399,10 +354,9 @@ export default function DestinationsManager({
           </DrawerContent>
         </Drawer>
 
-        {/* Edit Drawer */}
         <Drawer open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} direction="right">
-          <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full max-w-[700px] fixed right-0 top-0 px-0 sm:px-0">
-            <DrawerHeader className="pb-6 border-b border-zinc-800 flex items-center justify-between px-8 pt-8">
+          <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[600px] fixed right-0 top-0">
+            <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between">
               <DrawerTitle className="text-xl font-semibold">Edit Destination</DrawerTitle>
               <DrawerClose asChild>
                 <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
@@ -410,93 +364,8 @@ export default function DestinationsManager({
                 </Button>
               </DrawerClose>
             </DrawerHeader>
-            <div className="space-y-6 overflow-y-auto px-6 sm:px-8 py-6 flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Name *</Label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="Enter destination name"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-200">Slug *</Label>
-                  <Input
-                    value={formData.slug}
-                    onChange={(e) =>
-                      setFormData({ ...formData, slug: e.target.value })
-                    }
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                    placeholder="e.g., maasai-mara"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Tagline</Label>
-                <Input
-                  value={formData.tagline}
-                  onChange={(e) =>
-                    setFormData({ ...formData, tagline: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                  placeholder="Short catchy description"
-                />
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Description *</Label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none"
-                  rows={4}
-                  placeholder="Detailed description of the destination"
-                />
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Hero Image URL</Label>
-                <Input
-                  value={formData.heroImage}
-                  onChange={(e) =>
-                    setFormData({ ...formData, heroImage: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                  placeholder="/images/destination-hero.jpg"
-                />
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-gray-200">Additional Images</Label>
-                <Input
-                  value={formData.images}
-                  onChange={(e) =>
-                    setFormData({ ...formData, images: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                  placeholder="/images/1.jpg, /images/2.jpg, /images/3.jpg"
-                />
-                <p className="text-xs text-gray-500 mt-1">Separate multiple URLs with commas</p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="editIsPublished"
-                  checked={formData.isPublished}
-                  onChange={(e) =>
-                    setFormData({ ...formData, isPublished: e.target.checked })
-                  }
-                  className="w-4 h-4"
-                />
-                <Label htmlFor="editIsPublished">Published</Label>
-              </div>
+            <div className="space-y-6 overflow-y-auto p-6 flex-1">
+              <FormFields />
               <Button
                 onClick={handleEdit}
                 className="w-full bg-orange-500 hover:bg-orange-600"
@@ -528,9 +397,11 @@ export default function DestinationsManager({
                     </span>
                   )}
                 </div>
-                <p className="text-orange-500 italic mb-2">
-                  {destination.tagline}
-                </p>
+                {destination.tagline && (
+                  <p className="text-orange-500 italic mb-2 text-sm">
+                    {destination.tagline}
+                  </p>
+                )}
                 <p className="text-gray-400 text-sm mb-4 line-clamp-2">
                   {destination.description}
                 </p>

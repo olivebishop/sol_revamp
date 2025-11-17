@@ -52,7 +52,7 @@ export default function DashboardSidebar({ children }: DashboardSidebarProps) {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === href}
-                    className="w-full justify-start gap-3 px-3 py-2.5 text-gray-300 hover:bg-zinc-900 hover:text-orange-500 rounded-md transition-colors data-[active=true]:bg-orange-500/10 data-[active=true]:text-orange-500 data-[active=true]:border-orange-500/20"
+                    className="w-full justify-start gap-3 px-3 py-2.5 text-black hover:bg-zinc-900 hover:text-orange-500 rounded-md transition-colors data-[active=true]:bg-orange-500/10 data-[active=true]:text-orange-500 data-[active=true]:border-orange-500/20"
                   >
                     <Link href={href} className="flex items-center gap-3 w-full">
                       <Icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
