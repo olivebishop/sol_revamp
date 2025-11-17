@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getPackageBySlug } from "@/data/packages";
+import { getPackageBySlug, packages } from "@/data/packages";
 import PackageDetailsClient from "@/components/packages/package-details-client";
 
 interface PageProps {
@@ -8,20 +8,28 @@ interface PageProps {
   }>;
 }
 
-export default async function PackageDetailsPage({ params }: PageProps) {
-  const { slug } = await params;
-  const packageData = getPackageBySlug(slug);
+export default async function PackageDetailsPage(props: PageProps) {
+  const params = await props.params;
+  const packageData = getPackageBySlug(params.slug);
 
   if (!packageData) {
     notFound();
   }
 
-  return <PackageDetailsClient package={packageData} />;
+  // Get related packages on the server side
+  const relatedPackages = packages
+    .filter(
+      (p) =>
+        p.id !== packageData.id &&
+        (p.destination.id === packageData.destination.id ||
+          p.packageType === packageData.packageType),
+    )
+    .slice(0, 3);
+
+  return <PackageDetailsClient package={packageData} relatedPackages={relatedPackages} />;
 }
 
 export async function generateStaticParams() {
-  const { packages } = await import("@/data/packages");
-
   return packages.map((pkg) => ({
     slug: pkg.slug,
   }));

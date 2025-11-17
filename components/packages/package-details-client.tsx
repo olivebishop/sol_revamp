@@ -15,30 +15,21 @@ import {
 } from "lucide-react";
 import type { PackageData } from "@/data/packages";
 import PackageBookingDrawer from "@/components/packages/package-booking-drawer";
-import { packages } from "@/data/packages";
 import { PackageCard } from "@/components/shared/package-card";
 import CTASection from "@/components/shared/cta-section";
 import GrainOverlay from "@/components/shared/grain-overlay";
 
 interface PackageDetailsClientProps {
   package: PackageData;
+  relatedPackages: PackageData[];
 }
 
 export default function PackageDetailsClient({
   package: pkg,
+  relatedPackages,
 }: PackageDetailsClientProps) {
   const [isBookingDrawerOpen, setIsBookingDrawerOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
-
-  // Get related packages (same destination or package type, excluding current)
-  const relatedPackages = packages
-    .filter(
-      (p) =>
-        p.id !== pkg.id &&
-        (p.destination.id === pkg.destination.id ||
-          p.packageType === pkg.packageType),
-    )
-    .slice(0, 3);
 
   // Mock features based on package type
   const getFeatures = () => {

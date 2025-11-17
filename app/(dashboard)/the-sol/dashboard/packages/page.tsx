@@ -3,8 +3,34 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import PackagesManager from "@/components/admin/packages-manager";
+import { Suspense } from "react";
 
-export default async function PackagesPage() {
+// Loading component for the skeleton UI
+function PackagesLoading() {
+  return (
+    <div className="min-h-screen bg-black text-white p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Packages Management</h1>
+            <p className="text-gray-400">
+              Create and manage tour packages
+            </p>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div className="h-32 bg-gray-800 rounded-lg animate-pulse" />
+          <div className="h-32 bg-gray-800 rounded-lg animate-pulse" />
+          <div className="h-32 bg-gray-800 rounded-lg animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Move ALL dynamic data access into this component
+async function PackagesContent() {
+  // Auth check uses headers() which is a runtime API
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -13,7 +39,7 @@ export default async function PackagesPage() {
     redirect("/sign-in");
   }
 
-  // Check if user is admin
+  // Check if user is admin (database query)
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { isAdmin: true },
@@ -23,7 +49,7 @@ export default async function PackagesPage() {
     redirect("/");
   }
 
-  // Fetch all packages
+  // Fetch all packages (database query)
   const packages = await prisma.package.findMany({
     orderBy: { createdAt: "desc" },
     include: {
@@ -54,5 +80,13 @@ export default async function PackagesPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function PackagesPage() {
+  return (
+    <Suspense fallback={<PackagesLoading />}>
+      <PackagesContent />
+    </Suspense>
   );
 }

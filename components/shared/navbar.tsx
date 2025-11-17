@@ -1,3 +1,4 @@
+"use cache";
 
 import NavbarClient from "./navbarClient";
 import { getAllDestinations } from "@/lib/dal/destinationDAL";

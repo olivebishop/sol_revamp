@@ -1,9 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { SerializedEditorState } from "lexical"
+import dynamic from "next/dynamic"
 
-import { Editor } from "@/components/blocks/editor-00/editor"
+const Editor = dynamic(() => import("@/components/blocks/editor-00/editor").then(mod => ({ default: mod.Editor })), {
+  ssr: false,
+  loading: () => <div>Loading editor...</div>
+})
 
 export const initialValue = {
   root: {
