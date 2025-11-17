@@ -8,10 +8,9 @@ import {
 } from "@/components/shared/package-filters";
 import { Pagination } from "@/components/shared/pagination";
 import CTASection from "@/components/shared/cta-section";
-import type { PackageData } from "@/data/packages";
+// import type { PackageData } from "@/data/packages";
 
-interface PackagesClientProps {
-  packages: PackageData[];
+  packages: any[];
 }
 
 export function PackagesClient({ packages }: PackagesClientProps) {

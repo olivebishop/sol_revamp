@@ -3,10 +3,15 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, ArrowRight } from "lucide-react";
-import { destinations } from "@/data/destinations";
+// Removed mock data import
 import GrainOverlay from "@/components/shared/grain-overlay";
 
-export default function DestinationsClient() {
+
+interface DestinationsClientProps {
+  destinations: any[];
+}
+
+export default function DestinationsClient({ destinations }: DestinationsClientProps) {
   return (
     <div className="min-h-screen bg-black text-white relative">
       <GrainOverlay />
@@ -107,10 +112,10 @@ export default function DestinationsClient() {
                         <ul className="space-y-2">
                           {destination.highlights
                             .slice(0, 3)
-                            .map((highlight) => (
+                            .map((highlight: string) => (
                               <li
                                 key={highlight}
-                                className="text-gray-300 pl-6 relative before:content-['—'] before:absolute before:left-0 before:text-orange-500"
+                                className="text-gray-300 pl-6 relative before:content-['\u2014'] before:absolute before:left-0 before:text-orange-500"
                               >
                                 {highlight}
                               </li>
