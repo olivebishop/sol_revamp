@@ -76,10 +76,10 @@ export default function PackagesManager({
           ...formData,
           images: formData.images.split(",").map((img) => img.trim()),
           destination: {
-            id: "dest_001",
-            name: "Maasai Mara",
-            slug: "maasai-mara",
-            bestTime: "July - October",
+            id: "temp_destination",
+            name: "Select Destination",
+            slug: "select-destination",
+            bestTime: "Year-round",
           },
         }),
       });
@@ -160,8 +160,12 @@ export default function PackagesManager({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-end">
+    <div className="w-full max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-semibold text-white">Packages</h2>
+          <p className="text-sm text-gray-400 mt-1">Manage your tour packages</p>
+        </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-orange-500 hover:bg-orange-600">
@@ -169,42 +173,46 @@ export default function PackagesManager({
               Create Package
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-zinc-900 text-white max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Create New Package</DialogTitle>
+          <DialogContent className="bg-zinc-900 text-white max-w-4xl max-h-[90vh] overflow-hidden">
+            <DialogHeader className="pb-4 border-b border-zinc-800">
+              <DialogTitle className="text-xl font-semibold">Create New Package</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-              <div>
-                <Label>Name</Label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700"
-                />
+            <div className="space-y-6 max-h-[calc(90vh-120px)] overflow-y-auto p-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-200">Package Name *</Label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="Enter package name"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-200">Slug *</Label>
+                  <Input
+                    value={formData.slug}
+                    onChange={(e) =>
+                      setFormData({ ...formData, slug: e.target.value })
+                    }
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="e.g., ultimate-safari-experience"
+                  />
+                </div>
               </div>
+              
               <div>
-                <Label>Slug</Label>
-                <Input
-                  value={formData.slug}
-                  onChange={(e) =>
-                    setFormData({ ...formData, slug: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700"
-                  placeholder="e.g., ultimate-safari-experience"
-                />
-              </div>
-              <div>
-                <Label>Package Type</Label>
+                <Label className="text-sm font-medium text-gray-200">Package Type *</Label>
                 <Select
                   value={formData.packageType}
                   onValueChange={(value) =>
                     setFormData({ ...formData, packageType: value })
                   }
                 >
-                  <SelectTrigger className="bg-zinc-800 border-zinc-700">
-                    <SelectValue />
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                    <SelectValue placeholder="Select package type" />
                   </SelectTrigger>
                   <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
                     <SelectItem value="safari">Safari</SelectItem>
@@ -216,22 +224,27 @@ export default function PackagesManager({
                   </SelectContent>
                 </Select>
               </div>
+              
               <div>
-                <Label>Description</Label>
+                <Label className="text-sm font-medium text-gray-200">Description *</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  className="bg-zinc-800 border-zinc-700"
+                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none"
                   rows={4}
+                  placeholder="Detailed description of the package"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label>Pricing ($)</Label>
+                  <Label className="text-sm font-medium text-gray-200">Pricing ($) *</Label>
                   <Input
                     type="number"
+                    min="0"
+                    step="0.01"
                     value={formData.pricing}
                     onChange={(e) =>
                       setFormData({
@@ -239,13 +252,15 @@ export default function PackagesManager({
                         pricing: Number(e.target.value),
                       })
                     }
-                    className="bg-zinc-800 border-zinc-700"
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="0.00"
                   />
                 </div>
                 <div>
-                  <Label>Days of Travel</Label>
+                  <Label className="text-sm font-medium text-gray-200">Days of Travel *</Label>
                   <Input
                     type="number"
+                    min="1"
                     value={formData.daysOfTravel}
                     onChange={(e) =>
                       setFormData({
@@ -253,34 +268,39 @@ export default function PackagesManager({
                         daysOfTravel: Number(e.target.value),
                       })
                     }
-                    className="bg-zinc-800 border-zinc-700"
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-200">Max Capacity *</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={formData.maxCapacity}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        maxCapacity: Number(e.target.value),
+                      })
+                    }
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="10"
                   />
                 </div>
               </div>
+              
               <div>
-                <Label>Max Capacity</Label>
-                <Input
-                  type="number"
-                  value={formData.maxCapacity}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      maxCapacity: Number(e.target.value),
-                    })
-                  }
-                  className="bg-zinc-800 border-zinc-700"
-                />
-              </div>
-              <div>
-                <Label>Images (comma-separated URLs)</Label>
+                <Label className="text-sm font-medium text-gray-200">Package Images</Label>
                 <Input
                   value={formData.images}
                   onChange={(e) =>
                     setFormData({ ...formData, images: e.target.value })
                   }
-                  className="bg-zinc-800 border-zinc-700"
-                  placeholder="/images/1.jpg, /images/2.jpg"
+                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                  placeholder="/images/package1.jpg, /images/package2.jpg"
                 />
+                <p className="text-xs text-gray-500 mt-1">Separate multiple URLs with commas</p>
               </div>
               <div className="flex items-center space-x-2">
                 <input
@@ -305,11 +325,11 @@ export default function PackagesManager({
         </Dialog>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 lg:gap-6">
         {packages.map((pkg) => (
           <div
             key={pkg.id}
-            className="bg-zinc-900 border border-zinc-800 rounded-lg p-6"
+            className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 sm:p-6 hover:border-zinc-700 transition-colors"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">

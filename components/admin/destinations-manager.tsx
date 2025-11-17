@@ -74,13 +74,13 @@ export default function DestinationsManager({
           ...formData,
           images: formData.images.split(",").map((img) => img.trim()),
           location: { country: "", region: "", coordinates: { lat: 0, lng: 0 } },
-          overview: { title: "", content: "" },
-          wildlife: { title: "", description: "", animals: [] },
-          bestTimeToVisit: { title: "", description: "", seasons: [] },
-          thingsToKnow: { title: "", items: [] },
-          whatToPack: { title: "", categories: [] },
-          accommodation: { title: "", description: "", types: [] },
-          activities: { title: "", list: [] },
+          overview: { title: "Overview", content: "Destination overview content" },
+          wildlife: { title: "Wildlife", description: "Wildlife information", animals: [] },
+          bestTimeToVisit: { title: "Best Time to Visit", description: "Seasonal information", seasons: [] },
+          thingsToKnow: { title: "Things to Know", items: [] },
+          whatToPack: { title: "What to Pack", categories: [] },
+          accommodation: { title: "Accommodation", description: "Accommodation options", types: [] },
+          activities: { title: "Activities", list: [] },
           highlights: [],
           funFacts: [],
         }),
@@ -162,8 +162,12 @@ export default function DestinationsManager({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-end">
+    <div className="w-full max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-semibold text-white">Destinations</h2>
+          <p className="text-sm text-gray-400 mt-1">Manage your travel destinations</p>
+        </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-orange-500 hover:bg-orange-600">
@@ -171,74 +175,84 @@ export default function DestinationsManager({
               Create Destination
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-zinc-900 text-white max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Create New Destination</DialogTitle>
+          <DialogContent className="bg-zinc-900 text-white max-w-4xl max-h-[90vh] overflow-hidden">
+            <DialogHeader className="pb-4 border-b border-zinc-800">
+              <DialogTitle className="text-xl font-semibold">Create New Destination</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-              <div>
-                <Label>Name</Label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700"
-                />
+            <div className="space-y-6 max-h-[calc(90vh-120px)] overflow-y-auto p-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-200">Name *</Label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="Enter destination name"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-200">Slug *</Label>
+                  <Input
+                    value={formData.slug}
+                    onChange={(e) =>
+                      setFormData({ ...formData, slug: e.target.value })
+                    }
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="e.g., maasai-mara"
+                  />
+                </div>
               </div>
+
               <div>
-                <Label>Slug</Label>
-                <Input
-                  value={formData.slug}
-                  onChange={(e) =>
-                    setFormData({ ...formData, slug: e.target.value })
-                  }
-                  className="bg-zinc-800 border-zinc-700"
-                  placeholder="e.g., maasai-mara"
-                />
-              </div>
-              <div>
-                <Label>Tagline</Label>
+                <Label className="text-sm font-medium text-gray-200">Tagline</Label>
                 <Input
                   value={formData.tagline}
                   onChange={(e) =>
                     setFormData({ ...formData, tagline: e.target.value })
                   }
-                  className="bg-zinc-800 border-zinc-700"
+                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                  placeholder="Short catchy description"
                 />
               </div>
+
               <div>
-                <Label>Description</Label>
+                <Label className="text-sm font-medium text-gray-200">Description *</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  className="bg-zinc-800 border-zinc-700"
+                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none"
                   rows={4}
+                  placeholder="Detailed description of the destination"
                 />
               </div>
+
               <div>
-                <Label>Hero Image URL</Label>
+                <Label className="text-sm font-medium text-gray-200">Hero Image URL</Label>
                 <Input
                   value={formData.heroImage}
                   onChange={(e) =>
                     setFormData({ ...formData, heroImage: e.target.value })
                   }
-                  className="bg-zinc-800 border-zinc-700"
-                  placeholder="/images/destination.jpg"
+                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                  placeholder="/images/destination-hero.jpg"
                 />
               </div>
+
               <div>
-                <Label>Images (comma-separated URLs)</Label>
+                <Label className="text-sm font-medium text-gray-200">Additional Images</Label>
                 <Input
                   value={formData.images}
                   onChange={(e) =>
                     setFormData({ ...formData, images: e.target.value })
                   }
-                  className="bg-zinc-800 border-zinc-700"
-                  placeholder="/images/1.jpg, /images/2.jpg"
+                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                  placeholder="/images/1.jpg, /images/2.jpg, /images/3.jpg"
                 />
+                <p className="text-xs text-gray-500 mt-1">Separate multiple URLs with commas</p>
               </div>
               <div className="flex items-center space-x-2">
                 <input
@@ -263,11 +277,11 @@ export default function DestinationsManager({
         </Dialog>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 lg:gap-6">
         {destinations.map((destination) => (
           <div
             key={destination.id}
-            className="bg-zinc-900 border border-zinc-800 rounded-lg p-6"
+            className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 sm:p-6 hover:border-zinc-700 transition-colors"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
