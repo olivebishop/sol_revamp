@@ -46,15 +46,14 @@ interface Package {
 
 interface PackagesManagerProps {
   packages: Package[];
-  userId: string;
 }
 
 export default function PackagesManager({
   packages: initialPackages,
-  userId,
 }: PackagesManagerProps) {
   const [packages, setPackages] = useState(initialPackages);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -75,7 +74,7 @@ export default function PackagesManager({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          images: formData.images.split(",").map((img) => img.trim()),
+          images: formData.images ? formData.images.split(",").map((img) => img.trim()).filter(Boolean) : [],
           destination: {
             id: "temp_destination",
             name: "Select Destination",
@@ -98,6 +97,54 @@ export default function PackagesManager({
       console.error("Error:", error);
       toast.error("An error occurred");
     }
+  };
+
+  const handleEdit = async () => {
+    if (!editingPackage) return;
+
+    try {
+      const response = await fetch(`/api/packages/${editingPackage.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...editingPackage,
+          ...formData,
+          images: formData.images ? formData.images.split(",").map((img) => img.trim()).filter(Boolean) : [],
+        }),
+      });
+
+      if (response.ok) {
+        const updatedPackage = await response.json();
+        setPackages(
+          packages.map((p) => (p.id === updatedPackage.id ? updatedPackage : p))
+        );
+        setIsEditDialogOpen(false);
+        setEditingPackage(null);
+        toast.success("Package updated successfully");
+        resetForm();
+      } else {
+        toast.error("Failed to update package");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("An error occurred");
+    }
+  };
+
+  const openEditDialog = (pkg: Package) => {
+    setEditingPackage(pkg);
+    setFormData({
+      name: pkg.name,
+      slug: pkg.slug,
+      packageType: pkg.packageType,
+      description: pkg.description,
+      pricing: pkg.pricing,
+      daysOfTravel: pkg.daysOfTravel,
+      images: pkg.images?.join(", ") || "",
+      maxCapacity: pkg.maxCapacity,
+      isActive: pkg.isActive,
+    });
+    setIsEditDialogOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -329,6 +376,164 @@ export default function PackagesManager({
             </div>
           </DrawerContent>
         </Drawer>
+
+        {/* Edit Drawer */}
+        <Drawer open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} direction="right">
+          <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[600px] fixed right-0 top-0">
+            <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between">
+              <DrawerTitle className="text-xl font-semibold">Edit Package</DrawerTitle>
+              <DrawerClose asChild>
+                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+                  <X className="w-5 h-5" />
+                </Button>
+              </DrawerClose>
+            </DrawerHeader>
+            <div className="space-y-6 overflow-y-auto p-6 flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-200">Package Name *</Label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="Enter package name"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-200">Slug *</Label>
+                  <Input
+                    value={formData.slug}
+                    onChange={(e) =>
+                      setFormData({ ...formData, slug: e.target.value })
+                    }
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="e.g., ultimate-safari-experience"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label className="text-sm font-medium text-gray-200">Package Type *</Label>
+                <Select
+                  value={formData.packageType}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, packageType: value })
+                  }
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                    <SelectValue placeholder="Select package type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                    <SelectItem value="safari">Safari</SelectItem>
+                    <SelectItem value="beach">Beach</SelectItem>
+                    <SelectItem value="cultural">Cultural</SelectItem>
+                    <SelectItem value="adventure">Adventure</SelectItem>
+                    <SelectItem value="luxury">Luxury</SelectItem>
+                    <SelectItem value="mixed">Mixed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label className="text-sm font-medium text-gray-200">Description *</Label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none"
+                  rows={4}
+                  placeholder="Detailed description of the package"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-200">Pricing ($) *</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.pricing}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        pricing: Number(e.target.value),
+                      })
+                    }
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-200">Days of Travel *</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={formData.daysOfTravel}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        daysOfTravel: Number(e.target.value),
+                      })
+                    }
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-200">Max Capacity *</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={formData.maxCapacity}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        maxCapacity: Number(e.target.value),
+                      })
+                    }
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="10"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label className="text-sm font-medium text-gray-200">Package Images</Label>
+                <Input
+                  value={formData.images}
+                  onChange={(e) =>
+                    setFormData({ ...formData, images: e.target.value })
+                  }
+                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                  placeholder="/images/package1.jpg, /images/package2.jpg"
+                />
+                <p className="text-xs text-gray-500 mt-1">Separate multiple URLs with commas</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="editIsActive"
+                  checked={formData.isActive}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isActive: e.target.checked })
+                  }
+                  className="w-4 h-4"
+                />
+                <Label htmlFor="editIsActive">Active</Label>
+              </div>
+              <Button
+                onClick={handleEdit}
+                className="w-full bg-orange-500 hover:bg-orange-600"
+              >
+                Update Package
+              </Button>
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
 
       <div className="grid gap-4 lg:gap-6">
@@ -392,7 +597,7 @@ export default function PackagesManager({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setEditingPackage(pkg)}
+                  onClick={() => openEditDialog(pkg)}
                   className="text-gray-400 hover:text-orange-500"
                 >
                   <Edit className="w-4 h-4" />

@@ -45,15 +45,14 @@ interface Destination {
 
 interface DestinationsManagerProps {
   destinations: Destination[];
-  userId: string;
 }
 
 export default function DestinationsManager({
   destinations: initialDestinations,
-  userId,
 }: DestinationsManagerProps) {
   const [destinations, setDestinations] = useState(initialDestinations);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingDestination, setEditingDestination] =
     useState<Destination | null>(null);
   const [formData, setFormData] = useState({
@@ -73,7 +72,7 @@ export default function DestinationsManager({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          images: formData.images.split(",").map((img) => img.trim()),
+          images: formData.images ? formData.images.split(",").map((img) => img.trim()).filter(Boolean) : [],
           location: { country: "", region: "", coordinates: { lat: 0, lng: 0 } },
           overview: { title: "Overview", content: "Destination overview content" },
           wildlife: { title: "Wildlife", description: "Wildlife information", animals: [] },
@@ -100,6 +99,54 @@ export default function DestinationsManager({
       console.error("Error:", error);
       toast.error("An error occurred");
     }
+  };
+
+  const handleEdit = async () => {
+    if (!editingDestination) return;
+
+    try {
+      const response = await fetch(`/api/destinations/${editingDestination.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...editingDestination,
+          ...formData,
+          images: formData.images ? formData.images.split(",").map((img) => img.trim()).filter(Boolean) : [],
+        }),
+      });
+
+      if (response.ok) {
+        const updatedDestination = await response.json();
+        setDestinations(
+          destinations.map((d) =>
+            d.id === updatedDestination.id ? updatedDestination : d
+          )
+        );
+        setIsEditDialogOpen(false);
+        setEditingDestination(null);
+        toast.success("Destination updated successfully");
+        resetForm();
+      } else {
+        toast.error("Failed to update destination");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("An error occurred");
+    }
+  };
+
+  const openEditDialog = (destination: Destination) => {
+    setEditingDestination(destination);
+    setFormData({
+      name: destination.name,
+      slug: destination.slug,
+      tagline: destination.tagline || "",
+      description: destination.description,
+      heroImage: destination.heroImage || "",
+      images: destination.images?.join(", ") || "",
+      isPublished: destination.isPublished,
+    });
+    setIsEditDialogOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -177,7 +224,7 @@ export default function DestinationsManager({
             </Button>
           </DrawerTrigger>
           <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[600px] fixed right-0 top-0">
-            <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between">
+            <DrawerHeader className="pb-6 border-b border-zinc-800 flex items-center justify-between px-8 pt-8">
               <DrawerTitle className="text-xl font-semibold">Create New Destination</DrawerTitle>
               <DrawerClose asChild>
                 <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
@@ -185,7 +232,7 @@ export default function DestinationsManager({
                 </Button>
               </DrawerClose>
             </DrawerHeader>
-            <div className="space-y-6 overflow-y-auto p-6 flex-1">
+            <div className="space-y-6 overflow-y-auto px-8 py-6 flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-gray-200">Name *</Label>
@@ -281,6 +328,114 @@ export default function DestinationsManager({
             </div>
           </DrawerContent>
         </Drawer>
+
+        {/* Edit Drawer */}
+        <Drawer open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} direction="right">
+          <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[600px] fixed right-0 top-0">
+            <DrawerHeader className="pb-6 border-b border-zinc-800 flex items-center justify-between px-8 pt-8">
+              <DrawerTitle className="text-xl font-semibold">Edit Destination</DrawerTitle>
+              <DrawerClose asChild>
+                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+                  <X className="w-5 h-5" />
+                </Button>
+              </DrawerClose>
+            </DrawerHeader>
+            <div className="space-y-6 overflow-y-auto px-8 py-6 flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-200">Name *</Label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="Enter destination name"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-200">Slug *</Label>
+                  <Input
+                    value={formData.slug}
+                    onChange={(e) =>
+                      setFormData({ ...formData, slug: e.target.value })
+                    }
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                    placeholder="e.g., maasai-mara"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-200">Tagline</Label>
+                <Input
+                  value={formData.tagline}
+                  onChange={(e) =>
+                    setFormData({ ...formData, tagline: e.target.value })
+                  }
+                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                  placeholder="Short catchy description"
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-200">Description *</Label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none"
+                  rows={4}
+                  placeholder="Detailed description of the destination"
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-200">Hero Image URL</Label>
+                <Input
+                  value={formData.heroImage}
+                  onChange={(e) =>
+                    setFormData({ ...formData, heroImage: e.target.value })
+                  }
+                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                  placeholder="/images/destination-hero.jpg"
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-200">Additional Images</Label>
+                <Input
+                  value={formData.images}
+                  onChange={(e) =>
+                    setFormData({ ...formData, images: e.target.value })
+                  }
+                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+                  placeholder="/images/1.jpg, /images/2.jpg, /images/3.jpg"
+                />
+                <p className="text-xs text-gray-500 mt-1">Separate multiple URLs with commas</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="editIsPublished"
+                  checked={formData.isPublished}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isPublished: e.target.checked })
+                  }
+                  className="w-4 h-4"
+                />
+                <Label htmlFor="editIsPublished">Published</Label>
+              </div>
+              <Button
+                onClick={handleEdit}
+                className="w-full bg-orange-500 hover:bg-orange-600"
+              >
+                Update Destination
+              </Button>
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
 
       <div className="grid gap-4 lg:gap-6">
@@ -335,7 +490,7 @@ export default function DestinationsManager({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setEditingDestination(destination)}
+                  onClick={() => openEditDialog(destination)}
                   className="text-gray-400 hover:text-orange-500"
                 >
                   <Edit className="w-4 h-4" />

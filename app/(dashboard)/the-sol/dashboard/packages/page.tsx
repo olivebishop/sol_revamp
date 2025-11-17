@@ -80,7 +80,6 @@ async function PackagesContent() {
 
         <PackagesManager
           packages={JSON.parse(JSON.stringify(packages))}
-          userId={session.user.id}
         />
       </div>
     </div>

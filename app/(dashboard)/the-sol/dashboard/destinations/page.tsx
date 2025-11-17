@@ -79,7 +79,6 @@ async function DestinationsContent() {
 
         <DestinationsManager
           destinations={JSON.parse(JSON.stringify(destinations))}
-          userId={session.user.id}
         />
       </div>
     </div>
