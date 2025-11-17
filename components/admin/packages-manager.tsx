@@ -62,16 +62,6 @@ export default function PackagesManager({
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
-    name: "",
-    slug: "",
-    packageType: "safari",
-    description: "",
-    pricing: 0,
-    daysOfTravel: 1,
-    images: "",
-    maxCapacity: 10,
-    isActive: true,
-  });
   const [formData, setFormData] = useState({
     name: "",
     slug: "",

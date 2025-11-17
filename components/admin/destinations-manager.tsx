@@ -62,14 +62,6 @@ export default function DestinationsManager({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingDestination, setEditingDestination] =
     useState<Destination | null>(null);
-    name: "",
-    slug: "",
-    tagline: "",
-    description: "",
-    heroImage: "",
-    images: "",
-    isPublished: false,
-  });
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
