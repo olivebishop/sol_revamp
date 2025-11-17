@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { Suspense } from "react";
-import { Package, MapPin, Users, TrendingUp } from "lucide-react";
+import { Package, MapPin, Users } from "lucide-react";
 
 // Loading component
 function DashboardLoading() {
@@ -15,8 +15,8 @@ function DashboardLoading() {
           <p className="text-sm sm:text-base text-gray-400">Welcome to your admin dashboard</p>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-          {[...Array(4)].map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
+          {[...Array(2)].map((_, i) => (
             <div key={i} className="bg-zinc-900 rounded-lg p-4 sm:p-6 animate-pulse">
               <div className="h-4 bg-gray-700 rounded mb-2"></div>
               <div className="h-8 bg-gray-700 rounded"></div>
@@ -48,10 +48,9 @@ async function DashboardContent() {
   }
 
   // Get dashboard stats
-  const [destinationsCount, packagesCount, bookingsCount] = await Promise.all([
+  const [destinationsCount, packagesCount] = await Promise.all([
     prisma.destination.count(),
     prisma.package.count(),
-    prisma.booking.count(),
   ]);
 
   const stats = [
@@ -69,20 +68,6 @@ async function DashboardContent() {
       color: "text-green-500",
       bgColor: "bg-green-500/10",
     },
-    {
-      title: "Total Bookings",
-      value: bookingsCount,
-      icon: Users,
-      color: "text-purple-500",
-      bgColor: "bg-purple-500/10",
-    },
-    {
-      title: "Revenue",
-      value: "$0", // You can calculate this based on bookings
-      icon: TrendingUp,
-      color: "text-orange-500",
-      bgColor: "bg-orange-500/10",
-    },
   ];
 
   return (
@@ -98,7 +83,7 @@ async function DashboardContent() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
           {stats.map((stat, index) => (
             <div
               key={index}

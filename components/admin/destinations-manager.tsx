@@ -3,16 +3,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+  DrawerClose,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface Destination {
@@ -168,18 +169,23 @@ export default function DestinationsManager({
           <h2 className="text-xl sm:text-2xl font-semibold text-white">Destinations</h2>
           <p className="text-sm text-gray-400 mt-1">Manage your travel destinations</p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
+        <Drawer open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} direction="right">
+          <DrawerTrigger asChild>
             <Button className="bg-orange-500 hover:bg-orange-600">
               <Plus className="w-4 h-4 mr-2" />
               Create Destination
             </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-zinc-900 text-white max-w-4xl max-h-[90vh] overflow-hidden">
-            <DialogHeader className="pb-4 border-b border-zinc-800">
-              <DialogTitle className="text-xl font-semibold">Create New Destination</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-6 max-h-[calc(90vh-120px)] overflow-y-auto p-1">
+          </DrawerTrigger>
+          <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[600px] fixed right-0 top-0">
+            <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between">
+              <DrawerTitle className="text-xl font-semibold">Create New Destination</DrawerTitle>
+              <DrawerClose asChild>
+                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+                  <X className="w-5 h-5" />
+                </Button>
+              </DrawerClose>
+            </DrawerHeader>
+            <div className="space-y-6 overflow-y-auto p-6 flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-gray-200">Name *</Label>
@@ -273,8 +279,8 @@ export default function DestinationsManager({
                 Create Destination
               </Button>
             </div>
-          </DialogContent>
-        </Dialog>
+          </DrawerContent>
+        </Drawer>
       </div>
 
       <div className="grid gap-4 lg:gap-6">
