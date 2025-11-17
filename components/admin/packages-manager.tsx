@@ -69,13 +69,15 @@ export default function PackagesManager({
     description: "",
     pricing: 0,
     daysOfTravel: 1,
-    images: "",
+    images: [],
     maxCapacity: 10,
     isActive: true,
   });
   const [editorState, setEditorState] = useState<any>(null);
   const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
   const [heroImagePreview, setHeroImagePreview] = useState<string>("");
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
     try {
       const response = await fetch("/api/packages", {
@@ -568,14 +570,46 @@ export default function PackagesManager({
               <div>
                 <Label className="text-sm font-medium text-gray-200">Package Images</Label>
                 <Input
-                  value={formData.images}
-                  onChange={(e) =>
-                    setFormData({ ...formData, images: e.target.value })
-                  }
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const files = Array.from(e.target.files || []);
+                    setImageFiles(files);
+                    // Preview
+                    const previews = files.map((file) => URL.createObjectURL(file));
+                    setImagePreviews(previews);
+                    // Upload images to server (implement /api/upload)
+                    const uploadedUrls: string[] = [];
+                    for (const file of files) {
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      const res = await fetch("/api/upload", {
+                        method: "POST",
+                        body: formData,
+                      });
+                      const data = await res.json();
+                      if (data.url) uploadedUrls.push(data.url);
+                    }
+                    setFormData((prev) => ({ ...prev, images: uploadedUrls }));
+                  }}
                   className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-                  placeholder="/images/package1.jpg, /images/package2.jpg"
                 />
-                <p className="text-xs text-gray-500 mt-1">Separate multiple URLs with commas</p>
+                {imagePreviews.length > 0 && (
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {imagePreviews.map((src, idx) => (
+                      <Image
+                        key={idx}
+                        src={src}
+                        alt={`Preview ${idx + 1}`}
+                        width={80}
+                        height={80}
+                        className="rounded object-cover border border-zinc-700"
+                      />
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-gray-500 mt-1">Upload one or more images. First image will be used as the main image.</p>
               </div>
               <div className="flex items-center space-x-2">
                 <input
