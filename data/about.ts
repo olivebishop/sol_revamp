@@ -70,7 +70,7 @@ export const team: TeamMember[] = [
     name: "Nelson Pere",
     role: "Driver/Guide",
     quote: "Creating seamless experiences across the African continent.",
-    image: "/images/elephant.png",
+    image: "/images/nelson.jpg",
   },
   {
     name: "Jennifer Brubaker",
