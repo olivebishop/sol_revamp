@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { ContentEditable } from "@/components/editor/editor-ui/content-editable";
 import {
   Select,
   SelectContent,
@@ -273,14 +273,10 @@ export default function PackagesManager({
       
       <div>
         <Label className="text-sm font-medium text-gray-200">Description *</Label>
-        <Textarea
-          value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-          className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none"
-          rows={4}
+        <ContentEditable
           placeholder="Detailed description of the package"
+          className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none min-h-[120px] rounded-md px-3 py-2 mt-1"
+          // TODO: Wire up value and onChange to update formData.description
         />
       </div>
       
