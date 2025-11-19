@@ -127,7 +127,7 @@ export default function PackagesManager({
         setPackages(
           packages.map((p) => (p.id === updatedPackage.id ? updatedPackage : p))
         );
-        setIsEditDialogOpen(false);
+        // setIsEditDialogOpen(false); // Drawer removed
         setEditingPackage(null);
         toast.success("Package updated successfully");
         resetForm();
