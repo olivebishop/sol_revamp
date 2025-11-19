@@ -8,7 +8,6 @@ import {
 } from "@/components/shared/package-filters";
 import { Pagination } from "@/components/shared/pagination";
 import CTASection from "@/components/shared/cta-section";
-// import type { PackageData } from "@/data/packages";
 
 interface PackagesClientProps {
   packages: any[];
@@ -23,7 +22,7 @@ export function PackagesClient({ packages }: PackagesClientProps) {
     sortBy: "popular",
   });
 
-  const packagesPerPage = 9; // Changed to 9 for 3 columns
+  const packagesPerPage = 9;
 
   // Filter and sort packages
   const filteredPackages = useMemo(() => {
@@ -50,7 +49,6 @@ export function PackagesClient({ packages }: PackagesClientProps) {
         if (max) {
           if (pkg.pricing < min || pkg.pricing > max) return false;
         } else {
-          // "5000+" case
           if (pkg.pricing < min) return false;
         }
       }
@@ -58,11 +56,9 @@ export function PackagesClient({ packages }: PackagesClientProps) {
       // Duration filter
       if (filters.duration !== "all") {
         if (filters.duration.includes("+")) {
-          // "14+" case
           const minDays = Number.parseInt(filters.duration, 10);
           if (pkg.daysOfTravel < minDays) return false;
         } else {
-          // "1-3", "4-7" etc cases
           const [minDays, maxDays] = filters.duration.split("-").map(Number);
           if (pkg.daysOfTravel < minDays || pkg.daysOfTravel > maxDays)
             return false;
@@ -85,7 +81,6 @@ export function PackagesClient({ packages }: PackagesClientProps) {
         break;
       case "popular":
       default:
-        // Sort by currentBookings
         result.sort((a, b) => b.currentBookings - a.currentBookings);
         break;
     }
@@ -111,35 +106,11 @@ export function PackagesClient({ packages }: PackagesClientProps) {
 
   return (
     <>
-      {/* Header Section */}
-      <div className="relative pt-32 pb-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-[1400px] mx-auto">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 tracking-tight"
-          >
-            Explore Our
-            <span className="text-orange-500"> Packages</span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            className="text-gray-400 text-lg max-w-2xl"
-          >
-            Discover unforgettable adventures tailored to create memories that
-            last a lifetime
-          </motion.p>
-        </div>
-      </div>
-
       {/* Filters Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
         className="relative px-4 sm:px-6 lg:px-8 pb-8"
       >
         <div className="max-w-[1400px] mx-auto">
