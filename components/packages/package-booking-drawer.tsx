@@ -91,7 +91,7 @@ export default function PackageBookingDrawer({
         `Looking forward to this adventure!`;
 
       window.open(
-        `https://wa.me/254706294505?text=${whatsappMessage}`,
+        `https://wa.me/254768453819?text=${whatsappMessage}`,
         "_blank",
       );
 

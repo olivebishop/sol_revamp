@@ -93,7 +93,6 @@ export default async function DestinationsPage() {
   const headersObj = await headers();
   return (
     <Suspense fallback={<DestinationsLoading />}>
-      {/* @ts-expect-error Async Server Component */}
       <DestinationsContent headersObj={headersObj} />
     </Suspense>
   );

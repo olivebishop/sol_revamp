@@ -86,7 +86,7 @@ export default function PackagesManager({
       if (response.ok) {
         const newPackage = await response.json();
         setPackages([newPackage, ...packages]);
-        setIsCreateDialogOpen(false);
+        // setIsCreateDialogOpen(false); // Drawer removed
         toast.success("Package created successfully");
         resetForm();
       } else {

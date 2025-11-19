@@ -41,7 +41,7 @@ ${formData.message}
     `.trim();
 
     const encodedMessage = encodeURIComponent(whatsappMessage);
-    const whatsappUrl = `https://wa.me/+254706294505?text=${encodedMessage}`;
+    const whatsappUrl = `https://wa.me/+254768453819?text=${encodedMessage}`;
 
     // Open WhatsApp
     window.open(whatsappUrl, "_blank");

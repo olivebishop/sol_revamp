@@ -214,7 +214,7 @@ export function PackagesClient({ packages }: PackagesClientProps) {
         image="/images/sol_car.jpg"
         buttonText="Chat with Michael Kisangi"
         buttonAction={() => {
-          window.open("https://wa.me/+254706294505", "_blank");
+          window.open("https://wa.me/+254768453819", "_blank");
         }}
       />
     </>

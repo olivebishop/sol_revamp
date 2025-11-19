@@ -237,7 +237,7 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
         buttonText="Chat with Michael Kisangi"
         buttonAction={() => {
           // Add your chat functionality here
-          window.open("https://wa.me/+254706294505", "_blank");
+          window.open("https://wa.me/+254768453819", "_blank");
         }}
       />
     </>

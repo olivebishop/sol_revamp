@@ -93,8 +93,7 @@ export async function PackagesContent({ headersObj }: { headersObj: any }) {
 export default async function PackagesPage() {
   const headersObj = await headers();
   return (
-    <Suspense fallback={<PackagesLoading />}>
-      {/* @ts-expect-error Async Server Component */}
+    <Suspense fallback={<PackagesLoading />}> 
       <PackagesContent headersObj={headersObj} />
     </Suspense>
   );

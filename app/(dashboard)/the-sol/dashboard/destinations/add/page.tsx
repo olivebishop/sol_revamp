@@ -59,7 +59,7 @@ export default function AddDestinationPage() {
         body: formDataToSend,
       });
       if (response.ok) {
-        router.push("/app/(dashboard)/the-sol/dashboard/destinations");
+        router.push("/the-sol/dashboard/destinations");
       } else {
         alert("Failed to create destination");
       }
