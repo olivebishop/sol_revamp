@@ -348,7 +348,7 @@ export default function PackagesManager({
           <p className="text-sm text-gray-400 mt-1">Manage your tour packages</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <Link href="/the-sol/packages/add">
+          <Link href="/the-sol/dashboard/packages/add">
             <Button className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Add New Package
