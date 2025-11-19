@@ -1,19 +1,34 @@
 import { JSX } from "react"
 import { ContentEditable as LexicalContentEditable } from "@lexical/react/LexicalContentEditable"
 
+import { useRef, useEffect } from "react"
+
 type Props = {
   placeholder: string
   className?: string
   placeholderClassName?: string
+  value?: string
+  onChange?: (value: string) => void
 }
 
 export function ContentEditable({
   placeholder,
   className,
   placeholderClassName,
+  value = "",
+  onChange,
 }: Props): JSX.Element {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (ref.current && ref.current.innerText !== value) {
+      ref.current.innerText = value;
+    }
+  }, [value]);
+
   return (
     <LexicalContentEditable
+      ref={ref}
       className={
         className ??
         `ContentEditable__root relative block min-h-72 min-h-full overflow-auto px-8 py-4 focus:outline-none`
@@ -29,6 +44,12 @@ export function ContentEditable({
           {placeholder}
         </div>
       }
+      onInput={e => {
+        if (onChange) {
+          onChange((e.target as HTMLDivElement).innerText);
+        }
+      }}
+      suppressContentEditableWarning
     />
-  )
+  );
 }

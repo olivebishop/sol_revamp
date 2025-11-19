@@ -2,14 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-  DrawerClose,
-} from "@/components/ui/drawer";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ContentEditable } from "@/components/editor/editor-ui/content-editable";
@@ -35,8 +28,7 @@ export default function DestinationsManager({
   destinations: initialDestinations,
 }: DestinationsManagerProps) {
   const [destinations, setDestinations] = useState(initialDestinations);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  // Removed drawer state for add/edit
   const [editingDestination, setEditingDestination] = useState<Destination | null>(null);
   const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
   const [imageFiles, setImageFiles] = useState<FileList | null>(null);
@@ -87,7 +79,7 @@ export default function DestinationsManager({
       if (response.ok) {
         const newDestination = await response.json();
         setDestinations([newDestination, ...destinations]);
-        setIsCreateDialogOpen(false);
+        // setIsCreateDialogOpen(false); // Drawer removed
         toast.success("Destination created successfully");
         resetForm();
       } else {
@@ -132,7 +124,7 @@ export default function DestinationsManager({
             d.id === updatedDestination.id ? updatedDestination : d
           )
         );
-        setIsEditDialogOpen(false);
+        // setIsEditDialogOpen(false); // Drawer removed
         setEditingDestination(null);
         toast.success("Destination updated successfully");
         resetForm();
@@ -156,7 +148,7 @@ export default function DestinationsManager({
     });
     setHeroImageFile(null);
     setImageFiles(null);
-    setIsEditDialogOpen(true);
+    // setIsEditDialogOpen(true); // Drawer removed
   };
 
   const handleDelete = async (id: string) => {
@@ -263,7 +255,8 @@ export default function DestinationsManager({
         <ContentEditable
           placeholder="Detailed description of the destination"
           className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none min-h-[120px] rounded-md px-3 py-2 mt-1"
-          // TODO: Wire up value and onChange to update formData.description
+          value={formData.description}
+          onChange={(value) => setFormData({ ...formData, description: value })}
         />
       </div>
 
@@ -309,6 +302,7 @@ export default function DestinationsManager({
     </>
   );
 
+  const router = useRouter();
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8 px-2 sm:px-4 md:px-6 lg:px-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-8 py-4">
@@ -317,54 +311,12 @@ export default function DestinationsManager({
           <p className="text-sm text-gray-400 mt-1">Manage your travel destinations</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <Drawer open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} direction="right">
-            <DrawerTrigger asChild>
-              <Button className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Destination
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[480px] md:w-[600px] fixed right-0 top-0 p-0 flex flex-col">
-              <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between px-6 pt-6">
-                <DrawerTitle className="text-xl font-semibold">Create New Destination</DrawerTitle>
-                <DrawerClose asChild>
-                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-                    <X className="w-5 h-5" />
-                  </Button>
-                </DrawerClose>
-              </DrawerHeader>
-              <div className="space-y-6 overflow-y-auto p-6 flex-1">
-                <FormFields />
-                <Button
-                  onClick={handleCreate}
-                  className="w-full bg-orange-500 hover:bg-orange-600 mt-4"
-                >
-                  Create Destination
-                </Button>
-              </div>
-            </DrawerContent>
-          </Drawer>
-          <Drawer open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} direction="right">
-            <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[480px] md:w-[600px] fixed right-0 top-0 p-0 flex flex-col">
-              <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between px-6 pt-6">
-                <DrawerTitle className="text-xl font-semibold">Edit Destination</DrawerTitle>
-                <DrawerClose asChild>
-                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-                    <X className="w-5 h-5" />
-                  </Button>
-                </DrawerClose>
-              </DrawerHeader>
-              <div className="space-y-6 overflow-y-auto p-6 flex-1">
-                <FormFields />
-                <Button
-                  onClick={handleEdit}
-                  className="w-full bg-orange-500 hover:bg-orange-600 mt-4"
-                >
-                  Update Destination
-                </Button>
-              </div>
-            </DrawerContent>
-          </Drawer>
+          <a href="add">
+            <Button className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto">
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Destination
+            </Button>
+          </a>
         </div>
       </div>
 

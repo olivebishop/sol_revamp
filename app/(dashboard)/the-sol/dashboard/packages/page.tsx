@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import PackagesManager from "@/components/admin/packages-manager";
 import { Suspense } from "react";
+import { cacheLife } from "next/cache";
 
 // Loading component for the skeleton UI
 function PackagesLoading() {
@@ -32,11 +33,12 @@ function PackagesLoading() {
 
 // Move ALL dynamic data access into this component
 // @see https://nextjs.org/docs/app/building-your-application/data-fetching/caching
-export async function PackagesContent() {
+export async function PackagesContent({ headersObj }: { headersObj: any }) {
   'use cache';
+  cacheLife('hours');
   // Auth check uses headers() which is a runtime API
   const session = await auth.api.getSession({
-    headers: await headers(),
+    headers: headersObj,
   });
 
   if (!session?.user) {
@@ -88,10 +90,12 @@ export async function PackagesContent() {
   );
 }
 
-export default function PackagesPage() {
+export default async function PackagesPage() {
+  const headersObj = await headers();
   return (
     <Suspense fallback={<PackagesLoading />}>
-      <PackagesContent />
+      {/* @ts-expect-error Async Server Component */}
+      <PackagesContent headersObj={headersObj} />
     </Suspense>
   );
 }

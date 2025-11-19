@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import DestinationsManager from "@/components/admin/destinations-manager";
 import { Suspense } from "react";
+import { cacheLife } from "next/cache";
 
 // Loading component for the skeleton UI
 function DestinationsLoading() {
@@ -32,10 +33,11 @@ function DestinationsLoading() {
 
 // Move ALL dynamic data access into this component
 // @see https://nextjs.org/docs/app/building-your-application/data-fetching/caching
-export async function DestinationsContent() {
+export async function DestinationsContent({ headersObj }: { headersObj: any }) {
   'use cache';
+  cacheLife('hours');
   const session = await auth.api.getSession({
-    headers: await headers(),
+    headers: headersObj,
   });
 
   if (!session?.user) {
@@ -87,10 +89,12 @@ export async function DestinationsContent() {
   );
 }
 
-export default function DestinationsPage() {
+export default async function DestinationsPage() {
+  const headersObj = await headers();
   return (
     <Suspense fallback={<DestinationsLoading />}>
-      <DestinationsContent />
+      {/* @ts-expect-error Async Server Component */}
+      <DestinationsContent headersObj={headersObj} />
     </Suspense>
   );
 }

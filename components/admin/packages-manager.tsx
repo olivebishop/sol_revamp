@@ -2,14 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-  DrawerClose,
-} from "@/components/ui/drawer";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ContentEditable } from "@/components/editor/editor-ui/content-editable";
@@ -49,8 +42,7 @@ export default function PackagesManager({
   packages: initialPackages,
 }: PackagesManagerProps) {
   const [packages, setPackages] = useState(initialPackages);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  // Removed drawer state for add/edit
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
   const [imageFiles, setImageFiles] = useState<FileList | null>(null);
   const [formData, setFormData] = useState({
@@ -276,7 +268,8 @@ export default function PackagesManager({
         <ContentEditable
           placeholder="Detailed description of the package"
           className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none min-h-[120px] rounded-md px-3 py-2 mt-1"
-          // TODO: Wire up value and onChange to update formData.description
+          value={formData.description}
+          onChange={(value) => setFormData({ ...formData, description: value })}
         />
       </div>
       
@@ -355,54 +348,12 @@ export default function PackagesManager({
           <p className="text-sm text-gray-400 mt-1">Manage your tour packages</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <Drawer open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} direction="right">
-            <DrawerTrigger asChild>
-              <Button className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Package
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[480px] md:w-[600px] fixed right-0 top-0 p-0 flex flex-col">
-              <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between px-6 pt-6">
-                <DrawerTitle className="text-xl font-semibold">Create New Package</DrawerTitle>
-                <DrawerClose asChild>
-                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-                    <X className="w-5 h-5" />
-                  </Button>
-                </DrawerClose>
-              </DrawerHeader>
-              <div className="space-y-6 overflow-y-auto p-6 flex-1">
-                <FormFields />
-                <Button
-                  onClick={handleCreate}
-                  className="w-full bg-orange-500 hover:bg-orange-600 mt-4"
-                >
-                  Create Package
-                </Button>
-              </div>
-            </DrawerContent>
-          </Drawer>
-          <Drawer open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} direction="right">
-            <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[480px] md:w-[600px] fixed right-0 top-0 p-0 flex flex-col">
-              <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between px-6 pt-6">
-                <DrawerTitle className="text-xl font-semibold">Edit Package</DrawerTitle>
-                <DrawerClose asChild>
-                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-                    <X className="w-5 h-5" />
-                  </Button>
-                </DrawerClose>
-              </DrawerHeader>
-              <div className="space-y-6 overflow-y-auto p-6 flex-1">
-                <FormFields />
-                <Button
-                  onClick={handleEdit}
-                  className="w-full bg-orange-500 hover:bg-orange-600 mt-4"
-                >
-                  Update Package
-                </Button>
-              </div>
-            </DrawerContent>
-          </Drawer>
+          <Link href="/app/(dashboard)/the-sol/dashboard/packages/add">
+            <Button className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto">
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Package
+            </Button>
+          </Link>
         </div>
       </div>
 
