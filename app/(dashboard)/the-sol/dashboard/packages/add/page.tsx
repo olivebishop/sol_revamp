@@ -10,9 +10,10 @@ export const metadata = {
   title: "Add Package | Admin Dashboard",
 };
 
-export async function AddPackageContent({ headersObj }: { headersObj: any }) {
+export async function AddPackageContent() {
   'use cache';
   // Auth check
+  const headersObj = Object.fromEntries((headers() as any).entries());
   const session = await auth.api.getSession({ headers: headersObj });
   if (!session?.user) redirect("/sign-in");
   const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { isAdmin: true } });
@@ -25,11 +26,10 @@ export async function AddPackageContent({ headersObj }: { headersObj: any }) {
   );
 }
 
-export default async function AddPackagePage() {
-  const headersObj = await headers();
+export default function AddPackagePage() {
   return (
     <Suspense>
-      <AddPackageContent headersObj={headersObj} />
+      <AddPackageContent />
     </Suspense>
   );
 }
