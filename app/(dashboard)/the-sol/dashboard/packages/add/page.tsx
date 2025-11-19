@@ -1,8 +1,10 @@
+
 import PackagesManager from "@/components/admin/packages-manager";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "Add Package | Admin Dashboard",
@@ -25,5 +27,9 @@ export async function AddPackageContent({ headersObj }: { headersObj: any }) {
 
 export default async function AddPackagePage() {
   const headersObj = await headers();
-  return <AddPackageContent headersObj={headersObj} />;
+  return (
+    <Suspense>
+      <AddPackageContent headersObj={headersObj} />
+    </Suspense>
+  );
 }

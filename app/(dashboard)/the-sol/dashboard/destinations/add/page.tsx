@@ -4,8 +4,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ContentEditable } from "@/components/editor/editor-ui/content-editable";
+import dynamic from "next/dynamic";
+const ContentEditable = dynamic(
+  () => import("@/components/editor/editor-ui/content-editable").then(mod => mod.ContentEditable),
+  { ssr: false }
+);
 import { useRouter } from "next/navigation";
+import { signOut } from "@/lib/auth-client";
 
 export default function AddDestinationPage() {
   const router = useRouter();
@@ -72,7 +77,18 @@ export default function AddDestinationPage() {
 
   return (
     <div className="w-full max-w-2xl mx-auto py-8 px-4">
-      <h2 className="text-2xl font-semibold mb-2 text-white">Add New Destination</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold text-white">Add New Destination</h2>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            await signOut();
+            router.push("/sign-in");
+          }}
+        >
+          Logout
+        </Button>
+      </div>
       <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-900 p-6 rounded-lg border border-zinc-800">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
