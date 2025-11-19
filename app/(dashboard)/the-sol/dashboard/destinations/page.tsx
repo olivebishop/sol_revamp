@@ -31,7 +31,9 @@ function DestinationsLoading() {
 }
 
 // Move ALL dynamic data access into this component
-async function DestinationsContent() {
+// @see https://nextjs.org/docs/app/building-your-application/data-fetching/caching
+export async function DestinationsContent() {
+  'use cache';
   const session = await auth.api.getSession({
     headers: await headers(),
   });

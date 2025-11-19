@@ -31,7 +31,9 @@ function PackagesLoading() {
 }
 
 // Move ALL dynamic data access into this component
-async function PackagesContent() {
+// @see https://nextjs.org/docs/app/building-your-application/data-fetching/caching
+export async function PackagesContent() {
+  'use cache';
   // Auth check uses headers() which is a runtime API
   const session = await auth.api.getSession({
     headers: await headers(),

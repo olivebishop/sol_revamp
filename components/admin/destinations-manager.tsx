@@ -314,72 +314,73 @@ export default function DestinationsManager({
   );
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="w-full max-w-7xl mx-auto space-y-8 px-2 sm:px-4 md:px-6 lg:px-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-8 py-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-semibold text-white">Destinations</h2>
           <p className="text-sm text-gray-400 mt-1">Manage your travel destinations</p>
         </div>
-        <Drawer open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} direction="right">
-          <DrawerTrigger asChild>
-            <Button className="bg-orange-500 hover:bg-orange-600">
-              <Plus className="w-4 h-4 mr-2" />
-              Create Destination
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[600px] fixed right-0 top-0">
-            <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between">
-              <DrawerTitle className="text-xl font-semibold">Create New Destination</DrawerTitle>
-              <DrawerClose asChild>
-                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-                  <X className="w-5 h-5" />
-                </Button>
-              </DrawerClose>
-            </DrawerHeader>
-            <div className="space-y-6 overflow-y-auto p-6 flex-1">
-              <FormFields />
-              <Button
-                onClick={handleCreate}
-                className="w-full bg-orange-500 hover:bg-orange-600"
-              >
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <Drawer open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} direction="right">
+            <DrawerTrigger asChild>
+              <Button className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto">
+                <Plus className="w-4 h-4 mr-2" />
                 Create Destination
               </Button>
-            </div>
-          </DrawerContent>
-        </Drawer>
-
-        <Drawer open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} direction="right">
-          <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[600px] fixed right-0 top-0">
-            <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between">
-              <DrawerTitle className="text-xl font-semibold">Edit Destination</DrawerTitle>
-              <DrawerClose asChild>
-                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-                  <X className="w-5 h-5" />
+            </DrawerTrigger>
+            <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[480px] md:w-[600px] fixed right-0 top-0 p-0 flex flex-col">
+              <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between px-6 pt-6">
+                <DrawerTitle className="text-xl font-semibold">Create New Destination</DrawerTitle>
+                <DrawerClose asChild>
+                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+                    <X className="w-5 h-5" />
+                  </Button>
+                </DrawerClose>
+              </DrawerHeader>
+              <div className="space-y-6 overflow-y-auto p-6 flex-1">
+                <FormFields />
+                <Button
+                  onClick={handleCreate}
+                  className="w-full bg-orange-500 hover:bg-orange-600 mt-4"
+                >
+                  Create Destination
                 </Button>
-              </DrawerClose>
-            </DrawerHeader>
-            <div className="space-y-6 overflow-y-auto p-6 flex-1">
-              <FormFields />
-              <Button
-                onClick={handleEdit}
-                className="w-full bg-orange-500 hover:bg-orange-600"
-              >
-                Update Destination
-              </Button>
-            </div>
-          </DrawerContent>
-        </Drawer>
+              </div>
+            </DrawerContent>
+          </Drawer>
+          <Drawer open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} direction="right">
+            <DrawerContent className="bg-zinc-900 text-white border-l border-zinc-800 h-full w-full sm:w-[480px] md:w-[600px] fixed right-0 top-0 p-0 flex flex-col">
+              <DrawerHeader className="pb-4 border-b border-zinc-800 flex items-center justify-between px-6 pt-6">
+                <DrawerTitle className="text-xl font-semibold">Edit Destination</DrawerTitle>
+                <DrawerClose asChild>
+                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+                    <X className="w-5 h-5" />
+                  </Button>
+                </DrawerClose>
+              </DrawerHeader>
+              <div className="space-y-6 overflow-y-auto p-6 flex-1">
+                <FormFields />
+                <Button
+                  onClick={handleEdit}
+                  className="w-full bg-orange-500 hover:bg-orange-600 mt-4"
+                >
+                  Update Destination
+                </Button>
+              </div>
+            </DrawerContent>
+          </Drawer>
+        </div>
       </div>
 
-      <div className="grid gap-4 lg:gap-6">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-2 xl:grid-cols-3">
         {destinations.map((destination) => (
           <div
             key={destination.id}
-            className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 sm:p-6 hover:border-zinc-700 transition-colors"
+            className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 sm:p-6 hover:border-zinc-700 transition-colors flex flex-col justify-between min-h-[180px]"
           >
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex flex-wrap items-center gap-3 mb-2">
                   <h3 className="text-xl font-bold">{destination.name}</h3>
                   {destination.isPublished ? (
                     <span className="px-2 py-1 bg-green-500/20 text-green-500 text-xs rounded">
@@ -403,7 +404,7 @@ export default function DestinationsManager({
                   <span>Slug: {destination.slug}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 ml-4">
+              <div className="flex items-center gap-2 mt-4 sm:mt-0 ml-0 sm:ml-4">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -438,7 +439,7 @@ export default function DestinationsManager({
         ))}
 
         {destinations.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-gray-500 col-span-full">
             <p>No destinations yet. Create your first one!</p>
           </div>
         )}
