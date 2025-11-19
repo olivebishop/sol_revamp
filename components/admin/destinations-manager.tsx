@@ -25,12 +25,6 @@ interface Destination {
   heroImage: string;
   images: string[];
   isPublished: boolean;
-  createdAt: string;
-  updatedAt: string;
-  admin: {
-    name: string;
-    email: string;
-  };
 }
 
 interface DestinationsManagerProps {
@@ -407,12 +401,6 @@ export default function DestinationsManager({
                 </p>
                 <div className="flex items-center gap-4 text-xs text-gray-500">
                   <span>Slug: {destination.slug}</span>
-                  <span>•</span>
-                  <span>By: {destination.admin.name}</span>
-                  <span>•</span>
-                  <span>
-                    Created: {new Date(destination.createdAt).toLocaleDateString()}
-                  </span>
                 </div>
               </div>
               <div className="flex items-center gap-2 ml-4">

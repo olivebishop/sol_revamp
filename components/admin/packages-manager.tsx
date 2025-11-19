@@ -33,12 +33,12 @@ interface Package {
   daysOfTravel: number;
   images: string[];
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  admin: {
-    name: string;
-    email: string;
-  };
+    createdAt?: string; // Optional for backward compatibility
+    updatedAt?: string; // Optional for backward compatibility
+    admin?: { // Optional for backward compatibility
+      name?: string; // Optional for backward compatibility
+      email?: string; // Optional for backward compatibility
+    };
 }
 
 interface PackagesManagerProps {
