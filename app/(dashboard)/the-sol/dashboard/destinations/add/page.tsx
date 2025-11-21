@@ -4,11 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import dynamic from "next/dynamic";
-const ContentEditable = dynamic(
-  () => import("@/components/editor/editor-ui/content-editable").then(mod => mod.ContentEditable),
-  { ssr: false }
-);
+import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { AuthGuard } from "@/components/admin/auth-guard";
 
@@ -37,9 +33,7 @@ function AddDestinationForm() {
     }
   };
 
-  const handleDescriptionChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, description: value }));
-  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,11 +109,12 @@ function AddDestinationForm() {
         </div>
         <div>
           <Label className="text-sm font-medium text-gray-200">Description *</Label>
-          <ContentEditable
-            placeholder="Detailed description of the destination"
-            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none min-h-[120px] rounded-md px-3 py-2 mt-1"
+          <Textarea
             value={formData.description}
-            onChange={handleDescriptionChange}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Detailed description of the destination"
+            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none min-h-[120px]"
+            required
           />
         </div>
         <div>

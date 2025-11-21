@@ -1,12 +1,8 @@
 import { notFound } from "next/navigation";
-import { destinations } from "@/data/destinations";
+import { prisma } from "@/lib/prisma";
 import DestinationDetailClient from "@/components/destinations/destination-detail-client";
 
-export function generateStaticParams() {
-  return destinations.map((destination) => ({
-    slug: destination.slug,
-  }));
-}
+export const dynamic = 'force-dynamic';
 
 export default async function DestinationPage({
   params,
@@ -14,7 +10,11 @@ export default async function DestinationPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const destination = destinations.find((d) => d.slug === slug);
+  
+  // Fetch destination from database
+  const destination = await prisma.destination.findUnique({
+    where: { slug, isPublished: true },
+  });
 
   if (!destination) {
     notFound();
