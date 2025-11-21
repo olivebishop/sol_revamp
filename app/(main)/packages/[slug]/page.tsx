@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import PackageDetailsClient from "@/components/packages/package-details-client";
 import type { PackageData } from "@/data/packages";
+import { Suspense } from "react";
 
 interface PageProps {
   params: Promise<{
@@ -9,12 +10,10 @@ interface PageProps {
   }>;
 }
 
-export default async function PackageDetailsPage(props: PageProps) {
-  const params = await props.params;
-  
+async function PackageContent({ slug }: { slug: string }) {
   // Fetch package from database
   const dbPackage = await prisma.package.findUnique({
-    where: { slug: params.slug, isActive: true },
+    where: { slug, isActive: true },
   });
 
   if (!dbPackage) {
@@ -65,4 +64,22 @@ export default async function PackageDetailsPage(props: PageProps) {
   }));
 
   return <PackageDetailsClient package={packageData} relatedPackages={relatedPackages} />;
+}
+
+function PackageLoading() {
+  return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+    </div>
+  );
+}
+
+export default async function PackageDetailsPage(props: PageProps) {
+  const params = await props.params;
+
+  return (
+    <Suspense fallback={<PackageLoading />}>
+      <PackageContent slug={params.slug} />
+    </Suspense>
+  );
 }
