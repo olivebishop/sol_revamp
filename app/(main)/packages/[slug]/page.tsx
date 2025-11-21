@@ -9,8 +9,6 @@ interface PageProps {
   }>;
 }
 
-export const dynamic = 'force-dynamic';
-
 export default async function PackageDetailsPage(props: PageProps) {
   const params = await props.params;
   
