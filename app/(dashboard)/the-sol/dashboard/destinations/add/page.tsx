@@ -21,7 +21,21 @@ function AddDestinationForm() {
     description: "",
     isPublished: false,
   });
+  const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const handleHeroImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setHeroImageFile(e.target.files[0]);
+    }
+  };
+
+  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setImageFiles(e.target.files);
+    }
+  };
 
   const handleDescriptionChange = (value: string) => {
     setFormData((prev) => ({ ...prev, description: value }));
@@ -37,6 +51,16 @@ function AddDestinationForm() {
       formDataToSend.append("tagline", formData.tagline);
       formDataToSend.append("description", formData.description);
       formDataToSend.append("isPublished", formData.isPublished.toString());
+      
+      if (heroImageFile) {
+        formDataToSend.append("heroImage", heroImageFile);
+      }
+      
+      if (imageFiles) {
+        Array.from(imageFiles).forEach((file) => {
+          formDataToSend.append("images", file);
+        });
+      }
       
       const response = await fetch("/api/destinations", {
         method: "POST",
@@ -98,10 +122,30 @@ function AddDestinationForm() {
             onChange={handleDescriptionChange}
           />
         </div>
-        <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4">
-          <p className="text-sm text-yellow-200">
-            <strong>Note:</strong> Image uploads are temporarily disabled. Default placeholder images will be used. 
-            To enable image uploads, integrate with Cloudinary, AWS S3, or Vercel Blob storage.
+        <div>
+          <Label className="text-sm font-medium text-gray-200">Hero Image</Label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={handleHeroImageChange}
+            className="bg-zinc-800 border-zinc-700 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            {heroImageFile ? heroImageFile.name : "Select a hero image (uploaded to Supabase)"}
+          </p>
+        </div>
+        
+        <div>
+          <Label className="text-sm font-medium text-gray-200">Additional Images</Label>
+          <Input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleImagesChange}
+            className="bg-zinc-800 border-zinc-700 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            {imageFiles ? `${imageFiles.length} file(s) selected` : "Select one or multiple images (uploaded to Supabase)"}
           </p>
         </div>
         <div className="flex items-center space-x-2">

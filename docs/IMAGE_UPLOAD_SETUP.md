@@ -1,65 +1,72 @@
-# Image Upload Setup Guide
+# Image Upload with Supabase Storage
 
-Currently, image uploads are disabled because Vercel's serverless environment doesn't support persistent file system writes. To enable image uploads, you need to integrate with a cloud storage provider.
+✅ **Image uploads are now enabled using Supabase Storage!**
 
-## Recommended Solutions
+## Setup Complete
 
-### Option 1: Vercel Blob (Easiest for Vercel deployments)
+The application is configured to upload images to Supabase Storage buckets:
+- **Packages**: Stored in the `packages` bucket
+- **Destinations**: Stored in the `destinations` bucket
 
-1. Install the package:
-```bash
-pnpm add @vercel/blob
+## Supabase Storage Buckets Setup
+
+You need to create the storage buckets in your Supabase dashboard:
+
+1. Go to your Supabase project: https://dehakhyjxyadeogocxxi.supabase.co
+2. Navigate to **Storage** in the left sidebar
+3. Create two public buckets:
+   - `packages` - for package images
+   - `destinations` - for destination images
+4. Make sure both buckets are set to **public** so images can be accessed via URL
+
+### Creating a Bucket
+
+1. Click "New bucket"
+2. Enter bucket name (e.g., `packages`)
+3. Toggle "Public bucket" to ON
+4. Click "Create bucket"
+
+### Setting Bucket Policies
+
+For public access, you may need to add a policy:
+
+```sql
+-- Allow public read access
+CREATE POLICY "Public Access"
+ON storage.objects FOR SELECT
+USING ( bucket_id = 'packages' );
+
+-- Allow authenticated users to upload
+CREATE POLICY "Authenticated users can upload"
+ON storage.objects FOR INSERT
+WITH CHECK ( bucket_id = 'packages' AND auth.role() = 'authenticated' );
 ```
 
-2. Add environment variable to `.env`:
-```
-BLOB_READ_WRITE_TOKEN=your_token_here
-```
+## How It Works
 
-3. Update API routes to use Vercel Blob:
-```typescript
-import { put } from '@vercel/blob';
+1. **Upload**: When you create a package or destination, images are uploaded to Supabase Storage
+2. **Storage**: Files are stored with unique names (timestamp + random string)
+3. **URL**: Public URLs are generated and stored in the database
+4. **Fallback**: If upload fails, default placeholder images are used
 
-const blob = await put(filename, file, {
-  access: 'public',
-});
-const imageUrl = blob.url;
+## Files Involved
+
+- `lib/supabase.ts` - Supabase client and upload utilities
+- `app/api/packages/route.ts` - Package creation with image upload
+- `app/api/destinations/route.ts` - Destination creation with image upload
+- Form components - Handle file selection and upload
+
+## Environment Variables
+
+Already configured in `.env`:
 ```
-
-### Option 2: Cloudinary (Most feature-rich)
-
-1. Install the package:
-```bash
-pnpm add cloudinary
-```
-
-2. Add environment variables:
-```
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+NEXT_PUBLIC_SUPABASE_URL=https://dehakhyjxyadeogocxxi.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 ```
 
-3. Update API routes to use Cloudinary.
+## Testing
 
-### Option 3: AWS S3 (Most scalable)
-
-1. Install AWS SDK:
-```bash
-pnpm add @aws-sdk/client-s3
-```
-
-2. Add environment variables and configure S3 client.
-
-## Files to Update
-
-When implementing image uploads, update these files:
-- `app/api/packages/route.ts` - Package creation endpoint
-- `app/api/destinations/route.ts` - Destination creation endpoint
-- `app/(dashboard)/the-sol/dashboard/packages/add/page.tsx` - Re-enable file inputs
-- `app/(dashboard)/the-sol/dashboard/destinations/add/page.tsx` - Re-enable file inputs
-
-## Current Behavior
-
-- Packages use default images: `/images/default-package.jpg`, `/images/lion.png`, `/images/elephant.png`
-- Destinations use default images: `/images/default-destination.jpg`, `/images/giraffe.png`, `/images/elephant.png`
+1. Go to `/the-sol/dashboard/packages/add`
+2. Fill in the form and select images
+3. Submit - images will be uploaded to Supabase
+4. Check your Supabase Storage dashboard to see the uploaded files

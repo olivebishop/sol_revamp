@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { uploadToSupabase } from "@/lib/supabase";
 
 // GET all destinations
 export async function GET() {
@@ -50,10 +51,38 @@ export async function POST(request: NextRequest) {
     const description = formData.get("description") as string;
     const isPublished = formData.get("isPublished") === "true";
     
-    // For now, use placeholder images until cloud storage is set up
-    // TODO: Integrate with Cloudinary, AWS S3, or Vercel Blob for production
-    const defaultHeroImage = "/images/default-destination.jpg";
-    const defaultImages = ["/images/giraffe.png", "/images/elephant.png"];
+    // Handle file uploads to Supabase Storage
+    const heroImageFile = formData.get("heroImage") as File | null;
+    const imageFiles = formData.getAll("images") as File[];
+    
+    let heroImageUrl = "/images/default-destination.jpg";
+    const uploadedImages: string[] = [];
+    
+    // Upload hero image
+    if (heroImageFile && heroImageFile.size > 0) {
+      try {
+        heroImageUrl = await uploadToSupabase("destinations", heroImageFile);
+      } catch (error) {
+        console.error("Failed to upload hero image:", error);
+      }
+    }
+    
+    // Upload additional images
+    for (const file of imageFiles) {
+      if (file && file.size > 0) {
+        try {
+          const imageUrl = await uploadToSupabase("destinations", file);
+          uploadedImages.push(imageUrl);
+        } catch (error) {
+          console.error("Failed to upload image:", error);
+        }
+      }
+    }
+    
+    // Use uploaded images or fallback to defaults
+    const finalImages = uploadedImages.length > 0 
+      ? uploadedImages 
+      : ["/images/giraffe.png", "/images/elephant.png"];
 
     const destination = await prisma.destination.create({
       data: {
@@ -61,8 +90,8 @@ export async function POST(request: NextRequest) {
         slug,
         tagline,
         description,
-        heroImage: defaultHeroImage,
-        images: defaultImages,
+        heroImage: heroImageUrl,
+        images: finalImages,
         location: {
           country: "Kenya",
           region: name,
