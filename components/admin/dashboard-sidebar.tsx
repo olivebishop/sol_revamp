@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Map, Package, Menu, LogOut } from "lucide-react";
+import { Home, Map, Package, Menu, LogOut, MessageSquare } from "lucide-react";
 import {
   SidebarProvider,
   Sidebar,
@@ -23,6 +23,7 @@ const links = [
   { href: "/the-sol/dashboard" as const, label: "Dashboard", icon: Home },
   { href: "/the-sol/dashboard/destinations" as const, label: "Destinations", icon: Map },
   { href: "/the-sol/dashboard/packages" as const, label: "Packages", icon: Package },
+  { href: "/the-sol/dashboard/testimonials" as const, label: "Testimonials", icon: MessageSquare },
 ] as const;
 
 interface DashboardSidebarProps {
