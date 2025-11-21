@@ -1,39 +1,60 @@
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+"use client";
+
+import { useEffect, useState } from "react";
+import { notFound, useParams } from "next/navigation";
 import DestinationDetailClient from "@/components/destinations/destination-detail-client";
-import { Suspense } from "react";
 
-async function DestinationContent({ slug }: { slug: string }) {
-  // Fetch destination from database
-  const destination = await prisma.destination.findUnique({
-    where: { slug, isPublished: true },
-  });
+export const dynamicParams = true;
 
-  if (!destination) {
+export default function DestinationPage() {
+  const params = useParams();
+  const slug = params?.slug as string;
+  const [destination, setDestination] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFoundError, setNotFoundError] = useState(false);
+
+  useEffect(() => {
+    const fetchDestination = async () => {
+      try {
+        const response = await fetch(`/api/destinations?slug=${slug}`);
+        if (!response.ok) {
+          setNotFoundError(true);
+          return;
+        }
+        const data = await response.json();
+        if (!data || data.length === 0) {
+          setNotFoundError(true);
+          return;
+        }
+        setDestination(data[0]);
+      } catch (error) {
+        console.error("Error fetching destination:", error);
+        setNotFoundError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug) {
+      fetchDestination();
+    }
+  }, [slug]);
+
+  if (notFoundError) {
     notFound();
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
+
+  if (!destination) {
+    return null;
+  }
+
   return <DestinationDetailClient destination={destination} />;
-}
-
-function DestinationLoading() {
-  return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-    </div>
-  );
-}
-
-export default async function DestinationPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-
-  return (
-    <Suspense fallback={<DestinationLoading />}>
-      <DestinationContent slug={slug} />
-    </Suspense>
-  );
 }

@@ -4,9 +4,38 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { uploadToSupabase } from "@/lib/supabase";
 
-// GET all packages
-export async function GET() {
+// GET all packages or filtered
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const slug = searchParams.get("slug");
+    const type = searchParams.get("type");
+    const exclude = searchParams.get("exclude");
+    const limit = searchParams.get("limit");
+
+    // Get single package by slug
+    if (slug) {
+      const packageData = await prisma.package.findUnique({
+        where: { slug, isActive: true },
+      });
+      return NextResponse.json(packageData ? [packageData] : []);
+    }
+
+    // Get related packages by type
+    if (type) {
+      const packages = await prisma.package.findMany({
+        where: {
+          isActive: true,
+          packageType: type,
+          ...(exclude && { id: { not: exclude } }),
+        },
+        orderBy: { createdAt: "desc" },
+        take: limit ? parseInt(limit) : undefined,
+      });
+      return NextResponse.json(packages);
+    }
+
+    // Get all packages
     const packages = await prisma.package.findMany({
       where: { isActive: true },
       orderBy: { createdAt: "desc" },

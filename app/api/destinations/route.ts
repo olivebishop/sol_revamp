@@ -4,9 +4,21 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { uploadToSupabase } from "@/lib/supabase";
 
-// GET all destinations
-export async function GET() {
+// GET all destinations or single by slug
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const slug = searchParams.get("slug");
+
+    if (slug) {
+      // Get single destination by slug
+      const destination = await prisma.destination.findUnique({
+        where: { slug, isPublished: true },
+      });
+      return NextResponse.json(destination ? [destination] : []);
+    }
+
+    // Get all destinations
     const destinations = await prisma.destination.findMany({
       where: { isPublished: true },
       orderBy: { createdAt: "desc" },

@@ -74,14 +74,6 @@ async function PackagesContent({ headersObj }: { headersObj: Headers }) {
     <div className="w-full">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
-              Packages Management
-            </h1>
-            <p className="text-sm sm:text-base text-gray-400">
-              Create and manage tour packages
-            </p>
-          </div>
         </div>
 
         <PackagesManager
