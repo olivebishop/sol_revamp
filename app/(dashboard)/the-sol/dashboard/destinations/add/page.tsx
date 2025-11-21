@@ -10,9 +10,9 @@ const ContentEditable = dynamic(
   { ssr: false }
 );
 import { useRouter } from "next/navigation";
-import { signOut } from "@/lib/auth-client";
+import { AuthGuard } from "@/components/admin/auth-guard";
 
-export default function AddDestinationPage() {
+function AddDestinationForm() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
@@ -77,18 +77,7 @@ export default function AddDestinationPage() {
 
   return (
     <div className="w-full max-w-2xl mx-auto py-8 px-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold text-white">Add New Destination</h2>
-        <Button
-          variant="outline"
-          onClick={async () => {
-            await signOut();
-            router.push("/sign-in");
-          }}
-        >
-          Logout
-        </Button>
-      </div>
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-white">Add New Destination</h2>
       <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-900 p-6 rounded-lg border border-zinc-800">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -175,5 +164,13 @@ export default function AddDestinationPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function AddDestinationPage() {
+  return (
+    <AuthGuard>
+      <AddDestinationForm />
+    </AuthGuard>
   );
 }

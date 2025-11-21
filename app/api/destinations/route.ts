@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { writeFile, mkdir } from "fs/promises";
+import { join } from "path";
 
 // GET all destinations
 export async function GET() {
@@ -42,27 +44,98 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await request.json();
+    const formData = await request.formData();
+    
+    const name = formData.get("name") as string;
+    const slug = formData.get("slug") as string;
+    const tagline = formData.get("tagline") as string || "";
+    const description = formData.get("description") as string;
+    const isPublished = formData.get("isPublished") === "true";
+    
+    // Handle file uploads
+    const heroImageFile = formData.get("heroImage") as File | null;
+    const imageFiles = formData.getAll("images") as File[];
+    
+    let heroImageUrl = "";
+    const imageUrls: string[] = [];
+    
+    // Create uploads directory if it doesn't exist
+    const uploadsDir = join(process.cwd(), "public", "uploads", "destinations");
+    try {
+      await mkdir(uploadsDir, { recursive: true });
+    } catch (error) {
+      // Directory might already exist
+    }
+    
+    // Save hero image
+    if (heroImageFile && heroImageFile.size > 0) {
+      const bytes = await heroImageFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const filename = `${Date.now()}-${heroImageFile.name.replace(/\s/g, "-")}`;
+      const filepath = join(uploadsDir, filename);
+      await writeFile(filepath, buffer);
+      heroImageUrl = `/uploads/destinations/${filename}`;
+    }
+    
+    // Save additional images
+    for (const file of imageFiles) {
+      if (file && file.size > 0) {
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const filename = `${Date.now()}-${file.name.replace(/\s/g, "-")}`;
+        const filepath = join(uploadsDir, filename);
+        await writeFile(filepath, buffer);
+        imageUrls.push(`/uploads/destinations/${filename}`);
+      }
+    }
 
     const destination = await prisma.destination.create({
       data: {
-        name: body.name,
-        slug: body.slug,
-        tagline: body.tagline,
-        description: body.description,
-        heroImage: body.heroImage,
-        images: body.images || [],
-        location: body.location,
-        overview: body.overview,
-        wildlife: body.wildlife,
-        bestTimeToVisit: body.bestTimeToVisit,
-        thingsToKnow: body.thingsToKnow,
-        whatToPack: body.whatToPack,
-        accommodation: body.accommodation,
-        activities: body.activities,
-        highlights: body.highlights || [],
-        funFacts: body.funFacts || [],
-        isPublished: body.isPublished ?? false,
+        name,
+        slug,
+        tagline,
+        description,
+        heroImage: heroImageUrl || "/images/default-destination.jpg",
+        images: imageUrls,
+        location: {
+          country: "Kenya",
+          region: name,
+          coordinates: { lat: 0, lng: 0 }
+        },
+        overview: {
+          title: "Overview",
+          content: description
+        },
+        wildlife: {
+          title: "Wildlife",
+          description: "Discover amazing wildlife",
+          animals: []
+        },
+        bestTimeToVisit: {
+          title: "Best Time to Visit",
+          description: "Year-round destination",
+          seasons: []
+        },
+        thingsToKnow: {
+          title: "Things to Know",
+          items: []
+        },
+        whatToPack: {
+          title: "What to Pack",
+          categories: []
+        },
+        accommodation: {
+          title: "Accommodation",
+          description: "Various accommodation options available",
+          types: []
+        },
+        activities: {
+          title: "Activities",
+          list: []
+        },
+        highlights: [],
+        funFacts: [],
+        isPublished,
         createdBy: session.user.id,
       },
     });

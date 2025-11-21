@@ -7,10 +7,52 @@ import VisualNarratives from "@/components/shared/visual-narratives";
 import WhyChooseUs from "@/components/shared/why-choose-us";
 import Testimonials from "@/components/shared/testimonials";
 import CTASection from "@/components/shared/cta-section";
-import { packages } from "@/data/packages";
 import { testimonials } from "@/data/testimonials";
+import { useEffect, useState } from "react";
+import type { PackageData } from "@/data/packages";
 
 const Page = () => {
+  const [packages, setPackages] = useState<PackageData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const response = await fetch("/api/packages");
+        if (response.ok) {
+          const data = await response.json();
+          // Transform database packages to match PackageData interface
+          const transformedPackages: PackageData[] = data.map((pkg: any) => ({
+            id: pkg.id,
+            name: pkg.name,
+            slug: pkg.slug,
+            packageType: pkg.packageType || "safari",
+            description: pkg.description,
+            pricing: pkg.pricing,
+            daysOfTravel: pkg.daysOfTravel,
+            images: pkg.images || [],
+            maxCapacity: pkg.maxCapacity || 10,
+            currentBookings: pkg.currentBookings || 0,
+            isActive: pkg.isActive,
+            destination: pkg.destination || {
+              id: "default",
+              name: "Kenya",
+              slug: "kenya",
+              bestTime: "Year-round"
+            }
+          }));
+          setPackages(transformedPackages.filter((pkg: PackageData) => pkg.isActive));
+        }
+      } catch (error) {
+        console.error("Error fetching packages:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPackages();
+  }, []);
+
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       {/* Grain Overlay */}
@@ -20,14 +62,16 @@ const Page = () => {
       <HeroSection />
 
       {/* Featured Packages */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-      >
-        <FeaturedPackages packages={packages} />
-      </motion.div>
+      {!loading && packages.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <FeaturedPackages packages={packages} />
+        </motion.div>
+      )}
 
       {/* Visual Narratives */}
       <motion.div
