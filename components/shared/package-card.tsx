@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Users } from "lucide-react";
+import { MapPin, Calendar } from "lucide-react";
 import type { PackageData } from "@/data/packages";
 
 interface PackageCardProps {
@@ -68,15 +68,7 @@ export const PackageCard = ({ package: pkg }: PackageCardProps) => {
               {pkg.daysOfTravel} {pkg.daysOfTravel === 1 ? "Day" : "Days"}
             </span>
           </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-            className="flex items-center gap-2 text-gray-300"
-          >
-            <Users className="w-4 h-4 text-orange-500" />
-            <span>Up to {pkg.maxCapacity} people</span>
-          </motion.div>
+
         </div>
 
         {/* Price & CTA */}
