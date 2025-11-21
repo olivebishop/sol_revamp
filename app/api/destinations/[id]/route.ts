@@ -52,7 +52,7 @@ export async function PUT(request: NextRequest, context: any) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Get existing destination to preserve data if not updating
+    // Get existing destination
     const existingDestination = await prisma.destination.findUnique({
       where: { id: params.id },
     });
@@ -61,76 +61,60 @@ export async function PUT(request: NextRequest, context: any) {
       return NextResponse.json({ error: "Destination not found" }, { status: 404 });
     }
 
-    const formData = await request.formData();
+    // Check content type to determine if it's JSON (toggle) or FormData (edit)
+    const contentType = request.headers.get("content-type");
     
-    const name = formData.get("name") as string;
-    const slug = formData.get("slug") as string;
-    const tagline = formData.get("tagline") as string || "";
-    const description = formData.get("description") as string;
-    const isPublished = formData.get("isPublished") === "true";
-
-    // Keep existing images by default
-    let heroImageUrl = existingDestination.heroImage;
-    let finalImages = existingDestination.images;
-
-    // Handle hero image upload
-    const heroImageFile = formData.get("heroImage") as File | null;
-    if (heroImageFile && heroImageFile.size > 0) {
-      const { uploadToSupabase } = await import("@/lib/supabase");
-      try {
-        heroImageUrl = await uploadToSupabase("destinations", heroImageFile);
-      } catch (error) {
-        console.error("Failed to upload hero image:", error);
-      }
-    }
-
-    // Handle additional images upload
-    const imageFiles = formData.getAll("images") as File[];
-    if (imageFiles.length > 0 && imageFiles[0].size > 0) {
-      const { uploadToSupabase } = await import("@/lib/supabase");
-      const uploadedImages: string[] = [];
+    if (contentType?.includes("application/json")) {
+      // Handle JSON update (for toggle)
+      const body = await request.json();
       
-      for (const file of imageFiles) {
-        if (file && file.size > 0) {
-          try {
-            const imageUrl = await uploadToSupabase("destinations", file);
-            uploadedImages.push(imageUrl);
-          } catch (error) {
-            console.error("Failed to upload image:", error);
-          }
-        }
-      }
+      const destination = await prisma.destination.update({
+        where: { id: params.id },
+        data: {
+          isPublished: body.isPublished,
+        },
+      });
+
+      return NextResponse.json(destination);
+    } else {
+      // Handle FormData update (for edit with possible image)
+      const formData = await request.formData();
       
-      if (uploadedImages.length > 0) {
-        finalImages = uploadedImages;
-      }
+      const name = formData.get("name") as string;
+      const slug = formData.get("slug") as string;
+      const tagline = formData.get("tagline") as string || "";
+      const description = formData.get("description") as string;
+      const isPublished = formData.get("isPublished") === "true";
+      const heroImage = formData.get("heroImage") as string | null;
+
+      // Use new image if provided, otherwise keep existing
+      const heroImageUrl = heroImage || existingDestination.heroImage;
+
+      const destination = await prisma.destination.update({
+        where: { id: params.id },
+        data: {
+          name,
+          slug,
+          tagline,
+          description,
+          heroImage: heroImageUrl,
+          isPublished,
+          // Keep existing complex fields - cast to any to avoid type issues
+          location: existingDestination.location as any,
+          overview: { title: "Overview", content: description } as any,
+          wildlife: existingDestination.wildlife as any,
+          bestTimeToVisit: existingDestination.bestTimeToVisit as any,
+          thingsToKnow: existingDestination.thingsToKnow as any,
+          whatToPack: existingDestination.whatToPack as any,
+          accommodation: existingDestination.accommodation as any,
+          activities: existingDestination.activities as any,
+          highlights: existingDestination.highlights,
+          funFacts: existingDestination.funFacts,
+        },
+      });
+
+      return NextResponse.json(destination);
     }
-
-    const destination = await prisma.destination.update({
-      where: { id: params.id },
-      data: {
-        name,
-        slug,
-        tagline,
-        description,
-        heroImage: heroImageUrl,
-        images: finalImages,
-        isPublished,
-        // Keep existing complex fields - cast to any to avoid type issues
-        location: existingDestination.location as any,
-        overview: { title: "Overview", content: description } as any,
-        wildlife: existingDestination.wildlife as any,
-        bestTimeToVisit: existingDestination.bestTimeToVisit as any,
-        thingsToKnow: existingDestination.thingsToKnow as any,
-        whatToPack: existingDestination.whatToPack as any,
-        accommodation: existingDestination.accommodation as any,
-        activities: existingDestination.activities as any,
-        highlights: existingDestination.highlights,
-        funFacts: existingDestination.funFacts,
-      },
-    });
-
-    return NextResponse.json(destination);
   } catch (error) {
     console.error("Error updating destination:", error);
     return NextResponse.json(

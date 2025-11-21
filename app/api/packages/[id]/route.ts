@@ -46,7 +46,7 @@ export async function PUT(request: NextRequest, context: any) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Get existing package to preserve images if not updating
+    // Get existing package
     const existingPackage = await prisma.package.findUnique({
       where: { id: params.id },
     });
@@ -55,57 +55,53 @@ export async function PUT(request: NextRequest, context: any) {
       return NextResponse.json({ error: "Package not found" }, { status: 404 });
     }
 
-    const formData = await request.formData();
+    // Check content type to determine if it's JSON (toggle) or FormData (edit)
+    const contentType = request.headers.get("content-type");
     
-    const name = formData.get("name") as string;
-    const slug = formData.get("slug") as string;
-    const packageType = formData.get("packageType") as string;
-    const description = formData.get("description") as string;
-    const pricing = parseFloat(formData.get("pricing") as string);
-    const daysOfTravel = parseInt(formData.get("daysOfTravel") as string);
-    const isActive = formData.get("isActive") === "true";
-
-    // Keep existing images by default
-    let finalImages = existingPackage.images;
-
-    // If new images are uploaded, use them
-    const imageFiles = formData.getAll("images") as File[];
-    if (imageFiles.length > 0 && imageFiles[0].size > 0) {
-      // Import uploadToSupabase dynamically
-      const { uploadToSupabase } = await import("@/lib/supabase");
-      const uploadedImages: string[] = [];
+    if (contentType?.includes("application/json")) {
+      // Handle JSON update (for toggle)
+      const body = await request.json();
       
-      for (const file of imageFiles) {
-        if (file && file.size > 0) {
-          try {
-            const imageUrl = await uploadToSupabase("packages", file);
-            uploadedImages.push(imageUrl);
-          } catch (error) {
-            console.error("Failed to upload image:", error);
-          }
-        }
-      }
+      const packageData = await prisma.package.update({
+        where: { id: params.id },
+        data: {
+          isActive: body.isActive,
+        },
+      });
+
+      return NextResponse.json(packageData);
+    } else {
+      // Handle FormData update (for edit with possible image)
+      const formData = await request.formData();
       
-      if (uploadedImages.length > 0) {
-        finalImages = uploadedImages;
-      }
+      const name = formData.get("name") as string;
+      const slug = formData.get("slug") as string;
+      const packageType = formData.get("packageType") as string;
+      const description = formData.get("description") as string;
+      const pricing = parseFloat(formData.get("pricing") as string);
+      const daysOfTravel = parseInt(formData.get("daysOfTravel") as string);
+      const isActive = formData.get("isActive") === "true";
+      const heroImage = formData.get("heroImage") as string | null;
+
+      // Use new image if provided, otherwise keep existing
+      const finalImages = heroImage ? [heroImage] : existingPackage.images;
+
+      const packageData = await prisma.package.update({
+        where: { id: params.id },
+        data: {
+          name,
+          slug,
+          packageType,
+          description,
+          pricing,
+          daysOfTravel,
+          images: finalImages,
+          isActive,
+        },
+      });
+
+      return NextResponse.json(packageData);
     }
-
-    const packageData = await prisma.package.update({
-      where: { id: params.id },
-      data: {
-        name,
-        slug,
-        packageType,
-        description,
-        pricing,
-        daysOfTravel,
-        images: finalImages,
-        isActive,
-      },
-    });
-
-    return NextResponse.json(packageData);
   } catch (error) {
     console.error("Error updating package:", error);
     return NextResponse.json(

@@ -98,10 +98,26 @@ export default function PackagesManager({
     }
   };
 
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleEdit = async () => {
     if (!editingPackage) return;
 
     try {
+      let heroImageBase64 = "";
+      
+      // Convert image to base64 if new image selected
+      if (imageFiles && imageFiles.length > 0) {
+        heroImageBase64 = await convertToBase64(imageFiles[0]);
+      }
+
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
       formDataToSend.append("slug", formData.slug);
@@ -110,11 +126,9 @@ export default function PackagesManager({
       formDataToSend.append("pricing", formData.pricing.toString());
       formDataToSend.append("daysOfTravel", formData.daysOfTravel.toString());
       formDataToSend.append("isActive", formData.isActive.toString());
-
-      if (imageFiles) {
-        Array.from(imageFiles).forEach((file) => {
-          formDataToSend.append("images", file);
-        });
+      
+      if (heroImageBase64) {
+        formDataToSend.append("heroImage", heroImageBase64);
       }
 
       const response = await fetch(`/api/packages/${editingPackage.id}`, {
@@ -127,7 +141,6 @@ export default function PackagesManager({
         setPackages(
           packages.map((p) => (p.id === updatedPackage.id ? updatedPackage : p))
         );
-        // setIsEditDialogOpen(false); // Drawer removed
         setEditingPackage(null);
         toast.success("Package updated successfully");
         resetForm();

@@ -91,10 +91,26 @@ export default function DestinationsManager({
     }
   };
 
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleEdit = async () => {
     if (!editingDestination) return;
 
     try {
+      let heroImageBase64 = "";
+      
+      // Convert image to base64 if new image selected
+      if (heroImageFile) {
+        heroImageBase64 = await convertToBase64(heroImageFile);
+      }
+
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
       formDataToSend.append("slug", formData.slug);
@@ -102,14 +118,8 @@ export default function DestinationsManager({
       formDataToSend.append("description", formData.description);
       formDataToSend.append("isPublished", formData.isPublished.toString());
 
-      if (heroImageFile) {
-        formDataToSend.append("heroImage", heroImageFile);
-      }
-
-      if (imageFiles) {
-        Array.from(imageFiles).forEach((file) => {
-          formDataToSend.append("images", file);
-        });
+      if (heroImageBase64) {
+        formDataToSend.append("heroImage", heroImageBase64);
       }
 
       const response = await fetch(`/api/destinations/${editingDestination.id}`, {
@@ -124,7 +134,6 @@ export default function DestinationsManager({
             d.id === updatedDestination.id ? updatedDestination : d
           )
         );
-        // setIsEditDialogOpen(false); // Drawer removed
         setEditingDestination(null);
         toast.success("Destination updated successfully");
         resetForm();
