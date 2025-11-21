@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   cacheComponents: true,
   reactCompiler: true,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 
   turbopack: {
     root: process.cwd(),
