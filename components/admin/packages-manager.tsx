@@ -364,7 +364,7 @@ export default function PackagesManager({
           <Link href="/the-sol/dashboard/packages/add">
             <Button className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
-              Add New Package
+              Add New Package 
             </Button>
           </Link>
         </div>

@@ -176,12 +176,6 @@ export default function PackageBookingDrawer({
                     ${pkg.pricing.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Available spots</span>
-                  <span className="text-white font-semibold">
-                    {pkg.maxCapacity - pkg.currentBookings} remaining
-                  </span>
-                </div>
               </div>
 
               {/* Booking Form */}

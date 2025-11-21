@@ -2,8 +2,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home, Map, Package, Menu } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Home, Map, Package, Menu, LogOut } from "lucide-react";
 import {
   SidebarProvider,
   Sidebar,
@@ -14,7 +14,10 @@ import {
   SidebarMenuButton,
   SidebarGroupLabel,
   SidebarTrigger,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
 
 const links = [
   { href: "/the-sol/dashboard" as const, label: "Dashboard", icon: Home },
@@ -28,6 +31,12 @@ interface DashboardSidebarProps {
 
 export default function DashboardSidebar({ children }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await authClient.signOut();
+    router.push("/sign-in");
+  };
 
   return (
     <SidebarProvider>
@@ -63,6 +72,17 @@ export default function DashboardSidebar({ children }: DashboardSidebarProps) {
               ))}
             </SidebarMenu>
           </SidebarContent>
+
+          <SidebarFooter className="p-4 border-t border-zinc-800">
+            <Button
+              onClick={handleLogout}
+              variant="ghost"
+              className="w-full justify-start gap-3 px-3 py-2.5 text-gray-400 hover:bg-zinc-900 hover:text-red-500 rounded-md transition-colors"
+            >
+              <LogOut className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+              <span className="truncate">Logout</span>
+            </Button>
+          </SidebarFooter>
         </Sidebar>
 
         {/* Main content area */}
