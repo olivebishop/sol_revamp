@@ -11,6 +11,15 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'dehakhyjxyadeogocxxi.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+  },
 
   turbopack: {
     root: process.cwd(),

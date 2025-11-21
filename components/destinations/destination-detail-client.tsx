@@ -50,8 +50,8 @@ export default function DestinationDetailClient({
       <section className="border-b border-zinc-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-32">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 md:gap-12 lg:gap-16">
-            {/* Left - Large dropcap intro with wildlife & when to visit */}
-            <div className="lg:col-span-7 space-y-8 sm:space-y-12 lg:space-y-16">
+            {/* Left - Large dropcap intro */}
+            <div className="lg:col-span-7">
               {/* Main Description */}
               <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light leading-relaxed">
                 <span className="float-left text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold text-orange-500 leading-none mr-3 sm:mr-4 mt-1 sm:mt-2">
@@ -59,46 +59,6 @@ export default function DestinationDetailClient({
                 </span>
                 {destination.description}
               </p>
-
-              {/* Wildlife */}
-              <div>
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-orange-500">
-                  Wildlife
-                </h3>
-                <div className="space-y-2 sm:space-y-3">
-                  {destination.wildlife.animals.slice(0, 8).map((animal) => (
-                    <div
-                      key={animal.name}
-                      className="flex items-center gap-2 sm:gap-3 text-gray-300"
-                    >
-                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded bg-orange-500 shrink-0"></div>
-                      <span className="text-sm sm:text-base lg:text-lg">
-                        {animal.name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* When to Visit */}
-              <div>
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-orange-500">
-                  When to Visit
-                </h3>
-                <div className="space-y-2 sm:space-y-3">
-                  {destination.bestTimeToVisit.seasons.map((season) => (
-                    <div
-                      key={season.period}
-                      className="flex items-start gap-2 sm:gap-3 text-gray-300"
-                    >
-                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded bg-orange-500 shrink-0 mt-1.5 sm:mt-2"></div>
-                      <span className="text-sm sm:text-base lg:text-lg">
-                        {season.period} - {season.weather}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* Right - Hero Image */}
