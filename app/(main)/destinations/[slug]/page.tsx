@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { notFound, useParams } from "next/navigation";
 import DestinationDetailClient from "@/components/destinations/destination-detail-client";
 
-export const dynamicParams = true;
-
 export default function DestinationPage() {
   const params = useParams();
   const slug = params?.slug as string;

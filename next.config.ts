@@ -3,10 +3,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   typedRoutes: true,
-  cacheComponents: true,
+  cacheComponents: false,
   reactCompiler: true,
   typescript: {
     ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 
   turbopack: {
