@@ -4,7 +4,6 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import DestinationsManager from "@/components/admin/destinations-manager";
 import { Suspense } from "react";
-import { cacheLife } from "next/cache";
 
 // Loading component for the skeleton UI
 function DestinationsLoading() {
@@ -31,11 +30,8 @@ function DestinationsLoading() {
   );
 }
 
-// Move ALL dynamic data access into this component
-// @see https://nextjs.org/docs/app/building-your-application/data-fetching/caching
-export async function DestinationsContent({ headersObj }: { headersObj: any }) {
-  'use cache';
-  cacheLife('hours');
+// Separate data fetching function
+async function getDestinationsData(headersObj: Headers) {
   const session = await auth.api.getSession({
     headers: headersObj,
   });
@@ -67,6 +63,13 @@ export async function DestinationsContent({ headersObj }: { headersObj: any }) {
     },
   });
 
+  return destinations;
+}
+
+// Content component that uses the fetched data
+async function DestinationsContent({ headersObj }: { headersObj: Headers }) {
+  const destinations = await getDestinationsData(headersObj);
+
   return (
     <div className="w-full">
       <div className="max-w-7xl mx-auto">
@@ -91,6 +94,7 @@ export async function DestinationsContent({ headersObj }: { headersObj: any }) {
 
 export default async function DestinationsPage() {
   const headersObj = await headers();
+  
   return (
     <Suspense fallback={<DestinationsLoading />}>
       <DestinationsContent headersObj={headersObj} />

@@ -26,7 +26,10 @@ export async function AddPackageContent({ headersObj }: { headersObj: Record<str
 }
 
 export default function AddPackagePage() {
-  const headersObj = Object.fromEntries((headers() as any).entries());
+  // Only pass the `cookie` header which is required for session lookup.
+  // Some runtimes don't expose `entries()` on the headers object, so
+  // extracting `cookie` is more reliable for auth session checks.
+  const headersObj = { cookie: (headers() as any).get?.("cookie") ?? "" };
   return (
     <Suspense>
       <AddPackageContent headersObj={headersObj} />

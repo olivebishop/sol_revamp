@@ -4,7 +4,6 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import PackagesManager from "@/components/admin/packages-manager";
 import { Suspense } from "react";
-import { cacheLife } from "next/cache";
 
 // Loading component for the skeleton UI
 function PackagesLoading() {
@@ -31,12 +30,8 @@ function PackagesLoading() {
   );
 }
 
-// Move ALL dynamic data access into this component
-// @see https://nextjs.org/docs/app/building-your-application/data-fetching/caching
-export async function PackagesContent({ headersObj }: { headersObj: any }) {
-  'use cache';
-  cacheLife('hours');
-  // Auth check uses headers() which is a runtime API
+// Separate data fetching function
+async function getPackagesData(headersObj: Headers) {
   const session = await auth.api.getSession({
     headers: headersObj,
   });
@@ -45,7 +40,7 @@ export async function PackagesContent({ headersObj }: { headersObj: any }) {
     redirect("/sign-in");
   }
 
-  // Check if user is admin (database query)
+  // Check if user is admin
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { isAdmin: true },
@@ -55,7 +50,7 @@ export async function PackagesContent({ headersObj }: { headersObj: any }) {
     redirect("/");
   }
 
-  // Fetch all packages (database query)
+  // Fetch all packages
   const packages = await prisma.package.findMany({
     orderBy: { createdAt: "desc" },
     include: {
@@ -67,6 +62,13 @@ export async function PackagesContent({ headersObj }: { headersObj: any }) {
       },
     },
   });
+
+  return packages;
+}
+
+// Content component that uses the fetched data
+async function PackagesContent({ headersObj }: { headersObj: Headers }) {
+  const packages = await getPackagesData(headersObj);
 
   return (
     <div className="w-full">
@@ -92,8 +94,9 @@ export async function PackagesContent({ headersObj }: { headersObj: any }) {
 
 export default async function PackagesPage() {
   const headersObj = await headers();
+  
   return (
-    <Suspense fallback={<PackagesLoading />}> 
+    <Suspense fallback={<PackagesLoading />}>
       <PackagesContent headersObj={headersObj} />
     </Suspense>
   );
