@@ -52,28 +52,81 @@ export async function PUT(request: NextRequest, context: any) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await request.json();
+    // Get existing destination to preserve data if not updating
+    const existingDestination = await prisma.destination.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!existingDestination) {
+      return NextResponse.json({ error: "Destination not found" }, { status: 404 });
+    }
+
+    const formData = await request.formData();
+    
+    const name = formData.get("name") as string;
+    const slug = formData.get("slug") as string;
+    const tagline = formData.get("tagline") as string || "";
+    const description = formData.get("description") as string;
+    const isPublished = formData.get("isPublished") === "true";
+
+    // Keep existing images by default
+    let heroImageUrl = existingDestination.heroImage;
+    let finalImages = existingDestination.images;
+
+    // Handle hero image upload
+    const heroImageFile = formData.get("heroImage") as File | null;
+    if (heroImageFile && heroImageFile.size > 0) {
+      const { uploadToSupabase } = await import("@/lib/supabase");
+      try {
+        heroImageUrl = await uploadToSupabase("destinations", heroImageFile);
+      } catch (error) {
+        console.error("Failed to upload hero image:", error);
+      }
+    }
+
+    // Handle additional images upload
+    const imageFiles = formData.getAll("images") as File[];
+    if (imageFiles.length > 0 && imageFiles[0].size > 0) {
+      const { uploadToSupabase } = await import("@/lib/supabase");
+      const uploadedImages: string[] = [];
+      
+      for (const file of imageFiles) {
+        if (file && file.size > 0) {
+          try {
+            const imageUrl = await uploadToSupabase("destinations", file);
+            uploadedImages.push(imageUrl);
+          } catch (error) {
+            console.error("Failed to upload image:", error);
+          }
+        }
+      }
+      
+      if (uploadedImages.length > 0) {
+        finalImages = uploadedImages;
+      }
+    }
 
     const destination = await prisma.destination.update({
       where: { id: params.id },
       data: {
-        name: body.name,
-        slug: body.slug,
-        tagline: body.tagline,
-        description: body.description,
-        heroImage: body.heroImage,
-        images: body.images,
-        location: body.location,
-        overview: body.overview,
-        wildlife: body.wildlife,
-        bestTimeToVisit: body.bestTimeToVisit,
-        thingsToKnow: body.thingsToKnow,
-        whatToPack: body.whatToPack,
-        accommodation: body.accommodation,
-        activities: body.activities,
-        highlights: body.highlights,
-        funFacts: body.funFacts,
-        isPublished: body.isPublished,
+        name,
+        slug,
+        tagline,
+        description,
+        heroImage: heroImageUrl,
+        images: finalImages,
+        isPublished,
+        // Keep existing complex fields - cast to any to avoid type issues
+        location: existingDestination.location as any,
+        overview: { title: "Overview", content: description } as any,
+        wildlife: existingDestination.wildlife as any,
+        bestTimeToVisit: existingDestination.bestTimeToVisit as any,
+        thingsToKnow: existingDestination.thingsToKnow as any,
+        whatToPack: existingDestination.whatToPack as any,
+        accommodation: existingDestination.accommodation as any,
+        activities: existingDestination.activities as any,
+        highlights: existingDestination.highlights,
+        funFacts: existingDestination.funFacts,
       },
     });
 
@@ -81,7 +134,7 @@ export async function PUT(request: NextRequest, context: any) {
   } catch (error) {
     console.error("Error updating destination:", error);
     return NextResponse.json(
-      { error: "Failed to update destination" },
+      { error: "Failed to update destination", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

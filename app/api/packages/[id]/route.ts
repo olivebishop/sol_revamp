@@ -46,22 +46,62 @@ export async function PUT(request: NextRequest, context: any) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await request.json();
+    // Get existing package to preserve images if not updating
+    const existingPackage = await prisma.package.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!existingPackage) {
+      return NextResponse.json({ error: "Package not found" }, { status: 404 });
+    }
+
+    const formData = await request.formData();
+    
+    const name = formData.get("name") as string;
+    const slug = formData.get("slug") as string;
+    const packageType = formData.get("packageType") as string;
+    const description = formData.get("description") as string;
+    const pricing = parseFloat(formData.get("pricing") as string);
+    const daysOfTravel = parseInt(formData.get("daysOfTravel") as string);
+    const isActive = formData.get("isActive") === "true";
+
+    // Keep existing images by default
+    let finalImages = existingPackage.images;
+
+    // If new images are uploaded, use them
+    const imageFiles = formData.getAll("images") as File[];
+    if (imageFiles.length > 0 && imageFiles[0].size > 0) {
+      // Import uploadToSupabase dynamically
+      const { uploadToSupabase } = await import("@/lib/supabase");
+      const uploadedImages: string[] = [];
+      
+      for (const file of imageFiles) {
+        if (file && file.size > 0) {
+          try {
+            const imageUrl = await uploadToSupabase("packages", file);
+            uploadedImages.push(imageUrl);
+          } catch (error) {
+            console.error("Failed to upload image:", error);
+          }
+        }
+      }
+      
+      if (uploadedImages.length > 0) {
+        finalImages = uploadedImages;
+      }
+    }
 
     const packageData = await prisma.package.update({
       where: { id: params.id },
       data: {
-        name: body.name,
-        slug: body.slug,
-        packageType: body.packageType,
-        description: body.description,
-        pricing: body.pricing,
-        daysOfTravel: body.daysOfTravel,
-        images: body.images,
-        maxCapacity: body.maxCapacity,
-        currentBookings: body.currentBookings,
-        destination: body.destination,
-        isActive: body.isActive,
+        name,
+        slug,
+        packageType,
+        description,
+        pricing,
+        daysOfTravel,
+        images: finalImages,
+        isActive,
       },
     });
 
@@ -69,7 +109,7 @@ export async function PUT(request: NextRequest, context: any) {
   } catch (error) {
     console.error("Error updating package:", error);
     return NextResponse.json(
-      { error: "Failed to update package" },
+      { error: "Failed to update package", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

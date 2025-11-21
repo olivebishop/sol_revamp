@@ -2,8 +2,6 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import DestinationDetailClient from "@/components/destinations/destination-detail-client";
 
-export const dynamic = 'force-dynamic';
-
 export default async function DestinationPage({
   params,
 }: {
