@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { uploadToSupabase } from "@/lib/supabase";
 
 // GET all packages or filtered
 export async function GET(request: NextRequest) {
@@ -71,47 +70,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const formData = await request.formData();
+    const body = await request.json();
     
-    const name = formData.get("name") as string;
-    const slug = formData.get("slug") as string;
-    const description = formData.get("description") as string;
-    const price = parseFloat(formData.get("price") as string);
-    const duration = formData.get("duration") as string;
-    const isPublished = formData.get("isPublished") === "true";
+    const { name, slug, description, price, duration, isPublished, heroImage } = body;
     
-    // Handle file uploads to Supabase Storage
-    const heroImageFile = formData.get("heroImage") as File | null;
-    const imageFiles = formData.getAll("images") as File[];
-    
-    const uploadedImages: string[] = [];
-    
-    // Upload hero image
-    if (heroImageFile && heroImageFile.size > 0) {
-      try {
-        const heroUrl = await uploadToSupabase("packages", heroImageFile);
-        uploadedImages.push(heroUrl);
-      } catch (error) {
-        console.error("Failed to upload hero image:", error);
-      }
-    }
-    
-    // Upload additional images
-    for (const file of imageFiles) {
-      if (file && file.size > 0) {
-        try {
-          const imageUrl = await uploadToSupabase("packages", file);
-          uploadedImages.push(imageUrl);
-        } catch (error) {
-          console.error("Failed to upload image:", error);
-        }
-      }
-    }
-    
-    // Use uploaded images or fallback to defaults
-    const finalImages = uploadedImages.length > 0 
-      ? uploadedImages 
-      : ["/images/default-package.jpg", "/images/lion.png", "/images/elephant.png"];
+    // Use hero image if provided, otherwise use default
+    const finalImages = heroImage 
+      ? [heroImage] 
+      : ["/images/default-package.jpg"];
     
     // Extract days from duration string (e.g., "5 Days / 4 Nights" -> 5)
     const daysMatch = duration.match(/(\d+)/);

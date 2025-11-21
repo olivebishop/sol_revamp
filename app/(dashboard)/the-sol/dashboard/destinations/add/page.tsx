@@ -35,37 +35,49 @@ function AddDestinationForm() {
 
 
 
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("name", formData.name);
-      formDataToSend.append("slug", formData.slug);
-      formDataToSend.append("tagline", formData.tagline);
-      formDataToSend.append("description", formData.description);
-      formDataToSend.append("isPublished", formData.isPublished.toString());
+      let heroImageBase64 = "";
       
+      // Convert hero image to base64
       if (heroImageFile) {
-        formDataToSend.append("heroImage", heroImageFile);
-      }
-      
-      if (imageFiles) {
-        Array.from(imageFiles).forEach((file) => {
-          formDataToSend.append("images", file);
-        });
+        heroImageBase64 = await convertToBase64(heroImageFile);
       }
       
       const response = await fetch("/api/destinations", {
         method: "POST",
-        body: formDataToSend,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          slug: formData.slug,
+          tagline: formData.tagline,
+          description: formData.description,
+          isPublished: formData.isPublished,
+          heroImage: heroImageBase64,
+        }),
       });
+      
       if (response.ok) {
         router.push("/the-sol/dashboard/destinations");
       } else {
-        alert("Failed to create destination");
+        const error = await response.json();
+        alert(error.error || "Failed to create destination");
       }
     } catch (error) {
+      console.error("Error:", error);
       alert("An error occurred");
     } finally {
       setLoading(false);

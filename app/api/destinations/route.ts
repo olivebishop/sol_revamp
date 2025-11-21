@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { uploadToSupabase } from "@/lib/supabase";
 
 // GET all destinations or single by slug
 export async function GET(request: NextRequest) {
@@ -55,52 +54,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const formData = await request.formData();
+    const body = await request.json();
     
-    const name = formData.get("name") as string;
-    const slug = formData.get("slug") as string;
-    const tagline = formData.get("tagline") as string || "";
-    const description = formData.get("description") as string;
-    const isPublished = formData.get("isPublished") === "true";
+    const { name, slug, tagline, description, isPublished, heroImage } = body;
     
-    // Handle file uploads to Supabase Storage
-    const heroImageFile = formData.get("heroImage") as File | null;
-    const imageFiles = formData.getAll("images") as File[];
-    
-    let heroImageUrl = "/images/default-destination.jpg";
-    const uploadedImages: string[] = [];
-    
-    // Upload hero image
-    if (heroImageFile && heroImageFile.size > 0) {
-      try {
-        heroImageUrl = await uploadToSupabase("destinations", heroImageFile);
-      } catch (error) {
-        console.error("Failed to upload hero image:", error);
-      }
-    }
-    
-    // Upload additional images
-    for (const file of imageFiles) {
-      if (file && file.size > 0) {
-        try {
-          const imageUrl = await uploadToSupabase("destinations", file);
-          uploadedImages.push(imageUrl);
-        } catch (error) {
-          console.error("Failed to upload image:", error);
-        }
-      }
-    }
-    
-    // Use uploaded images or fallback to defaults
-    const finalImages = uploadedImages.length > 0 
-      ? uploadedImages 
-      : ["/images/giraffe.png", "/images/elephant.png"];
+    // Use hero image if provided (base64), otherwise use default
+    const heroImageUrl = heroImage || "/images/default-destination.jpg";
+    const finalImages = ["/images/giraffe.png", "/images/elephant.png"];
 
     const destination = await prisma.destination.create({
       data: {
         name,
         slug,
-        tagline,
+        tagline: tagline || "",
         description,
         heroImage: heroImageUrl,
         images: finalImages,

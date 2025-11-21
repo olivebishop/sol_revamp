@@ -34,31 +34,40 @@ function AddPackageForm() {
     }
   };
 
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("name", formData.name);
-      formDataToSend.append("slug", formData.slug);
-      formDataToSend.append("description", formData.description);
-      formDataToSend.append("price", formData.price);
-      formDataToSend.append("duration", formData.duration);
-      formDataToSend.append("isPublished", formData.isPublished.toString());
+      let heroImageBase64 = "";
       
+      // Convert hero image to base64
       if (heroImageFile) {
-        formDataToSend.append("heroImage", heroImageFile);
-      }
-      
-      if (imageFiles) {
-        Array.from(imageFiles).forEach((file) => {
-          formDataToSend.append("images", file);
-        });
+        heroImageBase64 = await convertToBase64(heroImageFile);
       }
 
       const response = await fetch("/api/packages", {
         method: "POST",
-        body: formDataToSend,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          slug: formData.slug,
+          description: formData.description,
+          price: parseFloat(formData.price),
+          duration: formData.duration,
+          isPublished: formData.isPublished,
+          heroImage: heroImageBase64,
+        }),
       });
 
       if (response.ok) {
@@ -153,19 +162,7 @@ function AddPackageForm() {
           </p>
         </div>
 
-        <div>
-          <Label className="text-sm font-medium text-gray-200">Additional Images</Label>
-          <Input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handleImagesChange}
-            className="bg-zinc-800 border-zinc-700 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            {imageFiles ? `${imageFiles.length} file(s) selected` : "Select one or multiple images (uploaded to Supabase)"}
-          </p>
-        </div>
+
 
         <div className="flex items-center space-x-2">
           <input
