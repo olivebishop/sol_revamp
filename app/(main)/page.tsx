@@ -7,21 +7,22 @@ import VisualNarratives from "@/components/shared/visual-narratives";
 import WhyChooseUs from "@/components/shared/why-choose-us";
 import Testimonials from "@/components/shared/testimonials";
 import CTASection from "@/components/shared/cta-section";
-import { testimonials } from "@/data/testimonials";
+
 import { useEffect, useState } from "react";
 import type { PackageData } from "@/data/packages";
 
 const Page = () => {
   const [packages, setPackages] = useState<PackageData[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPackages = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("/api/packages");
-        if (response.ok) {
-          const data = await response.json();
-          // Transform database packages to match PackageData interface
+        // Fetch packages
+        const packagesResponse = await fetch("/api/packages");
+        if (packagesResponse.ok) {
+          const data = await packagesResponse.json();
           const transformedPackages: PackageData[] = data.map((pkg: any) => ({
             id: pkg.id,
             name: pkg.name,
@@ -43,14 +44,21 @@ const Page = () => {
           }));
           setPackages(transformedPackages.filter((pkg: PackageData) => pkg.isActive));
         }
+
+        // Fetch testimonials
+        const testimonialsResponse = await fetch("/api/testimonials");
+        if (testimonialsResponse.ok) {
+          const testimonialsData = await testimonialsResponse.json();
+          setTestimonials(testimonialsData);
+        }
       } catch (error) {
-        console.error("Error fetching packages:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPackages();
+    fetchData();
   }, []);
 
   return (

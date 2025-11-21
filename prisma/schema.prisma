@@ -282,3 +282,21 @@ model BookingEmail {
 
   @@index([bookingId])
 }
+
+
+// Testimonials - User feedback and reviews
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  location  String
+  rating    Int      @default(5) // 1-5 stars
+  text      String   @db.Text
+  tripType  String? // Optional: e.g., "Safari Adventure", "Beach Getaway"
+  isApproved Boolean @default(false) // Admin must approve before showing
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isApproved])
+  @@index([createdAt])
+}
