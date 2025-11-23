@@ -59,67 +59,96 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
     const { name, slug, tagline, description, isPublished, heroImage } = body;
-    
+
+    // Validate required fields
+    if (!name || !slug || !description) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    // Check for duplicate slug (idempotency)
+    const existing = await prisma.destination.findUnique({ where: { slug } });
+    if (existing) {
+      return NextResponse.json({ error: "Destination with this slug already exists", destination: existing }, { status: 200 });
+    }
+
     // Use hero image if provided (base64), otherwise use default
     const heroImageUrl = heroImage || "/images/default-destination.jpg";
     const finalImages = ["/images/giraffe.png", "/images/elephant.png"];
 
-    const destination = await prisma.destination.create({
-      data: {
-        name,
-        slug,
-        tagline: tagline || "",
-        description,
-        heroImage: heroImageUrl,
-        images: finalImages,
-        location: {
-          country: "Kenya",
-          region: name,
-          coordinates: { lat: 0, lng: 0 }
+    let destination;
+    try {
+      destination = await prisma.destination.create({
+        data: {
+          name,
+          slug,
+          tagline: tagline || "",
+          description,
+          heroImage: heroImageUrl,
+          images: finalImages,
+          location: {
+            country: "Kenya",
+            region: name,
+            coordinates: { lat: 0, lng: 0 }
+          },
+          overview: {
+            title: "Overview",
+            content: description
+          },
+          wildlife: {
+            title: "Wildlife",
+            description: "Discover amazing wildlife",
+            animals: []
+          },
+          bestTimeToVisit: {
+            title: "Best Time to Visit",
+            description: "Year-round destination",
+            seasons: []
+          },
+          thingsToKnow: {
+            title: "Things to Know",
+            items: []
+          },
+          whatToPack: {
+            title: "What to Pack",
+            categories: []
+          },
+          accommodation: {
+            title: "Accommodation",
+            description: "Various accommodation options available",
+            types: []
+          },
+          activities: {
+            title: "Activities",
+            list: []
+          },
+          highlights: [],
+          funFacts: [],
+          isPublished,
+          createdBy: session.user.id,
         },
-        overview: {
-          title: "Overview",
-          content: description
-        },
-        wildlife: {
-          title: "Wildlife",
-          description: "Discover amazing wildlife",
-          animals: []
-        },
-        bestTimeToVisit: {
-          title: "Best Time to Visit",
-          description: "Year-round destination",
-          seasons: []
-        },
-        thingsToKnow: {
-          title: "Things to Know",
-          items: []
-        },
-        whatToPack: {
-          title: "What to Pack",
-          categories: []
-        },
-        accommodation: {
-          title: "Accommodation",
-          description: "Various accommodation options available",
-          types: []
-        },
-        activities: {
-          title: "Activities",
-          list: []
-        },
-        highlights: [],
-        funFacts: [],
-        isPublished,
-        createdBy: session.user.id,
-      },
-    });
+      });
+    } catch (dbError) {
+      // Prisma/DB error logging
+      if (dbError instanceof Error) {
+        console.error("Prisma error creating destination:", dbError.message, dbError.stack);
+      } else {
+        console.error("Prisma error creating destination:", dbError);
+      }
+      return NextResponse.json(
+        { error: "Database error", details: dbError instanceof Error ? dbError.message : "Unknown error" },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json(destination, { status: 201 });
+    return NextResponse.json({ success: true, destination }, { status: 201 });
   } catch (error) {
-    console.error("Error creating destination:", error);
+    // General error logging
+    if (error instanceof Error) {
+      console.error("Error creating destination:", error.message, error.stack);
+    } else {
+      console.error("Error creating destination:", error);
+    }
     return NextResponse.json(
       { error: "Failed to create destination", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
