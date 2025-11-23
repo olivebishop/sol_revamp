@@ -3,13 +3,9 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '20mb',
-    },
-  },
-};
+export const maxRequestBodySize = '20mb';
+
+// Previous body parser configuration is no longer needed.
 
 // GET all packages or filtered
 export async function GET(request: NextRequest) {

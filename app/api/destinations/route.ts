@@ -1,10 +1,4 @@
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '20mb',
-    },
-  },
-};
+export const maxRequestBodySize = '20mb';
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
