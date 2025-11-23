@@ -1,3 +1,10 @@
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '20mb',
+    },
+  },
+};
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -32,6 +39,9 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// POST create new destination (admin only)
+// ...existing code...
 
 // POST create new destination (admin only)
 export async function POST(request: NextRequest) {
