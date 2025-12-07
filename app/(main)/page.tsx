@@ -1,135 +1,170 @@
-"use client";
-import { motion } from "motion/react";
+import { cacheLife, cacheTag } from 'next/cache';
+import { Suspense } from 'react';
 import HeroSection from "@/components/shared/hero";
 import GrainOverlay from "@/components/shared/grain-overlay";
 import FeaturedPackages from "@/components/packages/featured-packages";
 import VisualNarratives from "@/components/shared/visual-narratives";
 import WhyChooseUs from "@/components/shared/why-choose-us";
 import Testimonials from "@/components/shared/testimonials";
-import CTASection from "@/components/shared/cta-section";
-
-import { useEffect, useState } from "react";
+import CTASectionWrapper from "@/components/shared/cta-section-wrapper";
 import type { PackageData } from "@/data/packages";
 
-const Page = () => {
-  const [packages, setPackages] = useState<PackageData[]>([]);
-  const [testimonials, setTestimonials] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+// Cached function to fetch packages
+async function getPackages() {
+  'use cache'
+  cacheLife('hours');
+  cacheTag('packages');
+  
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/packages`, {
+    next: { tags: ['packages'] },
+  });
+  
+  if (!res.ok) {
+    return [];
+  }
+  
+  const data = await res.json();
+  const transformedPackages: PackageData[] = data.map((pkg: any) => ({
+    id: pkg.id,
+    name: pkg.name,
+    slug: pkg.slug,
+    packageType: pkg.packageType || "safari",
+    description: pkg.description,
+    pricing: pkg.pricing,
+    daysOfTravel: pkg.daysOfTravel,
+    images: pkg.images || [],
+    maxCapacity: pkg.maxCapacity || 10,
+    currentBookings: pkg.currentBookings || 0,
+    isActive: pkg.isActive,
+    destination: pkg.destination || {
+      id: "default",
+      name: "Kenya",
+      slug: "kenya",
+      bestTime: "Year-round"
+    }
+  }));
+  
+  return transformedPackages.filter((pkg: PackageData) => pkg.isActive);
+}
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch packages
-        const packagesResponse = await fetch("/api/packages");
-        if (packagesResponse.ok) {
-          const data = await packagesResponse.json();
-          const transformedPackages: PackageData[] = data.map((pkg: any) => ({
-            id: pkg.id,
-            name: pkg.name,
-            slug: pkg.slug,
-            packageType: pkg.packageType || "safari",
-            description: pkg.description,
-            pricing: pkg.pricing,
-            daysOfTravel: pkg.daysOfTravel,
-            images: pkg.images || [],
-            maxCapacity: pkg.maxCapacity || 10,
-            currentBookings: pkg.currentBookings || 0,
-            isActive: pkg.isActive,
-            destination: pkg.destination || {
-              id: "default",
-              name: "Kenya",
-              slug: "kenya",
-              bestTime: "Year-round"
-            }
-          }));
-          setPackages(transformedPackages.filter((pkg: PackageData) => pkg.isActive));
-        }
+// Cached function to fetch testimonials
+async function getTestimonials() {
+  'use cache'
+  cacheLife('hours');
+  cacheTag('testimonials');
+  
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/testimonials`, {
+    next: { tags: ['testimonials'] },
+  });
+  
+  if (!res.ok) {
+    return [];
+  }
+  
+  return res.json();
+}
 
-        // Fetch testimonials
-        const testimonialsResponse = await fetch("/api/testimonials");
-        if (testimonialsResponse.ok) {
-          const testimonialsData = await testimonialsResponse.json();
-          setTestimonials(testimonialsData);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+// Loading component for packages
+function PackagesLoading() {
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* Grain Overlay */}
-      <GrainOverlay />
-
-      {/* Hero Section */}
-      <HeroSection />
-
-      {/* Featured Packages */}
-      {!loading && packages.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          <FeaturedPackages packages={packages} />
-        </motion.div>
-      )}
-
-      {/* Visual Narratives */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-      >
-        <VisualNarratives />
-      </motion.div>
-
-      {/* Why Choose Us Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-      >
-        <WhyChooseUs />
-      </motion.div>
-
-      {/* Testimonials Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-      >
-        <Testimonials testimonials={testimonials} />
-      </motion.div>
-
-      {/* CTA Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-      >
-        <CTASection
-          title="Your African Adventure Awaits"
-          description="From wild safaris to pristine beaches, let's turn your dream vacation into reality"
-          image="/images/sol_car.jpg"
-          buttonText="Chat with Michael Kisangi"
-          buttonAction={() => {
-            window.open("https://wa.me/+254768453819", "_blank");
-          }}
-        />
-      </motion.div>
+    <div className="container mx-auto px-4 py-20">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-12 animate-pulse">
+          <div className="h-12 bg-zinc-800 rounded w-1/3 mb-4"></div>
+          <div className="h-6 bg-zinc-800 rounded w-1/2"></div>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-zinc-900 rounded-lg overflow-hidden animate-pulse">
+              <div className="h-48 bg-zinc-800"></div>
+              <div className="p-6 space-y-4">
+                <div className="h-6 bg-zinc-800 rounded w-3/4"></div>
+                <div className="h-4 bg-zinc-800 rounded w-full"></div>
+                <div className="h-4 bg-zinc-800 rounded w-2/3"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
-};
+}
 
-export default Page;
+// Loading component for testimonials
+function TestimonialsLoading() {
+  return (
+    <div className="container mx-auto px-4 py-20">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-12 animate-pulse">
+          <div className="h-12 bg-zinc-800 rounded w-1/3 mx-auto mb-4"></div>
+          <div className="h-6 bg-zinc-800 rounded w-1/2 mx-auto"></div>
+        </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-zinc-900 rounded-lg p-6 space-y-4 animate-pulse">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-zinc-800 rounded-full"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-zinc-800 rounded w-2/3"></div>
+                  <div className="h-3 bg-zinc-800 rounded w-1/2"></div>
+                </div>
+              </div>
+              <div className="h-4 bg-zinc-800 rounded w-full"></div>
+              <div className="h-4 bg-zinc-800 rounded w-5/6"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Packages section component (cached)
+async function PackagesSection() {
+  const packages = await getPackages();
+  
+  if (packages.length === 0) {
+    return null;
+  }
+  
+  return <FeaturedPackages packages={packages} />;
+}
+
+// Testimonials section component (cached)
+async function TestimonialsSection() {
+  const testimonials = await getTestimonials();
+  
+  return <Testimonials testimonials={testimonials} />;
+}
+
+// Main page component - Static shell with cached dynamic sections
+export default async function Page() {
+  return (
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      {/* Grain Overlay - Part of static shell */}
+      <GrainOverlay />
+
+      {/* Hero Section - Part of static shell */}
+      <HeroSection />
+
+      {/* Featured Packages - Cached, can be part of static shell */}
+      <Suspense fallback={<PackagesLoading />}>
+        <PackagesSection />
+      </Suspense>
+
+      {/* Visual Narratives - Part of static shell */}
+      <VisualNarratives />
+
+      {/* Why Choose Us Section - Part of static shell */}
+      <WhyChooseUs />
+
+      {/* Testimonials Section - Cached, streams in if needed */}
+      <Suspense fallback={<TestimonialsLoading />}>
+        <TestimonialsSection />
+      </Suspense>
+
+      {/* CTA Section - Part of static shell */}
+      <CTASectionWrapper />
+    </div>
+  );
+}

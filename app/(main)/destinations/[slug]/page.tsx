@@ -78,24 +78,3 @@ export default async function DestinationPage({
     </div>
   );
 }
-
-// Generate metadata for SEO (cached)
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const destination = await getDestination(slug);
-  
-  if (!destination) {
-    return {
-      title: 'Destination Not Found',
-    };
-  }
-  
-  return {
-    title: `${destination.name} | Destinations`,
-    description: destination.tagline || destination.description?.substring(0, 160),
-  };
-}

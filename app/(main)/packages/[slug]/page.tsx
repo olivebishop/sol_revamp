@@ -143,6 +143,17 @@ async function RelatedPackages({ packageType, excludeId }: { packageType: string
   );
 }
 
+// Related packages wrapper that fetches package data inside Suspense
+async function RelatedPackagesWrapper({ slug }: { slug: string }) {
+  const dbPackage = await getPackage(slug);
+  
+  if (!dbPackage) {
+    return null;
+  }
+  
+  return <RelatedPackages packageType={dbPackage.packageType} excludeId={dbPackage.id} />;
+}
+
 // Main page component - Static shell with dynamic sections
 export default async function PackageDetailsPage({
   params,
@@ -150,13 +161,6 @@ export default async function PackageDetailsPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  
-  // Fetch package data for related packages info (cached)
-  const dbPackage = await getPackage(slug);
-  
-  if (!dbPackage) {
-    notFound();
-  }
   
   return (
     <div className="min-h-screen bg-black text-white">
@@ -168,7 +172,7 @@ export default async function PackageDetailsPage({
       {/* Related packages - Cached separately, can stream in */}
       <div className="container mx-auto px-4 pb-20">
         <Suspense fallback={<RelatedPackagesLoading />}>
-          <RelatedPackages packageType={dbPackage.packageType} excludeId={dbPackage.id} />
+          <RelatedPackagesWrapper slug={slug} />
         </Suspense>
       </div>
     </div>
