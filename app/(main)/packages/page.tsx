@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { cacheLife } from 'next/cache';
 import GrainOverlay from "@/components/shared/grain-overlay";
 import { PackagesClient } from "../../../components/packages/packages-client";
 
@@ -10,8 +11,10 @@ export const metadata = {
 
 // Async function to fetch packages
 async function getPackages() {
+  'use cache'
+  cacheLife('hours'); // Packages updated multiple times per day
+  
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/packages`, {
-    cache: 'no-store',
     next: { tags: ['packages'] },
   });
   

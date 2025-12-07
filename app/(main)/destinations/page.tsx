@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { cacheLife } from 'next/cache';
 import DestinationsClient from "@/components/destinations/destinations-client";
 
 export const metadata = {
@@ -9,8 +10,10 @@ export const metadata = {
 
 // Async function to fetch destinations
 async function getDestinations() {
+  'use cache'
+  cacheLife('hours'); // Destinations updated multiple times per day
+  
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/destinations`, {
-    cache: 'no-store',
     next: { tags: ['destinations'] },
   });
   

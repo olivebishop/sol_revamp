@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   typedRoutes: true,
-  cacheComponents: false,
+  cacheComponents: true,
   reactCompiler: true,
   typescript: {
     ignoreBuildErrors: true,

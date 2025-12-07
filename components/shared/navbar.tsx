@@ -1,7 +1,12 @@
+'use cache'
+
+import { cacheLife } from 'next/cache';
 import NavbarClient from "./navbarClient";
 import { getAllDestinations } from "@/lib/dal/destinationDAL";
 
 export default async function Navbar() {
+  cacheLife('hours'); // Navbar data updated multiple times per day
+  
   // Fetch latest destinations from DB
   const destinations = await getAllDestinations();
   // Only published destinations for nav
