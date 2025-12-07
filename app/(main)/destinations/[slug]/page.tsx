@@ -1,14 +1,13 @@
-'use cache'
-
-import { cacheLife } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from "next/navigation";
 import DestinationDetailClient from "@/components/destinations/destination-detail-client";
 import { Suspense } from 'react';
 
-// Async function to fetch destination by slug
+// Cached function to fetch destination by slug
 async function getDestination(slug: string) {
   'use cache'
-  cacheLife('hours'); // Destinations updated multiple times per day
+  cacheLife('hours');
+  cacheTag('destinations', `destination-${slug}`);
   
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/destinations?slug=${slug}`, {
     next: { tags: ['destinations', `destination-${slug}`] },
@@ -22,17 +21,37 @@ async function getDestination(slug: string) {
   return data && data.length > 0 ? data[0] : null;
 }
 
-// Loading component
-function DestinationLoading() {
+// Loading component with better skeleton
+function DestinationContentLoading() {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+    <div className="min-h-screen bg-black">
+      <div className="animate-pulse">
+        {/* Hero skeleton */}
+        <div className="h-[60vh] bg-zinc-800"></div>
+        
+        {/* Content skeleton */}
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-7xl mx-auto space-y-8">
+            <div className="h-12 bg-zinc-800 rounded w-2/3"></div>
+            <div className="h-6 bg-zinc-800 rounded w-1/2"></div>
+            
+            <div className="grid md:grid-cols-2 gap-8 mt-12">
+              <div className="space-y-4">
+                <div className="h-4 bg-zinc-800 rounded w-full"></div>
+                <div className="h-4 bg-zinc-800 rounded w-5/6"></div>
+                <div className="h-4 bg-zinc-800 rounded w-4/5"></div>
+              </div>
+              <div className="h-64 bg-zinc-800 rounded-lg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-// Data component
-async function DestinationData({ slug }: { slug: string }) {
+// Main destination content component (cached)
+async function DestinationContent({ slug }: { slug: string }) {
   const destination = await getDestination(slug);
   
   if (!destination) {
@@ -42,7 +61,7 @@ async function DestinationData({ slug }: { slug: string }) {
   return <DestinationDetailClient destination={destination} />;
 }
 
-// Main page component
+// Main page component - Creates static shell with cached content
 export default async function DestinationPage({
   params,
 }: {
@@ -51,13 +70,16 @@ export default async function DestinationPage({
   const { slug } = await params;
   
   return (
-    <Suspense fallback={<DestinationLoading />}>
-      <DestinationData slug={slug} />
-    </Suspense>
+    <div className="min-h-screen bg-black text-white">
+      {/* Destination content - Cached and part of static shell */}
+      <Suspense fallback={<DestinationContentLoading />}>
+        <DestinationContent slug={slug} />
+      </Suspense>
+    </div>
   );
 }
 
-// Generate metadata for SEO
+// Generate metadata for SEO (cached)
 export async function generateMetadata({
   params,
 }: {
