@@ -77,15 +77,21 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, slug, description, price, duration, isPublished, heroImage } = body;
 
+    console.log("Received package creation request:", { name, slug, description, price, duration, isPublished, hasHeroImage: !!heroImage });
+
     // Validate required fields
-    if (!name || !slug || !description || !price || !duration) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    if (!name || !slug || !description || price === undefined || price === null || !duration) {
+      console.error("Validation failed - missing fields:", { name, slug, description, price, duration });
+      return NextResponse.json({ 
+        error: "Missing required fields",
+        received: { name, slug, description, price, duration }
+      }, { status: 400 });
     }
 
     // Check for duplicate slug (idempotency)
     const existing = await prisma.package.findUnique({ where: { slug } });
     if (existing) {
-      return NextResponse.json({ error: "Package with this slug already exists", package: existing }, { status: 200 });
+      return NextResponse.json({ error: "Package with this slug already exists", package: existing }, { status: 409 });
     }
 
     // Use hero image if provided, otherwise use default
@@ -105,7 +111,7 @@ export async function POST(request: NextRequest) {
           slug,
           packageType: "safari", // Default type, can be made dynamic
           description,
-          pricing: price,
+          pricing: parseFloat(price),
           daysOfTravel,
           images: finalImages,
           maxCapacity: 10,
@@ -116,7 +122,7 @@ export async function POST(request: NextRequest) {
             slug: "kenya",
             bestTime: "Year-round"
           },
-          isActive: isPublished,
+          isActive: isPublished ?? true,
           createdBy: session.user.id,
         },
       });
@@ -133,7 +139,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ success: true, package: packageData }, { status: 201 });
+    console.log("Package created successfully:", packageData.id);
+    return NextResponse.json(packageData, { status: 201 });
   } catch (error) {
     // General error logging
     if (error instanceof Error) {

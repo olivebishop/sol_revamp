@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { AuthGuard } from "@/components/admin/auth-guard";
+import { toast } from "sonner";
 
 function AddPackageForm() {
   const router = useRouter();
@@ -46,12 +47,27 @@ function AddPackageForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
     try {
+      // Validate required fields
+      if (!formData.name || !formData.slug || !formData.description || !formData.price || !formData.duration) {
+        toast.error("Please fill in all required fields");
+        setLoading(false);
+        return;
+      }
+
       let heroImageBase64 = "";
       
       // Convert hero image to base64
       if (heroImageFile) {
-        heroImageBase64 = await convertToBase64(heroImageFile);
+        try {
+          heroImageBase64 = await convertToBase64(heroImageFile);
+        } catch (error) {
+          console.error("Error converting image:", error);
+          toast.error("Failed to process image");
+          setLoading(false);
+          return;
+        }
       }
 
       const response = await fetch("/api/packages", {
@@ -70,15 +86,19 @@ function AddPackageForm() {
         }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
+        toast.success("Package created successfully!");
         router.push("/the-sol/dashboard/packages");
+        router.refresh();
       } else {
-        const error = await response.json();
-        alert(error.error || "Failed to create package");
+        console.error("Error response:", data);
+        toast.error(data.error || "Failed to create package");
       }
     } catch (error) {
       console.error("Error creating package:", error);
-      alert("An error occurred while creating the package");
+      toast.error("An error occurred while creating the package");
     } finally {
       setLoading(false);
     }
@@ -94,7 +114,15 @@ function AddPackageForm() {
             <Label className="text-sm font-medium text-gray-200">Package Name *</Label>
             <Input
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => {
+                const name = e.target.value;
+                setFormData({ ...formData, name });
+                // Auto-generate slug if slug is empty or matches the previous auto-generated slug
+                if (!formData.slug || formData.slug === formData.name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-')) {
+                  const slug = name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+                  setFormData({ ...formData, name, slug });
+                }
+              }}
               className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
               placeholder="Enter package name"
               required
@@ -105,11 +133,17 @@ function AddPackageForm() {
             <Label className="text-sm font-medium text-gray-200">Slug *</Label>
             <Input
               value={formData.slug}
-              onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+              onChange={(e) => {
+                const slug = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+                setFormData({ ...formData, slug });
+              }}
               className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
               placeholder="e.g., safari-adventure"
               required
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Auto-formatted: lowercase with hyphens
+            </p>
           </div>
         </div>
 
