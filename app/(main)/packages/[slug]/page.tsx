@@ -1,4 +1,5 @@
 import { cacheLife, cacheTag } from 'next/cache';
+import { connection } from 'next/server';
 import { notFound } from "next/navigation";
 import PackageDetailsClient from "@/components/packages/package-details-client";
 import type { PackageData } from "@/data/packages";
@@ -160,6 +161,7 @@ export default async function PackageDetailsPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  await connection(); // Opt into dynamic rendering
   const { slug } = await params;
   
   return (

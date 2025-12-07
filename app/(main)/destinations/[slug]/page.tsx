@@ -1,4 +1,5 @@
-import { cacheLife, cacheTag, connection } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
+import { connection } from 'next/server';
 import { notFound } from "next/navigation";
 import DestinationDetailClient from "@/components/destinations/destination-detail-client";
 import { Suspense } from 'react';
