@@ -13,7 +13,7 @@ async function getDestinations() {
   'use cache'
   cacheLife('hours'); // Destinations updated multiple times per day
   
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/destinations`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/destinations?listView=true`, {
     next: { tags: ['destinations'] },
   });
   

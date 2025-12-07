@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get("slug");
+    const listView = searchParams.get("listView") === "true";
 
     if (slug) {
       // Get single destination by slug
@@ -19,6 +20,29 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all destinations
+    if (listView) {
+      // For list view, only return essential fields to reduce payload size
+      const destinations = await prisma.destination.findMany({
+        where: { isPublished: true },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          tagline: true,
+          description: true,
+          heroImage: true,
+          location: true,
+          isPublished: true,
+          createdAt: true,
+          updatedAt: true,
+          // Exclude: images, overview, wildlife, bestTimeToVisit, thingsToKnow
+        },
+      });
+      return NextResponse.json(destinations);
+    }
+
+    // Full data for other cases
     const destinations = await prisma.destination.findMany({
       where: { isPublished: true },
       orderBy: { createdAt: "desc" },
