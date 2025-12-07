@@ -1,4 +1,4 @@
-import { cacheLife, cacheTag } from 'next/cache';
+import { cacheLife, cacheTag, connection } from 'next/cache';
 import { notFound } from "next/navigation";
 import PackageDetailsClient from "@/components/packages/package-details-client";
 import type { PackageData } from "@/data/packages";
@@ -160,6 +160,7 @@ export default async function PackageDetailsPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  await connection(); // Opt into dynamic rendering
   const { slug } = await params;
   
   return (
@@ -177,25 +178,4 @@ export default async function PackageDetailsPage({
       </div>
     </div>
   );
-}
-
-// Generate metadata for SEO (cached)
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const dbPackage = await getPackage(slug);
-  
-  if (!dbPackage) {
-    return {
-      title: 'Package Not Found',
-    };
-  }
-  
-  return {
-    title: `${dbPackage.name} | Tour Packages`,
-    description: dbPackage.description?.substring(0, 160),
-  };
 }

@@ -1,4 +1,4 @@
-import { cacheLife, cacheTag } from 'next/cache';
+import { cacheLife, cacheTag, connection } from 'next/cache';
 import { notFound } from "next/navigation";
 import DestinationDetailClient from "@/components/destinations/destination-detail-client";
 import { Suspense } from 'react';
@@ -67,6 +67,7 @@ export default async function DestinationPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  await connection(); // Opt into dynamic rendering
   const { slug } = await params;
   
   return (
