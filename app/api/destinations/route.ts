@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get("slug");
     const listView = searchParams.get("listView") === "true";
+    const limit = searchParams.get("limit");
 
     if (slug) {
       // Get single destination by slug
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest) {
       const destinations = await prisma.destination.findMany({
         where: { isPublished: true },
         orderBy: { createdAt: "desc" },
+        take: limit ? parseInt(limit) : undefined,
         select: {
           id: true,
           name: true,
