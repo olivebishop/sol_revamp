@@ -1,5 +1,4 @@
 import { cacheLife, cacheTag } from 'next/cache';
-import { connection } from 'next/server';
 import { notFound } from "next/navigation";
 import DestinationDetailClient from "@/components/destinations/destination-detail-client";
 import { Suspense } from 'react';
@@ -52,7 +51,8 @@ function DestinationContentLoading() {
 }
 
 // Main destination content component (cached)
-async function DestinationContent({ slug }: { slug: string }) {
+async function DestinationContent({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const destination = await getDestination(slug);
   
   if (!destination) {
@@ -63,19 +63,16 @@ async function DestinationContent({ slug }: { slug: string }) {
 }
 
 // Main page component - Creates static shell with cached content
-export default async function DestinationPage({
+export default function DestinationPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  await connection(); // Opt into dynamic rendering
-  const { slug } = await params;
-  
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Destination content - Cached and part of static shell */}
       <Suspense fallback={<DestinationContentLoading />}>
-        <DestinationContent slug={slug} />
+        <DestinationContent params={params} />
       </Suspense>
     </div>
   );

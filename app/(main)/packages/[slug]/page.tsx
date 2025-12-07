@@ -1,5 +1,4 @@
 import { cacheLife, cacheTag } from 'next/cache';
-import { connection } from 'next/server';
 import { notFound } from "next/navigation";
 import PackageDetailsClient from "@/components/packages/package-details-client";
 import type { PackageData } from "@/data/packages";
@@ -104,7 +103,8 @@ function RelatedPackagesLoading() {
 }
 
 // Main package content component (cached)
-async function PackageContent({ slug }: { slug: string }) {
+async function PackageContent({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const dbPackage = await getPackage(slug);
   
   if (!dbPackage) {
@@ -145,7 +145,8 @@ async function RelatedPackages({ packageType, excludeId }: { packageType: string
 }
 
 // Related packages wrapper that fetches package data inside Suspense
-async function RelatedPackagesWrapper({ slug }: { slug: string }) {
+async function RelatedPackagesWrapper({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const dbPackage = await getPackage(slug);
   
   if (!dbPackage) {
@@ -156,25 +157,22 @@ async function RelatedPackagesWrapper({ slug }: { slug: string }) {
 }
 
 // Main page component - Static shell with dynamic sections
-export default async function PackageDetailsPage({
+export default function PackageDetailsPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  await connection(); // Opt into dynamic rendering
-  const { slug } = await params;
-  
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Main package content - Cached and part of static shell */}
       <Suspense fallback={<PackageDetailsLoading />}>
-        <PackageContent slug={slug} />
+        <PackageContent params={params} />
       </Suspense>
       
       {/* Related packages - Cached separately, can stream in */}
       <div className="container mx-auto px-4 pb-20">
         <Suspense fallback={<RelatedPackagesLoading />}>
-          <RelatedPackagesWrapper slug={slug} />
+          <RelatedPackagesWrapper params={params} />
         </Suspense>
       </div>
     </div>
