@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, ArrowRight } from "lucide-react";
-// Removed mock data import
+import { useEffect, useState } from "react";
 import GrainOverlay from "@/components/shared/grain-overlay";
 
 
@@ -11,7 +11,40 @@ interface DestinationsClientProps {
   destinations: any[];
 }
 
-export default function DestinationsClient({ destinations }: DestinationsClientProps) {
+export default function DestinationsClient({ destinations: initialDestinations }: DestinationsClientProps) {
+  const [destinations, setDestinations] = useState(initialDestinations);
+  const [loading, setLoading] = useState(initialDestinations.length === 0);
+
+  useEffect(() => {
+    // Only fetch if no initial destinations provided
+    if (initialDestinations.length === 0) {
+      fetch('/api/destinations?listView=true')
+        .then(res => res.json())
+        .then(data => {
+          setDestinations(data);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error('Failed to fetch destinations:', err);
+          setLoading(false);
+        });
+    }
+  }, [initialDestinations]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <GrainOverlay />
+        <div className="container mx-auto px-4 py-32">
+          <div className="animate-pulse space-y-8">
+            <div className="h-12 bg-zinc-800 rounded w-1/3"></div>
+            <div className="h-6 bg-zinc-800 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white relative">
       <GrainOverlay />
