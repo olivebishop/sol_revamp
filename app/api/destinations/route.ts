@@ -30,13 +30,10 @@ export async function GET(request: NextRequest) {
           name: true,
           slug: true,
           tagline: true,
-          description: true,
           heroImage: true,
           location: true,
           isPublished: true,
-          createdAt: true,
-          updatedAt: true,
-          // Exclude: images, overview, wildlife, bestTimeToVisit, thingsToKnow
+          // Exclude: description, images, overview, wildlife, bestTimeToVisit, thingsToKnow, whatToPack, accommodation, activities, createdAt, updatedAt
         },
       });
       return NextResponse.json(destinations);
