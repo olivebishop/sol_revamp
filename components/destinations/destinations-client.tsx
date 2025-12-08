@@ -45,6 +45,21 @@ export default function DestinationsClient({ destinations: initialDestinations }
     );
   }
 
+  // Guard against undefined or empty destinations
+  if (!destinations || destinations.length === 0) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <GrainOverlay />
+        <div className="container mx-auto px-4 py-32">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">No Destinations Found</h1>
+            <p className="text-gray-400">Check back soon for amazing destinations.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white relative">
       <GrainOverlay />
