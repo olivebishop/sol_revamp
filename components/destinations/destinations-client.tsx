@@ -29,7 +29,7 @@ export default function DestinationsClient({ destinations: initialDestinations }
           setLoading(false);
         });
     }
-  }, [initialDestinations]);
+  }, []); // Empty dependency array - only run once on mount
 
   if (loading) {
     return (
