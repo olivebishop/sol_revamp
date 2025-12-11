@@ -19,13 +19,25 @@ export default function DestinationsClient({ destinations: initialDestinations }
     // Only fetch if no initial destinations provided
     if (initialDestinations.length === 0) {
       fetch('/api/destinations?listView=true')
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
         .then(data => {
-          setDestinations(data);
+          // Ensure data is an array
+          if (Array.isArray(data)) {
+            setDestinations(data);
+          } else {
+            console.error('Invalid data format received:', data);
+            setDestinations([]);
+          }
           setLoading(false);
         })
         .catch(err => {
           console.error('Failed to fetch destinations:', err);
+          setDestinations([]);
           setLoading(false);
         });
     }
@@ -119,14 +131,16 @@ export default function DestinationsClient({ destinations: initialDestinations }
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
                     />
-                    <div className="absolute top-6 left-6">
-                      <div className="bg-white/20 backdrop-blur-sm text-white border border-white/30 px-4 py-2 rounded flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        <span className="text-sm font-semibold">
-                          {destination.location.country}
-                        </span>
+                    {destination.location?.country && (
+                      <div className="absolute top-6 left-6">
+                        <div className="bg-white/20 backdrop-blur-sm text-white border border-white/30 px-4 py-2 rounded flex items-center gap-2">
+                          <MapPin className="w-4 h-4" />
+                          <span className="text-sm font-semibold">
+                            {destination.location.country}
+                          </span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Content */}
@@ -148,28 +162,32 @@ export default function DestinationsClient({ destinations: initialDestinations }
                       <p className="text-2xl sm:text-3xl text-orange-500 font-light italic mb-6">
                         {destination.tagline}
                       </p>
-                      <p className="text-lg sm:text-xl text-gray-300 mb-8 leading-relaxed">
-                        {destination.description}
-                      </p>
+                      {destination.description && (
+                        <p className="text-lg sm:text-xl text-gray-300 mb-8 leading-relaxed">
+                          {destination.description}
+                        </p>
+                      )}
 
                       {/* Highlights */}
-                      <div className="mb-8">
-                        <h3 className="text-sm uppercase tracking-widest text-gray-500 mb-4">
-                          Highlights
-                        </h3>
-                        <ul className="space-y-2">
-                          {destination.highlights
-                            .slice(0, 3)
-                            .map((highlight: string) => (
-                              <li
-                                key={highlight}
-                                className="text-gray-300 pl-6 relative before:content-['\u2014'] before:absolute before:left-0 before:text-orange-500"
-                              >
-                                {highlight}
+                      {destination.highlights && destination.highlights.length > 0 && (
+                        <div className="mb-8">
+                          <h3 className="text-sm uppercase tracking-widest text-gray-500 mb-4">
+                            Highlights
+                          </h3>
+                          <ul className="space-y-2">
+                            {destination.highlights
+                              .slice(0, 3)
+                              .map((highlight: string) => (
+                                <li
+                                  key={highlight}
+                                  className="text-gray-300 pl-6 relative before:content-['\u2014'] before:absolute before:left-0 before:text-orange-500"
+                                >
+                                  {highlight}
                               </li>
                             ))}
-                        </ul>
-                      </div>
+                          </ul>
+                        </div>
+                      )}
 
                       {/* CTA */}
                       <div className="flex items-center gap-3 text-orange-500 font-semibold group/btn">

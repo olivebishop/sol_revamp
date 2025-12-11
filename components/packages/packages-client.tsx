@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "motion/react";
 import { PackageCard } from "@/components/shared/package-card";
 import {
@@ -8,12 +8,15 @@ import {
 } from "@/components/shared/package-filters";
 import { Pagination } from "@/components/shared/pagination";
 import CTASection from "@/components/shared/cta-section";
+import GrainOverlay from "@/components/shared/grain-overlay";
 
 interface PackagesClientProps {
   packages: any[];
 }
 
-export function PackagesClient({ packages }: PackagesClientProps) {
+export function PackagesClient({ packages: initialPackages }: PackagesClientProps) {
+  const [packages, setPackages] = useState(initialPackages);
+  const [loading, setLoading] = useState(initialPackages.length === 0);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<FilterOptions>({
     category: "all",
@@ -22,7 +25,63 @@ export function PackagesClient({ packages }: PackagesClientProps) {
     sortBy: "popular",
   });
 
+  useEffect(() => {
+    // Only fetch if no initial packages provided
+    if (initialPackages.length === 0) {
+      fetch('/api/packages')
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          // Ensure data is an array
+          if (Array.isArray(data)) {
+            setPackages(data);
+          } else {
+            console.error('Invalid data format received:', data);
+            setPackages([]);
+          }
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error('Failed to fetch packages:', err);
+          setPackages([]);
+          setLoading(false);
+        });
+    }
+  }, []);
+
   const packagesPerPage = 9;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white relative overflow-hidden">
+        <GrainOverlay />
+        <div className="container mx-auto px-4 py-32">
+          <div className="animate-pulse space-y-8">
+            <div className="h-12 bg-zinc-800 rounded w-1/3"></div>
+            <div className="h-6 bg-zinc-800 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!packages || packages.length === 0) {
+    return (
+      <div className="min-h-screen bg-black text-white relative overflow-hidden">
+        <GrainOverlay />
+        <div className="container mx-auto px-4 py-32">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">No Packages Found</h1>
+            <p className="text-gray-400">Check back soon for amazing tour packages.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Filter and sort packages
   const filteredPackages = useMemo(() => {
