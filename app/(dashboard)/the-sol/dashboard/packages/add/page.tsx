@@ -90,8 +90,8 @@ function AddPackageForm() {
 
       if (response.ok) {
         toast.success("Package created successfully!");
-        router.push("/the-sol/dashboard/packages");
-        router.refresh();
+        // Use replace instead of push to avoid history issues
+        router.replace("/the-sol/dashboard/packages");
       } else {
         console.error("Error response:", data);
         toast.error(data.error || "Failed to create package");
