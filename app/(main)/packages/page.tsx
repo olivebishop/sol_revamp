@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, cache } from 'react';
 import { PackagesClient } from "../../../components/packages/packages-client";
 import GrainOverlay from "@/components/shared/grain-overlay";
 import CTASection from "@/components/shared/cta-section";
@@ -10,13 +10,32 @@ export const metadata = {
     "Explore our curated collection of safari, beach, cultural, and adventure packages across East Africa. Book your dream vacation today.",
 };
 
-// Function to fetch packages (using no-store to prevent build-time pre-rendering)
+// Static shell component - renders immediately (cached)
+const StaticShell = cache(() => {
+  return (
+    <>
+      <GrainOverlay />
+      {/* Static header - renders immediately */}
+      <section className="relative pt-32 sm:pt-40 pb-16 sm:pb-20 border-b border-zinc-900">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4">
+            Tour Packages
+          </h1>
+          <p className="text-xl sm:text-2xl text-gray-400">
+            Discover unforgettable adventures across East Africa
+          </p>
+        </div>
+      </section>
+    </>
+  );
+});
+
+// Dynamic function to fetch packages (streams in)
 async function getPackages() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
     const res = await fetch(`${baseUrl}/api/packages`, {
-      cache: 'no-store', // Prevent build-time caching to avoid oversized pages
-      next: { tags: ['packages'] },
+      next: { tags: ['packages'], revalidate: 3600 }, // Cache for 1 hour
     });
     
     if (!res.ok) {
@@ -56,12 +75,10 @@ async function getPackages() {
   }
 }
 
-// Skeleton loader for packages
+// Skeleton loader for dynamic packages content (only the dynamic part)
 function PackagesLoading() {
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      <GrainOverlay />
-      
+    <>
       {/* Filters Skeleton */}
       <div className="relative px-4 sm:px-6 lg:px-8 pb-8">
         <div className="max-w-[1400px] mx-auto">
@@ -103,38 +120,45 @@ function PackagesLoading() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
-// Dynamic packages content component
+// Dynamic packages content component (streams in)
 async function PackagesContent() {
   const packages = await getPackages();
   return <PackagesClient packages={packages} />;
 }
 
-// Main page component - Static shell with streaming dynamic content
+// Static CTA component (cached, renders immediately)
+const StaticCTA = cache(() => {
+  return (
+    <div className="relative">
+      <CTASection
+        title="Want Something Unique?"
+        description="Don't see exactly what you're looking for? Let's craft a personalized safari experience tailored just for you"
+        image="/images/sol_car.jpg"
+        buttonText="Chat with Michael Kisangi"
+        buttonUrl="https://wa.me/+254768453819"
+      />
+    </div>
+  );
+});
+
+// Main page component - PPR: Static shell + streaming dynamic content
 export default function PackagesPage() {
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* Static shell - renders immediately */}
-      <GrainOverlay />
+      {/* Static shell - renders immediately (cached) */}
+      <StaticShell />
       
       {/* Dynamic content - streams in with Suspense */}
       <Suspense fallback={<PackagesLoading />}>
         <PackagesContent />
       </Suspense>
       
-      {/* Static CTA Section - renders immediately (client component) */}
-      <div className="relative">
-        <CTASection
-          title="Want Something Unique?"
-          description="Don't see exactly what you're looking for? Let's craft a personalized safari experience tailored just for you"
-          image="/images/sol_car.jpg"
-          buttonText="Chat with Michael Kisangi"
-          buttonUrl="https://wa.me/+254768453819"
-        />
-      </div>
+      {/* Static CTA Section - renders immediately (cached) */}
+      <StaticCTA />
     </div>
   );
 }
