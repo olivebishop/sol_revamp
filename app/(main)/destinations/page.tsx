@@ -8,16 +8,14 @@ export const metadata = {
     "Discover stunning destinations across East Africa. From the Serengeti to Zanzibar beaches.",
 };
 
-// Force dynamic rendering to avoid oversized pre-rendered pages
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 // Function to fetch destinations (dynamic, not cached during build)
 async function getDestinations() {
+  // Use no-store to prevent build-time pre-rendering and avoid oversized pages
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
     const res = await fetch(`${baseUrl}/api/destinations?listView=true`, {
-      next: { tags: ['destinations'], revalidate: 3600 },
+      cache: 'no-store', // Prevent build-time caching
+      next: { tags: ['destinations'] },
     });
     
     if (!res.ok) {

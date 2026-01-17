@@ -14,7 +14,8 @@ async function getPackages() {
     // During build, use relative URL or empty string (fetch will use current origin at runtime)
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
     const res = await fetch(`${baseUrl}/api/packages`, {
-      next: { tags: ['packages'], revalidate: 3600 },
+      next: { tags: ['packages'] },
+      // Use default caching strategy (not no-store) for homepage to allow static generation
     });
   
     if (!res.ok) {
@@ -59,7 +60,8 @@ async function getTestimonials() {
     // During build, use relative URL or empty string (fetch will use current origin at runtime)
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
     const res = await fetch(`${baseUrl}/api/testimonials`, {
-      next: { tags: ['testimonials'], revalidate: 3600 },
+      next: { tags: ['testimonials'] },
+      // Use default caching strategy (not no-store) for homepage to allow static generation
     });
     
     if (!res.ok) {
