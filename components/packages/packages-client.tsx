@@ -15,8 +15,8 @@ interface PackagesClientProps {
 }
 
 export function PackagesClient({ packages: initialPackages }: PackagesClientProps) {
-  const [packages, setPackages] = useState(initialPackages);
-  const [loading, setLoading] = useState(initialPackages.length === 0);
+  const [packages, setPackages] = useState(initialPackages || []);
+  const [loading, setLoading] = useState((initialPackages || []).length === 0);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<FilterOptions>({
     category: "all",
@@ -25,9 +25,13 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
     sortBy: "popular",
   });
 
+  // Update packages when initialPackages prop changes
   useEffect(() => {
-    // Only fetch if no initial packages provided
-    if (initialPackages.length === 0 && !loading) {
+    if (initialPackages && initialPackages.length > 0) {
+      setPackages(initialPackages);
+      setLoading(false);
+    } else if (initialPackages.length === 0 && !loading) {
+      // Only fetch if no initial packages provided (fallback for client-side navigation)
       setLoading(true);
       fetch('/api/packages')
         .then(res => {
@@ -53,13 +57,17 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
           setLoading(false);
         });
     }
-  }, [initialPackages.length, loading]);
+  }, [initialPackages, loading]);
 
   const packagesPerPage = 9;
 
   // Memoize filtered packages to avoid recalculating on every render
   const filteredPackages = useMemo(() => {
     const result = packages.filter((pkg) => {
+      // Ensure package has required fields
+      if (!pkg || !pkg.id || !pkg.name) {
+        return false;
+      }
       // Category filter
       if (filters.category !== "all") {
         const categoryMap: Record<string, string[]> = {
@@ -118,6 +126,9 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
         break;
     }
 
+    // Debug: Log filtered packages count
+    console.log('Filtered packages count:', result.length);
+    
     return result;
   }, [packages, filters]);
 

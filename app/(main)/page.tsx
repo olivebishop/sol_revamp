@@ -47,7 +47,8 @@ async function getPackages() {
       }
     }));
     
-    return transformedPackages.filter((pkg: PackageData) => pkg.isActive);
+    // Return all packages (don't filter by isActive - show all created packages)
+    return transformedPackages;
   } catch (error) {
     console.error('Error fetching packages:', error);
     return [];

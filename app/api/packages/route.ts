@@ -45,8 +45,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all packages - optimize by selecting only needed fields for list view
+    // Return all packages regardless of isActive status
     const packages = await prisma.package.findMany({
-      where: { isActive: true },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
