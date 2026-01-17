@@ -10,16 +10,22 @@ async function getPackage(slug: string) {
   cacheLife('hours');
   cacheTag('packages', `package-${slug}`);
   
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/packages?slug=${slug}`, {
-    next: { tags: ['packages', `package-${slug}`] },
-  });
-  
-  if (!res.ok) {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/packages?slug=${slug}`, {
+      next: { tags: ['packages', `package-${slug}`] },
+      cache: 'force-cache',
+    });
+    
+    if (!res.ok) {
+      return null;
+    }
+    
+    const data = await res.json();
+    return data && data.length > 0 ? data[0] : null;
+  } catch (error) {
+    console.error('Error fetching package:', error);
     return null;
   }
-  
-  const data = await res.json();
-  return data && data.length > 0 ? data[0] : null;
 }
 
 // Cached function to fetch related packages
@@ -28,18 +34,24 @@ async function getRelatedPackages(packageType: string, excludeId: string) {
   cacheLife('hours');
   cacheTag('packages');
   
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/packages?type=${packageType}&exclude=${excludeId}&limit=3`,
-    {
-      next: { tags: ['packages'] },
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/packages?type=${packageType}&exclude=${excludeId}&limit=3`,
+      {
+        next: { tags: ['packages'] },
+        cache: 'force-cache',
+      }
+    );
+    
+    if (!res.ok) {
+      return [];
     }
-  );
-  
-  if (!res.ok) {
+    
+    return res.json();
+  } catch (error) {
+    console.error('Error fetching related packages:', error);
     return [];
   }
-  
-  return res.json();
 }
 
 // Transform DB package to PackageData format

@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, ArrowRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import GrainOverlay from "@/components/shared/grain-overlay";
 
 
@@ -17,7 +17,8 @@ export default function DestinationsClient({ destinations: initialDestinations }
 
   useEffect(() => {
     // Only fetch if no initial destinations provided
-    if (initialDestinations.length === 0) {
+    if (initialDestinations.length === 0 && !loading) {
+      setLoading(true);
       fetch('/api/destinations?listView=true')
         .then(res => {
           if (!res.ok) {
@@ -33,15 +34,16 @@ export default function DestinationsClient({ destinations: initialDestinations }
             console.error('Invalid data format received:', data);
             setDestinations([]);
           }
-          setLoading(false);
         })
         .catch(err => {
           console.error('Failed to fetch destinations:', err);
           setDestinations([]);
+        })
+        .finally(() => {
           setLoading(false);
         });
     }
-  }, []); // Empty dependency array - only run once on mount
+  }, [initialDestinations.length, loading]);
 
   if (loading) {
     return (
@@ -103,12 +105,13 @@ export default function DestinationsClient({ destinations: initialDestinations }
           <Link
             key={destination.id}
             href={`/destinations/${destination.slug}` as any}
+            prefetch={index < 3} // Only prefetch first 3 for performance
           >
             <motion.article
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5 }}
               className={`${
                 index % 2 === 0 ? "bg-black" : "bg-zinc-950"
               } border-b border-zinc-900 hover:bg-zinc-900/50 transition-colors group`}
@@ -126,10 +129,13 @@ export default function DestinationsClient({ destinations: initialDestinations }
                     }`}
                   >
                     <Image
-                      src={destination.heroImage}
+                      src={destination.heroImage || "/images/default-destination.jpg"}
                       alt={destination.name}
                       fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      loading={index < 3 ? "eager" : "lazy"}
+                      priority={index < 2}
                     />
                     {destination.location?.country && (
                       <div className="absolute top-6 left-6">

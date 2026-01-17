@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
 import { PackageCard } from "@/components/shared/package-card";
 import {
@@ -27,7 +27,8 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
 
   useEffect(() => {
     // Only fetch if no initial packages provided
-    if (initialPackages.length === 0) {
+    if (initialPackages.length === 0 && !loading) {
+      setLoading(true);
       fetch('/api/packages')
         .then(res => {
           if (!res.ok) {
@@ -43,47 +44,20 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
             console.error('Invalid data format received:', data);
             setPackages([]);
           }
-          setLoading(false);
         })
         .catch(err => {
           console.error('Failed to fetch packages:', err);
           setPackages([]);
+        })
+        .finally(() => {
           setLoading(false);
         });
     }
-  }, []);
+  }, [initialPackages.length, loading]);
 
   const packagesPerPage = 9;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black text-white relative overflow-hidden">
-        <GrainOverlay />
-        <div className="container mx-auto px-4 py-32">
-          <div className="animate-pulse space-y-8">
-            <div className="h-12 bg-zinc-800 rounded w-1/3"></div>
-            <div className="h-6 bg-zinc-800 rounded w-1/2"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!packages || packages.length === 0) {
-    return (
-      <div className="min-h-screen bg-black text-white relative overflow-hidden">
-        <GrainOverlay />
-        <div className="container mx-auto px-4 py-32">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold mb-4">No Packages Found</h1>
-            <p className="text-gray-400">Check back soon for amazing tour packages.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Filter and sort packages
+  // Memoize filtered packages to avoid recalculating on every render
   const filteredPackages = useMemo(() => {
     const result = packages.filter((pkg) => {
       // Category filter
@@ -136,32 +110,63 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
         result.sort((a, b) => b.pricing - a.pricing);
         break;
       case "newest":
-        result.reverse();
+        result.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
         break;
       case "popular":
       default:
-        result.sort((a, b) => b.currentBookings - a.currentBookings);
+        result.sort((a, b) => (b.currentBookings || 0) - (a.currentBookings || 0));
         break;
     }
 
     return result;
   }, [packages, filters]);
 
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredPackages.length / packagesPerPage);
-  const startIndex = (currentPage - 1) * packagesPerPage;
-  const endIndex = startIndex + packagesPerPage;
-  const currentPackages = filteredPackages.slice(startIndex, endIndex);
+  // Memoize pagination calculations
+  const paginationData = useMemo(() => {
+    const totalPages = Math.ceil(filteredPackages.length / packagesPerPage);
+    const startIndex = (currentPage - 1) * packagesPerPage;
+    const endIndex = startIndex + packagesPerPage;
+    const currentPackages = filteredPackages.slice(startIndex, endIndex);
+    return { totalPages, startIndex, endIndex, currentPackages };
+  }, [filteredPackages, currentPage, packagesPerPage]);
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, []);
 
-  const handleFilterChange = (newFilters: FilterOptions) => {
+  const handleFilterChange = useCallback((newFilters: FilterOptions) => {
     setFilters(newFilters);
     setCurrentPage(1);
-  };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white relative overflow-hidden">
+        <GrainOverlay />
+        <div className="container mx-auto px-4 py-32">
+          <div className="animate-pulse space-y-8">
+            <div className="h-12 bg-zinc-800 rounded w-1/3"></div>
+            <div className="h-6 bg-zinc-800 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!packages || packages.length === 0) {
+    return (
+      <div className="min-h-screen bg-black text-white relative overflow-hidden">
+        <GrainOverlay />
+        <div className="container mx-auto px-4 py-32">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">No Packages Found</h1>
+            <p className="text-gray-400">Check back soon for amazing tour packages.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -185,8 +190,8 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
             <p className="text-gray-400">
               Showing{" "}
               <span className="text-white font-semibold">
-                {filteredPackages.length > 0 ? startIndex + 1 : 0}-
-                {Math.min(endIndex, filteredPackages.length)}
+                {paginationData.currentPackages.length > 0 ? paginationData.startIndex + 1 : 0}-
+                {Math.min(paginationData.endIndex, filteredPackages.length)}
               </span>{" "}
               of{" "}
               <span className="text-white font-semibold">
@@ -197,22 +202,22 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
           </div>
 
           {/* Package Cards Grid */}
-          {currentPackages.length > 0 ? (
+          {paginationData.currentPackages.length > 0 ? (
             <motion.div
               key={currentPage}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.3 }}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              {currentPackages.map((pkg, index) => (
+              {paginationData.currentPackages.map((pkg, index) => (
                 <motion.div
                   key={pkg.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{
-                    duration: 0.5,
-                    delay: index * 0.1,
+                    duration: 0.3,
+                    delay: Math.min(index * 0.05, 0.3),
                     ease: "easeOut",
                   }}
                 >
@@ -254,11 +259,11 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
           )}
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {paginationData.totalPages > 1 && (
             <div className="pt-8">
               <Pagination
                 currentPage={currentPage}
-                totalPages={totalPages}
+                totalPages={paginationData.totalPages}
                 onPageChange={handlePageChange}
               />
             </div>

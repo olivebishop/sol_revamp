@@ -62,18 +62,46 @@ export default function PackagesManager({
   };
 
   const handleCreate = async () => {
+    // Client-side validation
+    if (!formData.name.trim() || !formData.slug.trim() || !formData.description.trim()) {
+      toast.error("Please fill in all required fields (name, slug, description)");
+      return;
+    }
+
+    if (formData.pricing <= 0) {
+      toast.error("Pricing must be greater than 0");
+      return;
+    }
+
+    if (formData.daysOfTravel < 1) {
+      toast.error("Days of travel must be at least 1");
+      return;
+    }
+
+    // Validate slug format
+    const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    if (!slugRegex.test(formData.slug)) {
+      toast.error("Slug must be lowercase alphanumeric with hyphens only (e.g., 'ultimate-safari')");
+      return;
+    }
+
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("name", formData.name);
-      formDataToSend.append("slug", formData.slug);
+      formDataToSend.append("name", formData.name.trim());
+      formDataToSend.append("slug", formData.slug.trim().toLowerCase());
       formDataToSend.append("packageType", formData.packageType);
-      formDataToSend.append("description", formData.description);
+      formDataToSend.append("description", formData.description.trim());
       formDataToSend.append("pricing", formData.pricing.toString());
       formDataToSend.append("daysOfTravel", formData.daysOfTravel.toString());
       formDataToSend.append("isActive", formData.isActive.toString());
 
       if (imageFiles) {
         Array.from(imageFiles).forEach((file) => {
+          // Validate file size (max 5MB)
+          if (file.size > 5 * 1024 * 1024) {
+            toast.error(`Image ${file.name} is too large (max 5MB)`);
+            return;
+          }
           formDataToSend.append("images", file);
         });
       }
@@ -84,17 +112,18 @@ export default function PackagesManager({
       });
 
       if (response.ok) {
-        const newPackage = await response.json();
+        const result = await response.json();
+        const newPackage = result.package || result;
         setPackages([newPackage, ...packages]);
-        // setIsCreateDialogOpen(false); // Drawer removed
         toast.success("Package created successfully");
         resetForm();
       } else {
-        toast.error("Failed to create package");
+        const error = await response.json().catch(() => ({ error: "Failed to create package" }));
+        toast.error(error.error || error.details || "Failed to create package");
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error("An error occurred");
+      toast.error(error instanceof Error ? error.message : "An error occurred");
     }
   };
 

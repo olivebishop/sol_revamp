@@ -9,16 +9,22 @@ async function getDestination(slug: string) {
   cacheLife('hours');
   cacheTag('destinations', `destination-${slug}`);
   
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/destinations?slug=${slug}`, {
-    next: { tags: ['destinations', `destination-${slug}`] },
-  });
-  
-  if (!res.ok) {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/destinations?slug=${slug}`, {
+      next: { tags: ['destinations', `destination-${slug}`] },
+      cache: 'force-cache',
+    });
+    
+    if (!res.ok) {
+      return null;
+    }
+    
+    const data = await res.json();
+    return data && data.length > 0 ? data[0] : null;
+  } catch (error) {
+    console.error('Error fetching destination:', error);
     return null;
   }
-  
-  const data = await res.json();
-  return data && data.length > 0 ? data[0] : null;
 }
 
 // Loading component with better skeleton

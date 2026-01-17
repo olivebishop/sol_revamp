@@ -38,7 +38,11 @@ export async function GET(request: NextRequest) {
           // Exclude: description, images, overview, wildlife, bestTimeToVisit, thingsToKnow, whatToPack, accommodation, activities, createdAt, updatedAt
         },
       });
-      return NextResponse.json(destinations);
+      return NextResponse.json(destinations, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        },
+      });
     }
 
     // Full data for other cases
@@ -47,7 +51,11 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json(destinations);
+    return NextResponse.json(destinations, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      },
+    });
   } catch (error) {
     console.error("Error fetching destinations:", error);
     return NextResponse.json(
@@ -81,18 +89,68 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await request.json();
-    const { name, slug, tagline, description, isPublished, heroImage } = body;
+    // Check content type to handle both FormData and JSON
+    const contentType = request.headers.get("content-type") || "";
+    let name: string;
+    let slug: string;
+    let tagline: string;
+    let description: string;
+    let isPublished: boolean;
+    let heroImage: string | null = null;
+
+    if (contentType.includes("multipart/form-data") || contentType.includes("form-data")) {
+      // Handle FormData
+      const formData = await request.formData();
+      name = formData.get("name") as string;
+      slug = formData.get("slug") as string;
+      tagline = (formData.get("tagline") as string) || "";
+      description = formData.get("description") as string;
+      isPublished = formData.get("isPublished") === "true";
+      
+      // Handle hero image file - convert to base64 if provided
+      const heroImageFile = formData.get("heroImage") as File | null;
+      if (heroImageFile && heroImageFile instanceof File) {
+        const arrayBuffer = await heroImageFile.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const base64 = buffer.toString("base64");
+        const mimeType = heroImageFile.type || "image/jpeg";
+        heroImage = `data:${mimeType};base64,${base64}`;
+      }
+    } else {
+      // Handle JSON
+      const body = await request.json();
+      name = body.name;
+      slug = body.slug;
+      tagline = body.tagline || "";
+      description = body.description;
+      isPublished = body.isPublished ?? false;
+      heroImage = body.heroImage || null;
+    }
 
     // Validate required fields
     if (!name || !slug || !description) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return NextResponse.json({ 
+        error: "Missing required fields",
+        details: "Name, slug, and description are required"
+      }, { status: 400 });
+    }
+
+    // Validate slug format (alphanumeric, hyphens, underscores only)
+    const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    if (!slugRegex.test(slug)) {
+      return NextResponse.json({ 
+        error: "Invalid slug format",
+        details: "Slug must be lowercase alphanumeric with hyphens only (e.g., 'maasai-mara')"
+      }, { status: 400 });
     }
 
     // Check for duplicate slug (idempotency)
     const existing = await prisma.destination.findUnique({ where: { slug } });
     if (existing) {
-      return NextResponse.json({ error: "Destination with this slug already exists", destination: existing }, { status: 200 });
+      return NextResponse.json({ 
+        error: "Destination with this slug already exists", 
+        destination: existing 
+      }, { status: 409 });
     }
 
     // Use hero image if provided (base64), otherwise use default
