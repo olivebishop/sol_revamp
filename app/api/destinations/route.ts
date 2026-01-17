@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { uploadToSupabase } from "@/lib/supabase";
+import { revalidateTag } from "next/cache";
 
 // GET all destinations or single by slug
 export async function GET(request: NextRequest) {
@@ -97,6 +99,7 @@ export async function POST(request: NextRequest) {
     let description: string;
     let isPublished: boolean;
     let heroImage: string | null = null;
+    let uploadedImages: string[] = [];
 
     if (contentType.includes("multipart/form-data") || contentType.includes("form-data")) {
       // Handle FormData
@@ -107,14 +110,30 @@ export async function POST(request: NextRequest) {
       description = formData.get("description") as string;
       isPublished = formData.get("isPublished") === "true";
       
-      // Handle hero image file - convert to base64 if provided
+      // Handle hero image file - upload to Supabase
       const heroImageFile = formData.get("heroImage") as File | null;
-      if (heroImageFile && heroImageFile instanceof File) {
-        const arrayBuffer = await heroImageFile.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const base64 = buffer.toString("base64");
-        const mimeType = heroImageFile.type || "image/jpeg";
-        heroImage = `data:${mimeType};base64,${base64}`;
+      if (heroImageFile && heroImageFile instanceof File && heroImageFile.size > 0) {
+        try {
+          heroImage = await uploadToSupabase("destinations", heroImageFile);
+        } catch (uploadError) {
+          console.error("Error uploading hero image:", uploadError);
+          // Fallback to default image if upload fails
+          heroImage = "/images/default-destination.jpg";
+        }
+      }
+      
+      // Handle additional images
+      const imageFiles = formData.getAll("images") as File[];
+      for (const imageFile of imageFiles) {
+        if (imageFile instanceof File && imageFile.size > 0) {
+          try {
+            const imageUrl = await uploadToSupabase("destinations", imageFile);
+            uploadedImages.push(imageUrl);
+          } catch (uploadError) {
+            console.error("Error uploading additional image:", uploadError);
+            // Continue with other images even if one fails
+          }
+        }
       }
     } else {
       // Handle JSON
@@ -125,6 +144,7 @@ export async function POST(request: NextRequest) {
       description = body.description;
       isPublished = body.isPublished ?? false;
       heroImage = body.heroImage || null;
+      uploadedImages = body.images || [];
     }
 
     // Validate required fields
@@ -153,9 +173,12 @@ export async function POST(request: NextRequest) {
       }, { status: 409 });
     }
 
-    // Use hero image if provided (base64), otherwise use default
+    // Use hero image if provided, otherwise use default
     const heroImageUrl = heroImage || "/images/default-destination.jpg";
-    const finalImages = ["/images/giraffe.png", "/images/elephant.png"];
+    // Use uploaded images if any, otherwise use defaults
+    const finalImages = uploadedImages.length > 0 
+      ? uploadedImages 
+      : ["/images/giraffe.png", "/images/elephant.png"];
 
     let destination;
     try {
@@ -221,6 +244,10 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Revalidate cache
+    revalidateTag('destinations');
+    revalidateTag(`destination-${slug}`);
 
     return NextResponse.json({ success: true, destination }, { status: 201 });
   } catch (error) {

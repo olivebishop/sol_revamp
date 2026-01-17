@@ -126,23 +126,45 @@ export default function DestinationsManager({
   const handleEdit = async () => {
     if (!editingDestination) return;
 
-    try {
-      let heroImageBase64 = "";
-      
-      // Convert image to base64 if new image selected
-      if (heroImageFile) {
-        heroImageBase64 = await convertToBase64(heroImageFile);
-      }
+    // Client-side validation
+    if (!formData.name.trim() || !formData.slug.trim() || !formData.description.trim()) {
+      toast.error("Please fill in all required fields (name, slug, description)");
+      return;
+    }
 
+    // Validate slug format
+    const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    if (!slugRegex.test(formData.slug)) {
+      toast.error("Slug must be lowercase alphanumeric with hyphens only (e.g., 'maasai-mara')");
+      return;
+    }
+
+    try {
       const formDataToSend = new FormData();
-      formDataToSend.append("name", formData.name);
-      formDataToSend.append("slug", formData.slug);
-      formDataToSend.append("tagline", formData.tagline);
-      formDataToSend.append("description", formData.description);
+      formDataToSend.append("name", formData.name.trim());
+      formDataToSend.append("slug", formData.slug.trim().toLowerCase());
+      formDataToSend.append("tagline", formData.tagline.trim());
+      formDataToSend.append("description", formData.description.trim());
       formDataToSend.append("isPublished", formData.isPublished.toString());
 
-      if (heroImageBase64) {
-        formDataToSend.append("heroImage", heroImageBase64);
+      // Send file directly if new image selected
+      if (heroImageFile) {
+        if (heroImageFile.size > 5 * 1024 * 1024) {
+          toast.error("Hero image must be less than 5MB");
+          return;
+        }
+        formDataToSend.append("heroImage", heroImageFile);
+      }
+      
+      // Handle additional images
+      if (imageFiles) {
+        Array.from(imageFiles).forEach((file) => {
+          if (file.size > 5 * 1024 * 1024) {
+            toast.error(`Image ${file.name} is too large (max 5MB)`);
+            return;
+          }
+          formDataToSend.append("images", file);
+        });
       }
 
       const response = await fetch(`/api/destinations/${editingDestination.id}`, {

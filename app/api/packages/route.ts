@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { uploadToSupabase } from "@/lib/supabase";
+import { revalidateTag } from "next/cache";
 
 export const maxRequestBodySize = '20mb';
 
@@ -91,7 +93,7 @@ export async function POST(request: NextRequest) {
     let pricing: number;
     let daysOfTravel: number;
     let isActive: boolean;
-    let heroImage: string | null = null;
+    let uploadedImages: string[] = [];
 
     if (contentType.includes("multipart/form-data") || contentType.includes("form-data")) {
       // Handle FormData
@@ -104,15 +106,18 @@ export async function POST(request: NextRequest) {
       daysOfTravel = parseInt(formData.get("daysOfTravel") as string) || 1;
       isActive = formData.get("isActive") === "true";
       
-      // Handle image files - convert first image to base64 if provided
-      const imageFiles = formData.getAll("images");
-      if (imageFiles.length > 0 && imageFiles[0] instanceof File) {
-        const firstImage = imageFiles[0] as File;
-        const arrayBuffer = await firstImage.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const base64 = buffer.toString("base64");
-        const mimeType = firstImage.type || "image/jpeg";
-        heroImage = `data:${mimeType};base64,${base64}`;
+      // Handle image files - upload to Supabase
+      const imageFiles = formData.getAll("images") as File[];
+      for (const imageFile of imageFiles) {
+        if (imageFile instanceof File && imageFile.size > 0) {
+          try {
+            const imageUrl = await uploadToSupabase("packages", imageFile);
+            uploadedImages.push(imageUrl);
+          } catch (uploadError) {
+            console.error("Error uploading package image:", uploadError);
+            // Continue with other images even if one fails
+          }
+        }
       }
     } else {
       // Handle JSON
@@ -130,7 +135,7 @@ export async function POST(request: NextRequest) {
         daysOfTravel = body.daysOfTravel || 1;
       }
       isActive = body.isPublished ?? body.isActive ?? true;
-      heroImage = body.heroImage || null;
+      uploadedImages = body.images || [];
     }
 
     // Validate required fields
@@ -168,9 +173,9 @@ export async function POST(request: NextRequest) {
       }, { status: 409 });
     }
 
-    // Use hero image if provided, otherwise use default
-    const finalImages = heroImage 
-      ? [heroImage] 
+    // Use uploaded images if any, otherwise use default
+    const finalImages = uploadedImages.length > 0 
+      ? uploadedImages 
       : ["/images/default-package.jpg"];
 
     let packageData;
@@ -208,6 +213,10 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Revalidate cache
+    revalidateTag('packages');
+    revalidateTag(`package-${slug}`);
 
     return NextResponse.json({ success: true, package: packageData }, { status: 201 });
   } catch (error) {

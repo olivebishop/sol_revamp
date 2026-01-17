@@ -139,25 +139,48 @@ export default function PackagesManager({
   const handleEdit = async () => {
     if (!editingPackage) return;
 
-    try {
-      let heroImageBase64 = "";
-      
-      // Convert image to base64 if new image selected
-      if (imageFiles && imageFiles.length > 0) {
-        heroImageBase64 = await convertToBase64(imageFiles[0]);
-      }
+    // Client-side validation
+    if (!formData.name.trim() || !formData.slug.trim() || !formData.description.trim()) {
+      toast.error("Please fill in all required fields (name, slug, description)");
+      return;
+    }
 
+    if (formData.pricing <= 0) {
+      toast.error("Pricing must be greater than 0");
+      return;
+    }
+
+    if (formData.daysOfTravel < 1) {
+      toast.error("Days of travel must be at least 1");
+      return;
+    }
+
+    // Validate slug format
+    const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    if (!slugRegex.test(formData.slug)) {
+      toast.error("Slug must be lowercase alphanumeric with hyphens only (e.g., 'ultimate-safari')");
+      return;
+    }
+
+    try {
       const formDataToSend = new FormData();
-      formDataToSend.append("name", formData.name);
-      formDataToSend.append("slug", formData.slug);
+      formDataToSend.append("name", formData.name.trim());
+      formDataToSend.append("slug", formData.slug.trim().toLowerCase());
       formDataToSend.append("packageType", formData.packageType);
-      formDataToSend.append("description", formData.description);
+      formDataToSend.append("description", formData.description.trim());
       formDataToSend.append("pricing", formData.pricing.toString());
       formDataToSend.append("daysOfTravel", formData.daysOfTravel.toString());
       formDataToSend.append("isActive", formData.isActive.toString());
       
-      if (heroImageBase64) {
-        formDataToSend.append("heroImage", heroImageBase64);
+      // Send files directly if new images selected
+      if (imageFiles) {
+        Array.from(imageFiles).forEach((file) => {
+          if (file.size > 5 * 1024 * 1024) {
+            toast.error(`Image ${file.name} is too large (max 5MB)`);
+            return;
+          }
+          formDataToSend.append("images", file);
+        });
       }
 
       const response = await fetch(`/api/packages/${editingPackage.id}`, {
