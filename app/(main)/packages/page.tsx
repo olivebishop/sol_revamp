@@ -10,7 +10,8 @@ export const metadata = {
     "Explore our curated collection of safari, beach, cultural, and adventure packages across East Africa. Book your dream vacation today.",
 };
 
-// Static shell component - renders immediately (cached)
+// Static shell component - renders immediately (cached using React cache)
+// This is part of the static shell in PPR
 const StaticShell = cache(() => {
   return (
     <>
@@ -30,12 +31,14 @@ const StaticShell = cache(() => {
   );
 });
 
-// Dynamic function to fetch packages (streams in)
+// Dynamic function to fetch packages (streams in at runtime)
+// Using stable Next.js 16 pattern: cache: 'no-store' prevents build-time pre-rendering
 async function getPackages() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
     const res = await fetch(`${baseUrl}/api/packages`, {
-      next: { tags: ['packages'], revalidate: 3600 }, // Cache for 1 hour
+      cache: 'no-store', // Stable API: prevents build-time pre-rendering, fetches at runtime
+      next: { tags: ['packages'] }, // Allows revalidation via revalidateTag() at runtime
     });
     
     if (!res.ok) {
@@ -130,7 +133,7 @@ async function PackagesContent() {
   return <PackagesClient packages={packages} />;
 }
 
-// Static CTA component (cached, renders immediately)
+// Static CTA component (cached, renders immediately as part of static shell)
 const StaticCTA = cache(() => {
   return (
     <div className="relative">
@@ -145,14 +148,17 @@ const StaticCTA = cache(() => {
   );
 });
 
-// Main page component - PPR: Static shell + streaming dynamic content
+// Main page component - PPR (Partial Prerendering) pattern:
+// - Static shell renders immediately (StaticShell, StaticCTA)
+// - Dynamic content streams in via Suspense (PackagesContent)
+// This follows Next.js 16 best practices for PPR
 export default function PackagesPage() {
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       {/* Static shell - renders immediately (cached) */}
       <StaticShell />
       
-      {/* Dynamic content - streams in with Suspense */}
+      {/* Dynamic content - streams in with Suspense boundary */}
       <Suspense fallback={<PackagesLoading />}>
         <PackagesContent />
       </Suspense>

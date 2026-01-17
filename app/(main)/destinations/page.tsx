@@ -8,7 +8,8 @@ export const metadata = {
     "Discover stunning destinations across East Africa. From the Serengeti to Zanzibar beaches.",
 };
 
-// Static shell component - renders immediately (cached)
+// Static shell component - renders immediately (cached using React cache)
+// This is part of the static shell in PPR
 const StaticShell = cache(() => {
   return (
     <>
@@ -40,12 +41,14 @@ const StaticShell = cache(() => {
   );
 });
 
-// Dynamic function to fetch destinations (streams in)
+// Dynamic function to fetch destinations (streams in at runtime)
+// Using stable Next.js 16 pattern: cache: 'no-store' prevents build-time pre-rendering
 async function getDestinations() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
     const res = await fetch(`${baseUrl}/api/destinations?listView=true`, {
-      next: { tags: ['destinations'], revalidate: 3600 }, // Cache for 1 hour
+      cache: 'no-store', // Stable API: prevents build-time pre-rendering, fetches at runtime
+      next: { tags: ['destinations'] }, // Allows revalidation via revalidateTag() at runtime
     });
     
     if (!res.ok) {
@@ -111,14 +114,17 @@ async function DestinationsContent() {
   return <DestinationsClient destinations={destinations} />;
 }
 
-// Main page component - PPR: Static shell + streaming dynamic content
+// Main page component - PPR (Partial Prerendering) pattern:
+// - Static shell renders immediately (StaticShell)
+// - Dynamic content streams in via Suspense (DestinationsContent)
+// This follows Next.js 16 best practices for PPR
 export default function DestinationsPage() {
   return (
     <div className="min-h-screen bg-black text-white relative">
       {/* Static shell - renders immediately (cached) */}
       <StaticShell />
       
-      {/* Dynamic content - streams in with Suspense */}
+      {/* Dynamic content - streams in with Suspense boundary */}
       <Suspense fallback={<DestinationsLoading />}>
         <DestinationsContent />
       </Suspense>
