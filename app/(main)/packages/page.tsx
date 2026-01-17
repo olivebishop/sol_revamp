@@ -10,6 +10,10 @@ export const metadata = {
     "Explore our curated collection of safari, beach, cultural, and adventure packages across East Africa. Book your dream vacation today.",
 };
 
+// Force dynamic rendering to avoid oversized pre-rendered pages
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Function to fetch packages (using fetch cache instead of 'use cache' to avoid 2MB limit)
 async function getPackages() {
   try {

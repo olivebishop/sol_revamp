@@ -1,4 +1,3 @@
-import { cacheLife, cacheTag } from 'next/cache';
 import { Suspense } from 'react';
 import DestinationsClient from "@/components/destinations/destinations-client";
 import GrainOverlay from "@/components/shared/grain-overlay";
@@ -9,16 +8,16 @@ export const metadata = {
     "Discover stunning destinations across East Africa. From the Serengeti to Zanzibar beaches.",
 };
 
-// Cached function to fetch destinations
+// Force dynamic rendering to avoid oversized pre-rendered pages
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+// Function to fetch destinations (dynamic, not cached during build)
 async function getDestinations() {
-  'use cache'
-  cacheLife('hours');
-  cacheTag('destinations');
-  
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/destinations?listView=true`, {
-      next: { tags: ['destinations'] },
-      cache: 'force-cache',
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+    const res = await fetch(`${baseUrl}/api/destinations?listView=true`, {
+      next: { tags: ['destinations'], revalidate: 3600 },
     });
     
     if (!res.ok) {
