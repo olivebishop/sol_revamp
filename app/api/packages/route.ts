@@ -44,10 +44,26 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Get all packages
+    // Get all packages - optimize by selecting only needed fields for list view
     const packages = await prisma.package.findMany({
       where: { isActive: true },
       orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        packageType: true,
+        description: true,
+        pricing: true,
+        daysOfTravel: true,
+        images: true,
+        maxCapacity: true,
+        currentBookings: true,
+        isActive: true,
+        destination: true,
+        createdAt: true,
+        // Exclude: updatedAt, createdBy
+      },
     });
 
     return NextResponse.json(packages, {

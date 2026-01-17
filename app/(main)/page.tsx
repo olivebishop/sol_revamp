@@ -1,4 +1,3 @@
-import { cacheLife, cacheTag } from 'next/cache';
 import { Suspense } from 'react';
 import HeroSection from "@/components/shared/hero";
 import GrainOverlay from "@/components/shared/grain-overlay";
@@ -9,59 +8,69 @@ import Testimonials from "@/components/shared/testimonials";
 import CTASectionWrapper from "@/components/shared/cta-section-wrapper";
 import type { PackageData } from "@/data/packages";
 
-// Cached function to fetch packages
+// Function to fetch packages (using fetch cache to avoid build-time timeout)
 async function getPackages() {
-  'use cache'
-  cacheLife('hours');
-  cacheTag('packages');
+  try {
+    // During build, use relative URL or empty string (fetch will use current origin at runtime)
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+    const res = await fetch(`${baseUrl}/api/packages`, {
+      next: { tags: ['packages'], revalidate: 3600 },
+    });
   
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/packages`, {
-    next: { tags: ['packages'] },
-  });
-  
-  if (!res.ok) {
+    if (!res.ok) {
+      return [];
+    }
+    
+    const data = await res.json();
+    if (!Array.isArray(data)) {
+      return [];
+    }
+    
+    const transformedPackages: PackageData[] = data.map((pkg: any) => ({
+      id: pkg.id,
+      name: pkg.name,
+      slug: pkg.slug,
+      packageType: pkg.packageType || "safari",
+      description: pkg.description,
+      pricing: pkg.pricing,
+      daysOfTravel: pkg.daysOfTravel,
+      images: pkg.images || [],
+      maxCapacity: pkg.maxCapacity || 10,
+      currentBookings: pkg.currentBookings || 0,
+      isActive: pkg.isActive,
+      destination: pkg.destination || {
+        id: "default",
+        name: "Kenya",
+        slug: "kenya",
+        bestTime: "Year-round"
+      }
+    }));
+    
+    return transformedPackages.filter((pkg: PackageData) => pkg.isActive);
+  } catch (error) {
+    console.error('Error fetching packages:', error);
     return [];
   }
-  
-  const data = await res.json();
-  const transformedPackages: PackageData[] = data.map((pkg: any) => ({
-    id: pkg.id,
-    name: pkg.name,
-    slug: pkg.slug,
-    packageType: pkg.packageType || "safari",
-    description: pkg.description,
-    pricing: pkg.pricing,
-    daysOfTravel: pkg.daysOfTravel,
-    images: pkg.images || [],
-    maxCapacity: pkg.maxCapacity || 10,
-    currentBookings: pkg.currentBookings || 0,
-    isActive: pkg.isActive,
-    destination: pkg.destination || {
-      id: "default",
-      name: "Kenya",
-      slug: "kenya",
-      bestTime: "Year-round"
-    }
-  }));
-  
-  return transformedPackages.filter((pkg: PackageData) => pkg.isActive);
 }
 
-// Cached function to fetch testimonials
+// Function to fetch testimonials (using fetch cache to avoid build-time timeout)
 async function getTestimonials() {
-  'use cache'
-  cacheLife('hours');
-  cacheTag('testimonials');
-  
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/testimonials`, {
-    next: { tags: ['testimonials'] },
-  });
-  
-  if (!res.ok) {
+  try {
+    // During build, use relative URL or empty string (fetch will use current origin at runtime)
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+    const res = await fetch(`${baseUrl}/api/testimonials`, {
+      next: { tags: ['testimonials'], revalidate: 3600 },
+    });
+    
+    if (!res.ok) {
+      return [];
+    }
+    
+    return res.json();
+  } catch (error) {
+    console.error('Error fetching testimonials:', error);
     return [];
   }
-  
-  return res.json();
 }
 
 // Loading component for packages

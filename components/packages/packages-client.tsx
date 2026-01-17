@@ -277,9 +277,7 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
         description="Don't see exactly what you're looking for? Let's craft a personalized safari experience tailored just for you"
         image="/images/sol_car.jpg"
         buttonText="Chat with Michael Kisangi"
-        buttonAction={() => {
-          window.open("https://wa.me/+254768453819", "_blank");
-        }}
+        buttonUrl="https://wa.me/+254768453819"
       />
     </>
   );

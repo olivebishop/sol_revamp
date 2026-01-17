@@ -9,7 +9,8 @@ interface CTASectionProps {
   description: string;
   image: string;
   buttonText: string;
-  buttonAction: () => void;
+  buttonUrl?: string;
+  buttonAction?: () => void;
 }
 
 export default function CTASection({
@@ -17,8 +18,16 @@ export default function CTASection({
   description,
   image,
   buttonText,
+  buttonUrl,
   buttonAction,
 }: CTASectionProps) {
+  const handleClick = () => {
+    if (buttonUrl) {
+      window.open(buttonUrl, "_blank");
+    } else if (buttonAction) {
+      buttonAction();
+    }
+  };
   return (
     <section className="relative w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
       <div className="max-w-[1400px] mx-auto">
@@ -64,7 +73,7 @@ export default function CTASection({
                   transition={{ duration: 0.2 }}
                 >
                   <Button
-                    onClick={buttonAction}
+                    onClick={handleClick}
                     className="bg-orange-500 hover:bg-orange-600 text-white px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold tracking-wider rounded transition-all shadow-lg hover:shadow-orange-500/50 group"
                   >
                     {buttonText}

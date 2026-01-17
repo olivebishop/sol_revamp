@@ -1,4 +1,3 @@
-import { cacheLife, cacheTag } from 'next/cache';
 import { Suspense } from 'react';
 import { PackagesClient } from "../../../components/packages/packages-client";
 import GrainOverlay from "@/components/shared/grain-overlay";
@@ -11,16 +10,11 @@ export const metadata = {
     "Explore our curated collection of safari, beach, cultural, and adventure packages across East Africa. Book your dream vacation today.",
 };
 
-// Cached function to fetch packages
+// Function to fetch packages (using fetch cache instead of 'use cache' to avoid 2MB limit)
 async function getPackages() {
-  'use cache'
-  cacheLife('hours');
-  cacheTag('packages');
-  
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/packages`, {
-      next: { tags: ['packages'] },
-      cache: 'force-cache',
+      next: { tags: ['packages'], revalidate: 3600 },
     });
     
     if (!res.ok) {
@@ -136,11 +130,7 @@ export default function PackagesPage() {
           description="Don't see exactly what you're looking for? Let's craft a personalized safari experience tailored just for you"
           image="/images/sol_car.jpg"
           buttonText="Chat with Michael Kisangi"
-          buttonAction={() => {
-            if (typeof window !== 'undefined') {
-              window.open("https://wa.me/+254768453819", "_blank");
-            }
-          }}
+          buttonUrl="https://wa.me/+254768453819"
         />
       </div>
     </div>
