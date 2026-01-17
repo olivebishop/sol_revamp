@@ -34,10 +34,12 @@ export async function GET(request: NextRequest) {
           name: true,
           slug: true,
           tagline: true,
+          description: true, // Needed for display
           heroImage: true,
           location: true,
+          highlights: true, // Needed for display
           isPublished: true,
-          // Exclude: description, images, overview, wildlife, bestTimeToVisit, thingsToKnow, whatToPack, accommodation, activities, createdAt, updatedAt
+          // Exclude: images array, overview, wildlife, bestTimeToVisit, thingsToKnow, whatToPack, accommodation, activities, createdAt, updatedAt
         },
       });
       return NextResponse.json(destinations, {
@@ -47,10 +49,31 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Full data for other cases
+    // Full data for other cases - but still optimize by excluding large fields when not needed
     const destinations = await prisma.destination.findMany({
       where: { isPublished: true },
       orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        tagline: true,
+        description: true,
+        heroImage: true,
+        images: true,
+        location: true,
+        overview: true,
+        wildlife: true,
+        bestTimeToVisit: true,
+        thingsToKnow: true,
+        whatToPack: true,
+        accommodation: true,
+        activities: true,
+        highlights: true,
+        funFacts: true,
+        isPublished: true,
+        // Exclude: createdAt, updatedAt, createdBy to reduce payload
+      },
     });
 
     return NextResponse.json(destinations, {

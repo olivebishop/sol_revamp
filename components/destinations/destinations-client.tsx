@@ -1,9 +1,10 @@
 "use client";
+import { memo, useMemo } from "react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, ArrowRight } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import GrainOverlay from "@/components/shared/grain-overlay";
 
 
@@ -110,8 +111,8 @@ export default function DestinationsClient({ destinations: initialDestinations }
             <motion.article
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.3 }}
               className={`${
                 index % 2 === 0 ? "bg-black" : "bg-zinc-950"
               } border-b border-zinc-900 hover:bg-zinc-900/50 transition-colors group`}
@@ -132,10 +133,11 @@ export default function DestinationsClient({ destinations: initialDestinations }
                       src={destination.heroImage || "/images/default-destination.jpg"}
                       alt={destination.name}
                       fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
-                      loading={index < 3 ? "eager" : "lazy"}
-                      priority={index < 2}
+                      loading={index < 2 ? "eager" : "lazy"}
+                      priority={index < 1}
+                      quality={85}
                     />
                     {destination.location?.country && (
                       <div className="absolute top-6 left-6">
@@ -152,10 +154,10 @@ export default function DestinationsClient({ destinations: initialDestinations }
                   {/* Content */}
                   <div className={index % 2 === 1 ? "lg:order-1" : ""}>
                     <motion.div
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 10 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: 0.2 }}
+                      transition={{ duration: 0.3 }}
                     >
                       <div className="mb-4">
                         <span className="text-6xl sm:text-7xl md:text-8xl font-bold text-orange-500/10">

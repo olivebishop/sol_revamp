@@ -50,16 +50,20 @@ async function getDestinationsData(headersObj: Headers) {
     redirect("/");
   }
 
-  // Fetch all destinations
+  // Fetch all destinations - optimized query (only needed fields)
   const destinations = await prisma.destination.findMany({
     orderBy: { createdAt: "desc" },
-    include: {
-      admin: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      tagline: true,
+      description: true,
+      heroImage: true,
+      images: true,
+      isPublished: true,
+      createdAt: true,
+      // Exclude admin relation to reduce payload size
     },
   });
 
@@ -73,9 +77,7 @@ async function DestinationsContent({ headersObj }: { headersObj: Headers }) {
   return (
     <div className="w-full">
       <div className="max-w-7xl mx-auto">
-        <DestinationsManager
-          destinations={JSON.parse(JSON.stringify(destinations))}
-        />
+        <DestinationsManager destinations={destinations} />
       </div>
     </div>
   );

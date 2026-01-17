@@ -56,17 +56,24 @@ export async function GET(request: NextRequest) {
         description: true,
         pricing: true,
         daysOfTravel: true,
-        images: true,
+        images: true, // Get all images, but we'll optimize in transform
         maxCapacity: true,
         currentBookings: true,
         isActive: true,
         destination: true,
-        createdAt: true,
-        // Exclude: updatedAt, createdBy
+        // Exclude: createdAt, updatedAt, createdBy to reduce payload
       },
     });
+    
+    // Transform images array to only include first image for list view (reduces payload size)
+    const optimizedPackages = packages.map((pkg) => ({
+      ...pkg,
+      images: Array.isArray(pkg.images) && pkg.images.length > 0 
+        ? [pkg.images[0]] 
+        : (pkg.images || []),
+    }));
 
-    return NextResponse.json(packages, {
+    return NextResponse.json(optimizedPackages, {
       headers: {
         'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
       },

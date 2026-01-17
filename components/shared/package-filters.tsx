@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { SlidersHorizontal } from "lucide-react";
 
@@ -14,7 +14,7 @@ interface PackageFiltersProps {
   onFilterChange: (filters: FilterOptions) => void;
 }
 
-export const PackageFilters = ({ onFilterChange }: PackageFiltersProps) => {
+export const PackageFilters = memo(({ onFilterChange }: PackageFiltersProps) => {
   const [filters, setFilters] = useState<FilterOptions>({
     category: "all",
     priceRange: "all",
@@ -46,13 +46,15 @@ export const PackageFilters = ({ onFilterChange }: PackageFiltersProps) => {
     { value: "newest", label: "Newest First" },
   ];
 
-  const handleFilterChange = (key: keyof FilterOptions, value: string) => {
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
-    onFilterChange(newFilters);
-  };
+  const handleFilterChange = useCallback((key: keyof FilterOptions, value: string) => {
+    setFilters((prev) => {
+      const newFilters = { ...prev, [key]: value };
+      onFilterChange(newFilters);
+      return newFilters;
+    });
+  }, [onFilterChange]);
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     const defaultFilters = {
       category: "all",
       priceRange: "all",
@@ -61,7 +63,7 @@ export const PackageFilters = ({ onFilterChange }: PackageFiltersProps) => {
     };
     setFilters(defaultFilters);
     onFilterChange(defaultFilters);
-  };
+  }, [onFilterChange]);
 
   return (
     <div className="flex flex-wrap items-center gap-3 bg-black/40 border border-white/10 rounded p-4">
@@ -119,4 +121,6 @@ export const PackageFilters = ({ onFilterChange }: PackageFiltersProps) => {
       </Button>
     </div>
   );
-};
+});
+
+PackageFilters.displayName = "PackageFilters";

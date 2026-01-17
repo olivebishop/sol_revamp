@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -220,7 +220,7 @@ export default function PackagesManager({
     // setIsEditDialogOpen(true); // Drawer removed
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (!confirm("Are you sure you want to delete this package?")) return;
 
     try {
@@ -229,7 +229,7 @@ export default function PackagesManager({
       });
 
       if (response.ok) {
-        setPackages(packages.filter((p) => p.id !== id));
+        setPackages((prev) => prev.filter((p) => p.id !== id));
         toast.success("Package deleted successfully");
       } else {
         toast.error("Failed to delete package");
@@ -238,9 +238,9 @@ export default function PackagesManager({
       console.error("Error:", error);
       toast.error("An error occurred");
     }
-  };
+  }, []);
 
-  const toggleActive = async (pkg: Package) => {
+  const toggleActive = useCallback(async (pkg: Package) => {
     try {
       const response = await fetch(`/api/packages/${pkg.id}`, {
         method: "PUT",
@@ -253,7 +253,7 @@ export default function PackagesManager({
 
       if (response.ok) {
         const updated = await response.json();
-        setPackages(packages.map((p) => (p.id === updated.id ? updated : p)));
+        setPackages((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
         toast.success(
           `Package ${updated.isActive ? "activated" : "deactivated"}`
         );
@@ -264,7 +264,7 @@ export default function PackagesManager({
       console.error("Error:", error);
       toast.error("An error occurred");
     }
-  };
+  }, []);
 
   const resetForm = () => {
     setFormData({

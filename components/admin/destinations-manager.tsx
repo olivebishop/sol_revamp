@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -174,8 +174,8 @@ export default function DestinationsManager({
 
       if (response.ok) {
         const updatedDestination = await response.json();
-        setDestinations(
-          destinations.map((d) =>
+        setDestinations((prev) =>
+          prev.map((d) =>
             d.id === updatedDestination.id ? updatedDestination : d
           )
         );
@@ -205,7 +205,7 @@ export default function DestinationsManager({
     // setIsEditDialogOpen(true); // Drawer removed
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (!confirm("Are you sure you want to delete this destination?")) return;
 
     try {
@@ -214,7 +214,7 @@ export default function DestinationsManager({
       });
 
       if (response.ok) {
-        setDestinations(destinations.filter((d) => d.id !== id));
+        setDestinations((prev) => prev.filter((d) => d.id !== id));
         toast.success("Destination deleted successfully");
       } else {
         toast.error("Failed to delete destination");
@@ -223,9 +223,9 @@ export default function DestinationsManager({
       console.error("Error:", error);
       toast.error("An error occurred");
     }
-  };
+  }, []);
 
-  const togglePublish = async (destination: Destination) => {
+  const togglePublish = useCallback(async (destination: Destination) => {
     try {
       const response = await fetch(`/api/destinations/${destination.id}`, {
         method: "PUT",
@@ -238,8 +238,8 @@ export default function DestinationsManager({
 
       if (response.ok) {
         const updated = await response.json();
-        setDestinations(
-          destinations.map((d) => (d.id === updated.id ? updated : d))
+        setDestinations((prev) =>
+          prev.map((d) => (d.id === updated.id ? updated : d))
         );
         toast.success(
           `Destination ${updated.isPublished ? "published" : "unpublished"}`
@@ -251,7 +251,7 @@ export default function DestinationsManager({
       console.error("Error:", error);
       toast.error("An error occurred");
     }
-  };
+  }, []);
 
   const resetForm = () => {
     setFormData({
@@ -375,7 +375,9 @@ export default function DestinationsManager({
       </div>
 
       <div className="grid gap-4 md:gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        {destinations.map((destination) => (
+        {destinations.map((destination) => {
+          // Memoize destination card to prevent unnecessary re-renders
+          return (
           <div
             key={destination.id}
             className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 sm:p-6 hover:border-zinc-700 transition-colors flex flex-col justify-between min-h-[180px]"
@@ -438,7 +440,8 @@ export default function DestinationsManager({
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
 
         {destinations.length === 0 && (
           <div className="text-center py-12 text-gray-500 col-span-full">

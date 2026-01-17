@@ -50,16 +50,23 @@ async function getPackagesData(headersObj: Headers) {
     redirect("/");
   }
 
-  // Fetch all packages
+  // Fetch all packages - optimized query (only needed fields)
   const packages = await prisma.package.findMany({
     orderBy: { createdAt: "desc" },
-    include: {
-      admin: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      packageType: true,
+      description: true,
+      pricing: true,
+      daysOfTravel: true,
+      images: true,
+      maxCapacity: true,
+      currentBookings: true,
+      isActive: true,
+      createdAt: true,
+      // Exclude admin relation and destination JSON to reduce payload size
     },
   });
 
@@ -76,9 +83,7 @@ async function PackagesContent({ headersObj }: { headersObj: Headers }) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
         </div>
 
-        <PackagesManager
-          packages={JSON.parse(JSON.stringify(packages))}
-        />
+        <PackagesManager packages={packages} />
       </div>
     </div>
   );

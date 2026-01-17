@@ -1,4 +1,5 @@
 "use client";
+import { memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
@@ -10,7 +11,7 @@ interface PackageCardProps {
   package: PackageData;
 }
 
-export const PackageCard = ({ package: pkg }: PackageCardProps) => {
+export const PackageCard = memo(({ package: pkg }: PackageCardProps) => {
   return (
     <motion.div
       whileHover={{ y: -8 }}
@@ -25,10 +26,14 @@ export const PackageCard = ({ package: pkg }: PackageCardProps) => {
           className="w-full h-full"
         >
           <Image
-            src={pkg.images[0]}
+            src={pkg.images?.[0] || "/images/default-package.jpg"}
             alt={pkg.name}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover"
+            loading="lazy"
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
           />
         </motion.div>
         <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent opacity-60"></div>
@@ -99,4 +104,6 @@ export const PackageCard = ({ package: pkg }: PackageCardProps) => {
       </div>
     </motion.div>
   );
-};
+});
+
+PackageCard.displayName = "PackageCard";

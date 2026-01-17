@@ -171,16 +171,11 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
   return (
     <>
       {/* Filters Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative px-4 sm:px-6 lg:px-8 pb-8"
-      >
+      <div className="relative px-4 sm:px-6 lg:px-8 pb-8">
         <div className="max-w-[1400px] mx-auto">
           <PackageFilters onFilterChange={handleFilterChange} />
         </div>
-      </motion.div>
+      </div>
 
       {/* Main Content */}
       <div className="relative px-4 sm:px-6 lg:px-8 pb-20">
@@ -203,35 +198,16 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
 
           {/* Package Cards Grid */}
           {paginationData.currentPackages.length > 0 ? (
-            <motion.div
+            <div
               key={currentPage}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              {paginationData.currentPackages.map((pkg, index) => (
-                <motion.div
-                  key={pkg.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.3,
-                    delay: Math.min(index * 0.05, 0.3),
-                    ease: "easeOut",
-                  }}
-                >
-                  <PackageCard package={pkg} />
-                </motion.div>
+              {paginationData.currentPackages.map((pkg) => (
+                <PackageCard key={pkg.id} package={pkg} />
               ))}
-            </motion.div>
+            </div>
           ) : (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="text-center py-20"
-            >
+            <div className="text-center py-20">
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-orange-500/10 mb-6">
                 <svg
                   className="w-10 h-10 text-orange-500"
@@ -255,7 +231,7 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
               <p className="text-gray-400 text-lg">
                 Try adjusting your filters
               </p>
-            </motion.div>
+            </div>
           )}
 
           {/* Pagination */}
