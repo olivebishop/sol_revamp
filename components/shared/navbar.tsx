@@ -1,15 +1,21 @@
-'use cache'
-
-import { cacheLife } from 'next/cache';
+import { cache } from 'react';
 import NavbarClient from "./navbarClient";
 import { getAllDestinations } from "@/lib/dal/destinationDAL";
 
-export default async function Navbar() {
-  cacheLife('hours'); // Navbar data updated multiple times per day
-  
+// Cache the destinations fetch for the request
+const getCachedDestinations = cache(async () => {
   try {
-    // Fetch latest destinations from DB
-    const destinations = await getAllDestinations();
+    return await getAllDestinations();
+  } catch (error) {
+    console.error("Error loading destinations for navbar:", error);
+    return [];
+  }
+});
+
+export default async function Navbar() {
+  try {
+    // Fetch latest destinations from DB (cached per request)
+    const destinations = await getCachedDestinations();
     // Only published destinations for nav
     const published = destinations.filter((d) => d.isPublished);
     const navDestinations = published.map((d) => ({

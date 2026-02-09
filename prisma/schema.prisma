@@ -106,8 +106,8 @@ model Destination {
   slug        String   @unique
   tagline     String // Short catchy description
   description String   @db.Text // Main description
-  heroImage   String // Main hero image URL
-  images      String[] // Array of additional image URLs
+  heroImage   String // Main hero image URL (kept for backward compatibility)
+  images      String[] // Array of additional image URLs (kept for backward compatibility)
   
   // Location info stored as JSON
   location    Json // { country, region, coordinates: { lat, lng } }
@@ -143,7 +143,42 @@ model Destination {
   createdBy   String // Better Auth user ID
   admin       User     @relation(fields: [createdBy], references: [id])
 
+  // Relations
+  destinationImages Image[] // New relation to Image model
+
   @@index([slug])
+}
+
+// Image model - Stores image metadata in database
+// Images are stored in Supabase buckets, but metadata is tracked in DB
+model Image {
+  id          String   @id @default(cuid())
+  url         String   // Public URL from Supabase
+  bucket      String   // Supabase bucket name (e.g., "packages", "destinations")
+  filename    String   // Original filename
+  filePath    String   // Path in bucket
+  fileSize    Int      // File size in bytes
+  mimeType    String   // MIME type (e.g., "image/jpeg")
+  width       Int?     // Image width in pixels
+  height      Int?     // Image height in pixels
+  alt         String?  // Alt text for accessibility
+  isHero      Boolean  @default(false) // Is this a hero image?
+  displayOrder Int     @default(0) // Order for display
+  
+  // Relations - images can belong to packages or destinations
+  packageId     String?
+  package       Package?     @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  
+  destinationId String?
+  destination   Destination? @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([packageId])
+  @@index([destinationId])
+  @@index([bucket])
+  @@index([url])
 }
 
 // Tour Packages
@@ -155,7 +190,7 @@ model Package {
   description     String   @db.Text // Package details
   pricing         Float // Price for the package
   daysOfTravel    Int // Number of days
-  images          String[] // Array of image URLs
+  images          String[] // Array of image URLs (kept for backward compatibility)
   maxCapacity     Int      @default(10) // Maximum number of travelers
   currentBookings Int      @default(0) // Current number of bookings
   isActive        Boolean  @default(true)
@@ -172,6 +207,7 @@ model Package {
   // Relations
   bookings         Booking[]
   packageSchedules PackageSchedule[]
+  packageImages    Image[] // New relation to Image model
 
   @@index([slug])
   @@index([packageType])
