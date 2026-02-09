@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ContentEditable } from "@/components/editor/editor-ui/content-editable";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -116,16 +116,18 @@ export default function PackagesManager({
     // Validate total file size (max 10MB total)
     let totalFileSize = 0;
     if (imageFiles) {
-      Array.from(imageFiles).forEach((file) => {
+      // Check each file individually first - use for...of so return actually stops execution
+      for (const file of Array.from(imageFiles)) {
         if (file.size > 5 * 1024 * 1024) {
           toast.error(`Image ${file.name} is too large (max 5MB per file)`);
-          return;
+          return; // Stop execution immediately
         }
         totalFileSize += file.size;
-      });
+      }
+      // Check total size
       if (totalFileSize > 10 * 1024 * 1024) {
         toast.error("Total image size must be less than 10MB");
-        return;
+        return; // Stop execution immediately
       }
     }
 
@@ -139,12 +141,13 @@ export default function PackagesManager({
       formDataToSend.append("daysOfTravel", formData.daysOfTravel.toString());
       formDataToSend.append("isActive", formData.isActive.toString());
 
+      // Only append files that passed validation
       if (imageFiles) {
-        Array.from(imageFiles).forEach((file) => {
+        for (const file of Array.from(imageFiles)) {
           if (file.size > 0 && file.size <= 5 * 1024 * 1024) {
             formDataToSend.append("images", file);
           }
-        });
+        }
       }
 
       const response = await fetch("/api/packages", {
@@ -225,16 +228,18 @@ export default function PackagesManager({
     // Validate total file size (max 10MB total)
     let totalFileSize = 0;
     if (imageFiles) {
-      Array.from(imageFiles).forEach((file) => {
+      // Check each file individually first
+      for (const file of Array.from(imageFiles)) {
         if (file.size > 5 * 1024 * 1024) {
           toast.error(`Image ${file.name} is too large (max 5MB per file)`);
-          return;
+          return; // Stop execution immediately
         }
         totalFileSize += file.size;
-      });
+      }
+      // Check total size
       if (totalFileSize > 10 * 1024 * 1024) {
         toast.error("Total image size must be less than 10MB");
-        return;
+        return; // Stop execution immediately
       }
     }
 
@@ -248,13 +253,13 @@ export default function PackagesManager({
       formDataToSend.append("daysOfTravel", formData.daysOfTravel.toString());
       formDataToSend.append("isActive", formData.isActive.toString());
       
-      // Send files directly if new images selected
+      // Only append files that passed validation
       if (imageFiles) {
-        Array.from(imageFiles).forEach((file) => {
+        for (const file of Array.from(imageFiles)) {
           if (file.size > 0 && file.size <= 5 * 1024 * 1024) {
             formDataToSend.append("images", file);
           }
-        });
+        }
       }
 
       const response = await fetch(`/api/packages/${editingPackage.id}`, {
@@ -424,15 +429,17 @@ export default function PackagesManager({
         <Label className="text-sm font-medium text-gray-200">
           Description * ({formData.description.length}/{MAX_DESCRIPTION_LENGTH} characters)
         </Label>
-        <ContentEditable
+        <Textarea
           placeholder="Detailed description of the package"
-          className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none min-h-[120px] rounded-md px-3 py-2 mt-1"
+          className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none min-h-[120px]"
           value={formData.description}
-          onChange={(value) => {
+          onChange={(e) => {
+            const value = e.target.value;
             if (value.length <= MAX_DESCRIPTION_LENGTH) {
               setFormData({ ...formData, description: value });
             }
           }}
+          maxLength={MAX_DESCRIPTION_LENGTH}
         />
         {formData.description.length > MAX_DESCRIPTION_LENGTH * 0.9 && (
           <p className="text-xs text-orange-500 mt-1">
