@@ -90,7 +90,7 @@ async function migrateImages() {
     const destinations = await prisma.destination.findMany({
       where: {
         OR: [
-          { heroImage: { not: null } },
+          { heroImage: { not: { equals: "" } } },
           { images: { isEmpty: false } },
         ],
       },
