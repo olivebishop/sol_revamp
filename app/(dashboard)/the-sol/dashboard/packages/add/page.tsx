@@ -96,21 +96,23 @@ function AddPackageForm() {
         return;
       }
 
-      // Validate file sizes
+      // Validate file sizes - use for...of so return actually stops execution
       let totalFileSize = 0;
       if (imageFiles) {
-        Array.from(imageFiles).forEach((file) => {
+        // Check each file individually first
+        for (const file of Array.from(imageFiles)) {
           if (file.size > 5 * 1024 * 1024) {
             toast.error(`Image ${file.name} is too large (max 5MB per file)`);
             setLoading(false);
-            return;
+            return; // Stop execution immediately
           }
           totalFileSize += file.size;
-        });
+        }
+        // Check total size
         if (totalFileSize > 10 * 1024 * 1024) {
           toast.error("Total image size must be less than 10MB");
           setLoading(false);
-          return;
+          return; // Stop execution immediately
         }
       }
 
@@ -124,13 +126,13 @@ function AddPackageForm() {
       formDataToSend.append("daysOfTravel", daysOfTravel.toString());
       formDataToSend.append("isActive", formData.isActive.toString());
 
-      // Add images if any
+      // Only append files that passed validation
       if (imageFiles) {
-        Array.from(imageFiles).forEach((file) => {
+        for (const file of Array.from(imageFiles)) {
           if (file.size > 0 && file.size <= 5 * 1024 * 1024) {
             formDataToSend.append("images", file);
           }
-        });
+        }
       }
 
       const response = await fetch("/api/packages", {
