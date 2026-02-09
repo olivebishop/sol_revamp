@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, cache } from 'react';
 import HeroSection from "@/components/shared/hero";
 import GrainOverlay from "@/components/shared/grain-overlay";
 import FeaturedPackages from "@/components/packages/featured-packages";
@@ -6,31 +6,18 @@ import VisualNarratives from "@/components/shared/visual-narratives";
 import WhyChooseUs from "@/components/shared/why-choose-us";
 import Testimonials from "@/components/shared/testimonials";
 import CTASectionWrapper from "@/components/shared/cta-section-wrapper";
+import { getAllPackages } from "@/lib/dal/packageDAL";
+import { getApprovedTestimonials } from "@/lib/dal/testimonialDAL";
 import type { PackageData } from "@/data/packages";
 
-// Function to fetch packages (using fetch cache to avoid build-time timeout)
-async function getPackages() {
+// Cached function to fetch packages directly from database
+// Using React cache() for request-level memoization - eliminates API route overhead
+const getCachedPackages = cache(async (): Promise<PackageData[]> => {
   try {
-    // During build, use relative URL or empty string (fetch will use current origin at runtime)
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-    const res = await fetch(`${baseUrl}/api/packages`, {
-      cache: 'force-cache', // Cache aggressively - use cached data when available
-      next: { 
-        tags: ['packages'], // Allows revalidation via revalidateTag() at runtime
-        revalidate: 3600, // Revalidate every hour (3600 seconds)
-      },
-    } as RequestInit & { next?: { tags?: string[]; revalidate?: number } });
-  
-    if (!res.ok) {
-      return [];
-    }
+    const packages = await getAllPackages();
     
-    const data = await res.json();
-    if (!Array.isArray(data)) {
-      return [];
-    }
-    
-    const transformedPackages: PackageData[] = data.map((pkg: any) => ({
+    // Transform to PackageData format
+    const transformedPackages: PackageData[] = packages.map((pkg) => ({
       id: pkg.id,
       name: pkg.name,
       slug: pkg.slug,
@@ -38,46 +25,39 @@ async function getPackages() {
       description: pkg.description,
       pricing: pkg.pricing,
       daysOfTravel: pkg.daysOfTravel,
-      images: pkg.images || [],
+      images: Array.isArray(pkg.images) && pkg.images.length > 0 
+        ? [pkg.images[0]] 
+        : (pkg.images || []),
       maxCapacity: pkg.maxCapacity || 10,
       currentBookings: pkg.currentBookings || 0,
       isActive: pkg.isActive,
-      destination: pkg.destination || {
-        id: "default",
-        name: "Kenya",
-        slug: "kenya",
-        bestTime: "Year-round"
-      }
+      destination: (typeof pkg.destination === 'object' && pkg.destination !== null)
+        ? pkg.destination as { id: string; name: string; slug: string; bestTime: string }
+        : {
+            id: "default",
+            name: "Kenya",
+            slug: "kenya",
+            bestTime: "Year-round"
+          }
     }));
     
-    // Return all packages (don't filter by isActive - show all created packages)
     return transformedPackages;
   } catch (error) {
     console.error('Error fetching packages:', error);
     return [];
   }
-}
+});
 
-// Function to fetch testimonials (using fetch cache to avoid build-time timeout)
-async function getTestimonials() {
+// Cached function to fetch testimonials directly from database
+// Using React cache() for request-level memoization - eliminates API route overhead
+const getCachedTestimonials = cache(async () => {
   try {
-    // During build, use relative URL or empty string (fetch will use current origin at runtime)
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-    const res = await fetch(`${baseUrl}/api/testimonials`, {
-      next: { tags: ['testimonials'] },
-      // Use default caching strategy (not no-store) for homepage to allow static generation
-    } as RequestInit & { next?: { tags?: string[] } });
-    
-    if (!res.ok) {
-      return [];
-    }
-    
-    return res.json();
+    return await getApprovedTestimonials(6);
   } catch (error) {
     console.error('Error fetching testimonials:', error);
     return [];
   }
-}
+});
 
 // Loading component for packages
 function PackagesLoading() {
@@ -134,9 +114,9 @@ function TestimonialsLoading() {
   );
 }
 
-// Packages section component (cached)
+// Packages section component (cached - queries DB directly)
 async function PackagesSection() {
-  const packages = await getPackages();
+  const packages = await getCachedPackages();
   
   if (packages.length === 0) {
     return null;
@@ -145,9 +125,9 @@ async function PackagesSection() {
   return <FeaturedPackages packages={packages} />;
 }
 
-// Testimonials section component (cached)
+// Testimonials section component (cached - queries DB directly)
 async function TestimonialsSection() {
-  const testimonials = await getTestimonials();
+  const testimonials = await getCachedTestimonials();
   
   return <Testimonials testimonials={testimonials} />;
 }

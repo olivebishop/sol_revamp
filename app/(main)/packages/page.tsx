@@ -2,6 +2,7 @@ import { Suspense, cache } from 'react';
 import { PackagesClient } from "../../../components/packages/packages-client";
 import GrainOverlay from "@/components/shared/grain-overlay";
 import CTASection from "@/components/shared/cta-section";
+import { getAllPackages } from "@/lib/dal/packageDAL";
 import type { PackageData } from "@/data/packages";
 
 export const metadata = {
@@ -31,30 +32,15 @@ const StaticShell = cache(() => {
   );
 });
 
-// Dynamic function to fetch packages (streams in at runtime)
-// Aggressive caching: prefetch on first load, cache for 1 hour, revalidate via tags
-async function getPackages() {
+// Cached function to fetch packages directly from database
+// Using React cache() for request-level memoization - much faster than API routes
+// This eliminates network overhead and queries DB directly
+const getCachedPackages = cache(async (): Promise<PackageData[]> => {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-    const res = await fetch(`${baseUrl}/api/packages`, {
-      cache: 'force-cache', // Cache aggressively - use cached data when available
-      next: { 
-        tags: ['packages'], // Allows revalidation via revalidateTag() at runtime
-        revalidate: 3600, // Revalidate every hour (3600 seconds)
-      },
-    } as RequestInit & { next?: { tags?: string[]; revalidate?: number } });
-    
-    if (!res.ok) {
-      return [];
-    }
-    
-    const data = await res.json();
-    if (!Array.isArray(data)) {
-      return [];
-    }
+    const packages = await getAllPackages();
     
     // Transform to PackageData format
-    const transformedPackages: PackageData[] = data.map((pkg: any) => ({
+    const transformedPackages: PackageData[] = packages.map((pkg) => ({
       id: pkg.id,
       name: pkg.name,
       slug: pkg.slug,
@@ -62,25 +48,28 @@ async function getPackages() {
       description: pkg.description,
       pricing: pkg.pricing,
       daysOfTravel: pkg.daysOfTravel,
-      images: pkg.images || [],
+      images: Array.isArray(pkg.images) && pkg.images.length > 0 
+        ? [pkg.images[0]] 
+        : (pkg.images || []),
       maxCapacity: pkg.maxCapacity || 10,
       currentBookings: pkg.currentBookings || 0,
       isActive: pkg.isActive,
-      destination: pkg.destination || {
-        id: "default",
-        name: "Kenya",
-        slug: "kenya",
-        bestTime: "Year-round"
-      }
+      destination: (typeof pkg.destination === 'object' && pkg.destination !== null)
+        ? pkg.destination as { id: string; name: string; slug: string; bestTime: string }
+        : {
+            id: "default",
+            name: "Kenya",
+            slug: "kenya",
+            bestTime: "Year-round"
+          }
     }));
     
-    // Return all packages (don't filter by isActive - show all created packages)
     return transformedPackages;
   } catch (error) {
     console.error('Error fetching packages:', error);
     return [];
   }
-}
+});
 
 // Skeleton loader for dynamic packages content (only the dynamic part)
 function PackagesLoading() {
@@ -132,8 +121,9 @@ function PackagesLoading() {
 }
 
 // Dynamic packages content component (streams in)
+// Uses cached direct database query - much faster than API routes
 async function PackagesContent() {
-  const packages = await getPackages();
+  const packages = await getCachedPackages();
   return <PackagesClient packages={packages} />;
 }
 
