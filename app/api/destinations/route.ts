@@ -1,4 +1,4 @@
-export const maxRequestBodySize = '20mb';
+export const maxRequestBodySize = '10mb'; // Reduced to prevent Vercel limits (4.5MB actual limit)
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -133,9 +133,21 @@ export async function POST(request: NextRequest) {
       description = formData.get("description") as string;
       isPublished = formData.get("isPublished") === "true";
       
-      // Handle hero image file - upload to Supabase
+      // Handle hero image file - upload to Supabase with size validation
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB per file
+      const MAX_TOTAL_SIZE = 10 * 1024 * 1024; // 10MB total
+      let totalFileSize = 0;
+      
       const heroImageFile = formData.get("heroImage") as File | null;
       if (heroImageFile && heroImageFile instanceof File && heroImageFile.size > 0) {
+        if (heroImageFile.size > MAX_FILE_SIZE) {
+          return NextResponse.json({ 
+            error: "File too large",
+            details: `Hero image exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB limit`
+          }, { status: 400 });
+        }
+        totalFileSize += heroImageFile.size;
+        
         try {
           heroImage = await uploadToSupabase("destinations", heroImageFile);
         } catch (uploadError) {
@@ -145,10 +157,25 @@ export async function POST(request: NextRequest) {
         }
       }
       
-      // Handle additional images
+      // Handle additional images with size validation
       const imageFiles = formData.getAll("images") as File[];
       for (const imageFile of imageFiles) {
         if (imageFile instanceof File && imageFile.size > 0) {
+          if (imageFile.size > MAX_FILE_SIZE) {
+            return NextResponse.json({ 
+              error: "File too large",
+              details: `Image ${imageFile.name} exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB limit`
+            }, { status: 400 });
+          }
+          
+          totalFileSize += imageFile.size;
+          if (totalFileSize > MAX_TOTAL_SIZE) {
+            return NextResponse.json({ 
+              error: "Total file size too large",
+              details: `Total image size exceeds ${MAX_TOTAL_SIZE / (1024 * 1024)}MB limit`
+            }, { status: 400 });
+          }
+          
           try {
             const imageUrl = await uploadToSupabase("destinations", imageFile);
             uploadedImages.push(imageUrl);
@@ -170,11 +197,46 @@ export async function POST(request: NextRequest) {
       uploadedImages = body.images || [];
     }
 
+    // Character limits to prevent 413 errors
+    const MAX_DESCRIPTION_LENGTH = 5000;
+    const MAX_NAME_LENGTH = 200;
+    const MAX_SLUG_LENGTH = 100;
+    const MAX_TAGLINE_LENGTH = 200;
+
     // Validate required fields
     if (!name || !slug || !description) {
       return NextResponse.json({ 
         error: "Missing required fields",
         details: "Name, slug, and description are required"
+      }, { status: 400 });
+    }
+
+    // Validate character limits
+    if (name.length > MAX_NAME_LENGTH) {
+      return NextResponse.json({ 
+        error: "Name too long",
+        details: `Name must be less than ${MAX_NAME_LENGTH} characters`
+      }, { status: 400 });
+    }
+
+    if (slug.length > MAX_SLUG_LENGTH) {
+      return NextResponse.json({ 
+        error: "Slug too long",
+        details: `Slug must be less than ${MAX_SLUG_LENGTH} characters`
+      }, { status: 400 });
+    }
+
+    if (tagline.length > MAX_TAGLINE_LENGTH) {
+      return NextResponse.json({ 
+        error: "Tagline too long",
+        details: `Tagline must be less than ${MAX_TAGLINE_LENGTH} characters`
+      }, { status: 400 });
+    }
+
+    if (description.length > MAX_DESCRIPTION_LENGTH) {
+      return NextResponse.json({ 
+        error: "Description too long",
+        details: `Description must be less than ${MAX_DESCRIPTION_LENGTH} characters`
       }, { status: 400 });
     }
 
@@ -203,14 +265,20 @@ export async function POST(request: NextRequest) {
       ? uploadedImages 
       : ["/images/giraffe.png", "/images/elephant.png"];
 
+    // Truncate fields to limits before saving
+    const truncatedName = name.substring(0, MAX_NAME_LENGTH);
+    const truncatedSlug = slug.substring(0, MAX_SLUG_LENGTH);
+    const truncatedTagline = tagline.substring(0, MAX_TAGLINE_LENGTH);
+    const truncatedDescription = description.substring(0, MAX_DESCRIPTION_LENGTH);
+
     let destination;
     try {
       destination = await prisma.destination.create({
         data: {
-          name,
-          slug,
-          tagline: tagline || "",
-          description,
+          name: truncatedName,
+          slug: truncatedSlug,
+          tagline: truncatedTagline,
+          description: truncatedDescription,
           heroImage: heroImageUrl,
           images: finalImages,
           location: {
@@ -220,7 +288,7 @@ export async function POST(request: NextRequest) {
           },
           overview: {
             title: "Overview",
-            content: description
+            content: truncatedDescription
           },
           wildlife: {
             title: "Wildlife",

@@ -5,43 +5,40 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { AuthGuard } from "@/components/admin/auth-guard";
 import { toast } from "sonner";
+
+// Character limits to prevent 413 errors
+const MAX_DESCRIPTION_LENGTH = 5000;
+const MAX_NAME_LENGTH = 200;
+const MAX_SLUG_LENGTH = 100;
 
 function AddPackageForm() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
+    packageType: "safari",
     description: "",
-    price: "",
-    duration: "",
-    isPublished: false,
+    pricing: "",
+    daysOfTravel: "",
+    isActive: true,
   });
-  const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
   const [imageFiles, setImageFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
-
-  const handleHeroImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setHeroImageFile(e.target.files[0]);
-    }
-  };
 
   const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setImageFiles(e.target.files);
     }
-  };
-
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,51 +47,109 @@ function AddPackageForm() {
     
     try {
       // Validate required fields
-      if (!formData.name || !formData.slug || !formData.description || !formData.price || !formData.duration) {
+      if (!formData.name.trim() || !formData.slug.trim() || !formData.description.trim() || !formData.pricing || !formData.daysOfTravel) {
         toast.error("Please fill in all required fields");
         setLoading(false);
         return;
       }
 
-      let heroImageBase64 = "";
-      
-      // Convert hero image to base64
-      if (heroImageFile) {
-        try {
-          heroImageBase64 = await convertToBase64(heroImageFile);
-        } catch (error) {
-          console.error("Error converting image:", error);
-          toast.error("Failed to process image");
+      // Validate character limits
+      if (formData.name.length > MAX_NAME_LENGTH) {
+        toast.error(`Name must be less than ${MAX_NAME_LENGTH} characters`);
+        setLoading(false);
+        return;
+      }
+
+      if (formData.slug.length > MAX_SLUG_LENGTH) {
+        toast.error(`Slug must be less than ${MAX_SLUG_LENGTH} characters`);
+        setLoading(false);
+        return;
+      }
+
+      if (formData.description.length > MAX_DESCRIPTION_LENGTH) {
+        toast.error(`Description must be less than ${MAX_DESCRIPTION_LENGTH} characters`);
+        setLoading(false);
+        return;
+      }
+
+      // Validate slug format
+      const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+      if (!slugRegex.test(formData.slug)) {
+        toast.error("Slug must be lowercase alphanumeric with hyphens only");
+        setLoading(false);
+        return;
+      }
+
+      // Validate pricing
+      const pricing = parseFloat(formData.pricing);
+      if (isNaN(pricing) || pricing <= 0) {
+        toast.error("Pricing must be a positive number");
+        setLoading(false);
+        return;
+      }
+
+      // Validate days of travel
+      const daysOfTravel = parseInt(formData.daysOfTravel);
+      if (isNaN(daysOfTravel) || daysOfTravel < 1) {
+        toast.error("Days of travel must be at least 1");
+        setLoading(false);
+        return;
+      }
+
+      // Validate file sizes
+      let totalFileSize = 0;
+      if (imageFiles) {
+        Array.from(imageFiles).forEach((file) => {
+          if (file.size > 5 * 1024 * 1024) {
+            toast.error(`Image ${file.name} is too large (max 5MB per file)`);
+            setLoading(false);
+            return;
+          }
+          totalFileSize += file.size;
+        });
+        if (totalFileSize > 10 * 1024 * 1024) {
+          toast.error("Total image size must be less than 10MB");
           setLoading(false);
           return;
         }
       }
 
+      // Use FormData instead of JSON to avoid base64 size issues
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name.trim().substring(0, MAX_NAME_LENGTH));
+      formDataToSend.append("slug", formData.slug.trim().toLowerCase().substring(0, MAX_SLUG_LENGTH));
+      formDataToSend.append("packageType", formData.packageType);
+      formDataToSend.append("description", formData.description.trim().substring(0, MAX_DESCRIPTION_LENGTH));
+      formDataToSend.append("pricing", pricing.toString());
+      formDataToSend.append("daysOfTravel", daysOfTravel.toString());
+      formDataToSend.append("isActive", formData.isActive.toString());
+
+      // Add images if any
+      if (imageFiles) {
+        Array.from(imageFiles).forEach((file) => {
+          if (file.size > 0 && file.size <= 5 * 1024 * 1024) {
+            formDataToSend.append("images", file);
+          }
+        });
+      }
+
       const response = await fetch("/api/packages", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          slug: formData.slug,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          duration: formData.duration,
-          isPublished: formData.isPublished,
-          heroImage: heroImageBase64,
-        }),
+        body: formDataToSend,
       });
 
       const data = await response.json();
 
       if (response.ok) {
         toast.success("Package created successfully!");
-        // Use replace instead of push to avoid history issues
         router.replace("/the-sol/dashboard/packages");
       } else {
         console.error("Error response:", data);
-        toast.error(data.error || "Failed to create package");
+        if (response.status === 413) {
+          toast.error("Request too large. Please reduce image sizes or description length.");
+        } else {
+          toast.error(data.error || data.details || "Failed to create package");
+        }
       }
     } catch (error) {
       console.error("Error creating package:", error);
@@ -111,34 +166,44 @@ function AddPackageForm() {
       <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-900 p-6 rounded-lg border border-zinc-800">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label className="text-sm font-medium text-gray-200">Package Name *</Label>
+            <Label className="text-sm font-medium text-gray-200">
+              Package Name * ({formData.name.length}/{MAX_NAME_LENGTH})
+            </Label>
             <Input
               value={formData.name}
               onChange={(e) => {
                 const name = e.target.value;
-                setFormData({ ...formData, name });
-                // Auto-generate slug if slug is empty or matches the previous auto-generated slug
-                if (!formData.slug || formData.slug === formData.name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-')) {
-                  const slug = name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
-                  setFormData({ ...formData, name, slug });
+                if (name.length <= MAX_NAME_LENGTH) {
+                  setFormData({ ...formData, name });
+                  // Auto-generate slug if slug is empty or matches the previous auto-generated slug
+                  if (!formData.slug || formData.slug === formData.name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-')) {
+                    const slug = name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+                    setFormData({ ...formData, name, slug });
+                  }
                 }
               }}
               className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
               placeholder="Enter package name"
+              maxLength={MAX_NAME_LENGTH}
               required
             />
           </div>
           
           <div>
-            <Label className="text-sm font-medium text-gray-200">Slug *</Label>
+            <Label className="text-sm font-medium text-gray-200">
+              Slug * ({formData.slug.length}/{MAX_SLUG_LENGTH})
+            </Label>
             <Input
               value={formData.slug}
               onChange={(e) => {
                 const slug = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
-                setFormData({ ...formData, slug });
+                if (slug.length <= MAX_SLUG_LENGTH) {
+                  setFormData({ ...formData, slug });
+                }
               }}
               className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
               placeholder="e.g., safari-adventure"
+              maxLength={MAX_SLUG_LENGTH}
               required
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -147,13 +212,37 @@ function AddPackageForm() {
           </div>
         </div>
 
+        <div>
+          <Label className="text-sm font-medium text-gray-200">Package Type *</Label>
+          <Select
+            value={formData.packageType}
+            onValueChange={(value) =>
+              setFormData({ ...formData, packageType: value })
+            }
+          >
+            <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+              <SelectValue placeholder="Select package type" />
+            </SelectTrigger>
+            <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+              <SelectItem value="safari">Safari</SelectItem>
+              <SelectItem value="beach">Beach</SelectItem>
+              <SelectItem value="cultural">Cultural</SelectItem>
+              <SelectItem value="adventure">Adventure</SelectItem>
+              <SelectItem value="luxury">Luxury</SelectItem>
+              <SelectItem value="mixed">Mixed</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label className="text-sm font-medium text-gray-200">Price (USD) *</Label>
+            <Label className="text-sm font-medium text-gray-200">Pricing ($) *</Label>
             <Input
               type="number"
-              value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              min="0"
+              step="0.01"
+              value={formData.pricing}
+              onChange={(e) => setFormData({ ...formData, pricing: e.target.value })}
               className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
               placeholder="e.g., 1500"
               required
@@ -161,52 +250,73 @@ function AddPackageForm() {
           </div>
           
           <div>
-            <Label className="text-sm font-medium text-gray-200">Duration *</Label>
+            <Label className="text-sm font-medium text-gray-200">Days of Travel *</Label>
             <Input
-              value={formData.duration}
-              onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+              type="number"
+              min="1"
+              value={formData.daysOfTravel}
+              onChange={(e) => setFormData({ ...formData, daysOfTravel: e.target.value })}
               className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-              placeholder="e.g., 5 Days / 4 Nights"
+              placeholder="e.g., 5"
               required
             />
           </div>
         </div>
 
         <div>
-          <Label className="text-sm font-medium text-gray-200">Description *</Label>
+          <Label className="text-sm font-medium text-gray-200">
+            Description * ({formData.description.length}/{MAX_DESCRIPTION_LENGTH} characters)
+          </Label>
           <Textarea
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value.length <= MAX_DESCRIPTION_LENGTH) {
+                setFormData({ ...formData, description: value });
+              }
+            }}
             className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none min-h-[120px]"
             placeholder="Detailed description of the package"
+            maxLength={MAX_DESCRIPTION_LENGTH}
             required
           />
+          {formData.description.length > MAX_DESCRIPTION_LENGTH * 0.9 && (
+            <p className="text-xs text-orange-500 mt-1">
+              Warning: Approaching character limit
+            </p>
+          )}
         </div>
 
         <div>
-          <Label className="text-sm font-medium text-gray-200">Hero Image</Label>
+          <Label className="text-sm font-medium text-gray-200">Package Images</Label>
           <Input
             type="file"
+            multiple
             accept="image/*"
-            onChange={handleHeroImageChange}
+            onChange={handleImagesChange}
             className="bg-zinc-800 border-zinc-700 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600"
           />
           <p className="text-xs text-gray-500 mt-1">
-            {heroImageFile ? heroImageFile.name : "Select a hero image (uploaded to Supabase)"}
+            {imageFiles 
+              ? `${imageFiles.length} file(s) selected (max 5MB per file, 10MB total)` 
+              : "Select one or multiple images (max 5MB per file, 10MB total)"}
           </p>
+          {imageFiles && Array.from(imageFiles).some(f => f.size > 5 * 1024 * 1024) && (
+            <p className="text-xs text-red-500 mt-1">
+              ⚠️ Some files exceed 5MB limit
+            </p>
+          )}
         </div>
-
-
 
         <div className="flex items-center space-x-2">
           <input
             type="checkbox"
-            id="isPublished"
-            checked={formData.isPublished}
-            onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
+            id="isActive"
+            checked={formData.isActive}
+            onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
             className="w-4 h-4 rounded border-zinc-700 bg-zinc-800"
           />
-          <Label htmlFor="isPublished" className="text-gray-200">Published</Label>
+          <Label htmlFor="isActive" className="text-gray-200">Active</Label>
         </div>
 
         <div className="flex gap-3 pt-2">

@@ -1,4 +1,5 @@
 import { Suspense, cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 import { PackagesClient } from "../../../components/packages/packages-client";
 import GrainOverlay from "@/components/shared/grain-overlay";
 import CTASection from "@/components/shared/cta-section";
@@ -33,9 +34,13 @@ const StaticShell = cache(() => {
 });
 
 // Cached function to fetch packages directly from database
-// Using React cache() for request-level memoization - much faster than API routes
-// This eliminates network overhead and queries DB directly
-const getCachedPackages = cache(async (): Promise<PackageData[]> => {
+// Using Next.js 'use cache' with cacheLife for cross-request caching
+// This provides persistent caching across requests, not just within a single request
+async function getCachedPackages(): Promise<PackageData[]> {
+  'use cache'
+  cacheLife('hours'); // Cache for hours - data doesn't change frequently
+  cacheTag('packages'); // Tag for manual revalidation
+  
   try {
     const packages = await getAllPackages();
     
@@ -69,7 +74,7 @@ const getCachedPackages = cache(async (): Promise<PackageData[]> => {
     console.error('Error fetching packages:', error);
     return [];
   }
-});
+}
 
 // Skeleton loader for dynamic packages content (only the dynamic part)
 function PackagesLoading() {

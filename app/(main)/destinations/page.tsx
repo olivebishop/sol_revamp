@@ -1,4 +1,5 @@
 import { Suspense, cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 import DestinationsClient from "@/components/destinations/destinations-client";
 import GrainOverlay from "@/components/shared/grain-overlay";
 import { getAllDestinations } from "@/lib/dal/destinationDAL";
@@ -43,9 +44,13 @@ const StaticShell = cache(() => {
 });
 
 // Cached function to fetch destinations directly from database
-// Using React cache() for request-level memoization - much faster than API routes
-// This eliminates network overhead and queries DB directly
-const getCachedDestinations = cache(async () => {
+// Using Next.js 'use cache' with cacheLife for cross-request caching
+// This provides persistent caching across requests, not just within a single request
+async function getCachedDestinations() {
+  'use cache'
+  cacheLife('hours'); // Cache for hours - data doesn't change frequently
+  cacheTag('destinations'); // Tag for manual revalidation
+  
   try {
     const destinations = await getAllDestinations();
     return destinations;
@@ -53,7 +58,7 @@ const getCachedDestinations = cache(async () => {
     console.error('Error fetching destinations:', error);
     return [];
   }
-});
+}
 
 // Skeleton loader for dynamic destinations content (only the dynamic part)
 function DestinationsLoading() {

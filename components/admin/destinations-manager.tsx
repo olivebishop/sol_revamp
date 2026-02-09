@@ -6,6 +6,14 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ContentEditable } from "@/components/editor/editor-ui/content-editable";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Plus, Edit, Trash2, Eye, EyeOff, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -28,8 +36,8 @@ export default function DestinationsManager({
   destinations: initialDestinations,
 }: DestinationsManagerProps) {
   const [destinations, setDestinations] = useState(initialDestinations);
-  // Removed drawer state for add/edit
   const [editingDestination, setEditingDestination] = useState<Destination | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
   const [imageFiles, setImageFiles] = useState<FileList | null>(null);
   const [formData, setFormData] = useState({
@@ -39,6 +47,12 @@ export default function DestinationsManager({
     description: "",
     isPublished: false,
   });
+  
+  // Character limits
+  const MAX_DESCRIPTION_LENGTH = 5000; // 5KB limit to prevent 413 errors
+  const MAX_NAME_LENGTH = 200;
+  const MAX_SLUG_LENGTH = 100;
+  const MAX_TAGLINE_LENGTH = 200;
 
   const handleHeroImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -59,6 +73,26 @@ export default function DestinationsManager({
       return;
     }
 
+    if (formData.name.length > MAX_NAME_LENGTH) {
+      toast.error(`Name must be less than ${MAX_NAME_LENGTH} characters`);
+      return;
+    }
+
+    if (formData.slug.length > MAX_SLUG_LENGTH) {
+      toast.error(`Slug must be less than ${MAX_SLUG_LENGTH} characters`);
+      return;
+    }
+
+    if (formData.tagline.length > MAX_TAGLINE_LENGTH) {
+      toast.error(`Tagline must be less than ${MAX_TAGLINE_LENGTH} characters`);
+      return;
+    }
+
+    if (formData.description.length > MAX_DESCRIPTION_LENGTH) {
+      toast.error(`Description must be less than ${MAX_DESCRIPTION_LENGTH} characters`);
+      return;
+    }
+
     // Validate slug format
     const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
     if (!slugRegex.test(formData.slug)) {
@@ -66,30 +100,46 @@ export default function DestinationsManager({
       return;
     }
 
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("name", formData.name.trim());
-      formDataToSend.append("slug", formData.slug.trim().toLowerCase());
-      formDataToSend.append("tagline", formData.tagline.trim());
-      formDataToSend.append("description", formData.description.trim());
-      formDataToSend.append("isPublished", formData.isPublished.toString());
-
-      if (heroImageFile) {
-        // Validate file size (max 5MB)
-        if (heroImageFile.size > 5 * 1024 * 1024) {
-          toast.error("Hero image must be less than 5MB");
+    // Validate total file size (max 10MB total)
+    let totalFileSize = 0;
+    if (heroImageFile) {
+      if (heroImageFile.size > 5 * 1024 * 1024) {
+        toast.error("Hero image must be less than 5MB");
+        return;
+      }
+      totalFileSize += heroImageFile.size;
+    }
+    if (imageFiles) {
+      Array.from(imageFiles).forEach((file) => {
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`Image ${file.name} is too large (max 5MB per file)`);
           return;
         }
+        totalFileSize += file.size;
+      });
+      if (totalFileSize > 10 * 1024 * 1024) {
+        toast.error("Total image size must be less than 10MB");
+        return;
+      }
+    }
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name.trim().substring(0, MAX_NAME_LENGTH));
+      formDataToSend.append("slug", formData.slug.trim().toLowerCase().substring(0, MAX_SLUG_LENGTH));
+      formDataToSend.append("tagline", formData.tagline.trim().substring(0, MAX_TAGLINE_LENGTH));
+      formDataToSend.append("description", formData.description.trim().substring(0, MAX_DESCRIPTION_LENGTH));
+      formDataToSend.append("isPublished", formData.isPublished.toString());
+
+      if (heroImageFile && heroImageFile.size > 0 && heroImageFile.size <= 5 * 1024 * 1024) {
         formDataToSend.append("heroImage", heroImageFile);
       }
 
       if (imageFiles) {
         Array.from(imageFiles).forEach((file) => {
-          if (file.size > 5 * 1024 * 1024) {
-            toast.error(`Image ${file.name} is too large (max 5MB)`);
-            return;
+          if (file.size > 0 && file.size <= 5 * 1024 * 1024) {
+            formDataToSend.append("images", file);
           }
-          formDataToSend.append("images", file);
         });
       }
 
@@ -105,8 +155,12 @@ export default function DestinationsManager({
         toast.success("Destination created successfully");
         resetForm();
       } else {
-        const error = await response.json().catch(() => ({ error: "Failed to create destination" }));
-        toast.error(error.error || error.details || "Failed to create destination");
+        const errorData = await response.json().catch(() => ({ error: "Failed to create destination" }));
+        if (response.status === 413) {
+          toast.error("Request too large. Please reduce image sizes or description length.");
+        } else {
+          toast.error(errorData.error || errorData.details || "Failed to create destination");
+        }
       }
     } catch (error) {
       console.error("Error:", error);
@@ -132,6 +186,26 @@ export default function DestinationsManager({
       return;
     }
 
+    if (formData.name.length > MAX_NAME_LENGTH) {
+      toast.error(`Name must be less than ${MAX_NAME_LENGTH} characters`);
+      return;
+    }
+
+    if (formData.slug.length > MAX_SLUG_LENGTH) {
+      toast.error(`Slug must be less than ${MAX_SLUG_LENGTH} characters`);
+      return;
+    }
+
+    if (formData.tagline.length > MAX_TAGLINE_LENGTH) {
+      toast.error(`Tagline must be less than ${MAX_TAGLINE_LENGTH} characters`);
+      return;
+    }
+
+    if (formData.description.length > MAX_DESCRIPTION_LENGTH) {
+      toast.error(`Description must be less than ${MAX_DESCRIPTION_LENGTH} characters`);
+      return;
+    }
+
     // Validate slug format
     const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
     if (!slugRegex.test(formData.slug)) {
@@ -139,31 +213,48 @@ export default function DestinationsManager({
       return;
     }
 
+    // Validate total file size (max 10MB total)
+    let totalFileSize = 0;
+    if (heroImageFile) {
+      if (heroImageFile.size > 5 * 1024 * 1024) {
+        toast.error("Hero image must be less than 5MB");
+        return;
+      }
+      totalFileSize += heroImageFile.size;
+    }
+    if (imageFiles) {
+      Array.from(imageFiles).forEach((file) => {
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`Image ${file.name} is too large (max 5MB per file)`);
+          return;
+        }
+        totalFileSize += file.size;
+      });
+      if (totalFileSize > 10 * 1024 * 1024) {
+        toast.error("Total image size must be less than 10MB");
+        return;
+      }
+    }
+
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("name", formData.name.trim());
-      formDataToSend.append("slug", formData.slug.trim().toLowerCase());
-      formDataToSend.append("tagline", formData.tagline.trim());
-      formDataToSend.append("description", formData.description.trim());
+      formDataToSend.append("name", formData.name.trim().substring(0, MAX_NAME_LENGTH));
+      formDataToSend.append("slug", formData.slug.trim().toLowerCase().substring(0, MAX_SLUG_LENGTH));
+      formDataToSend.append("tagline", formData.tagline.trim().substring(0, MAX_TAGLINE_LENGTH));
+      formDataToSend.append("description", formData.description.trim().substring(0, MAX_DESCRIPTION_LENGTH));
       formDataToSend.append("isPublished", formData.isPublished.toString());
 
       // Send file directly if new image selected
-      if (heroImageFile) {
-        if (heroImageFile.size > 5 * 1024 * 1024) {
-          toast.error("Hero image must be less than 5MB");
-          return;
-        }
+      if (heroImageFile && heroImageFile.size > 0 && heroImageFile.size <= 5 * 1024 * 1024) {
         formDataToSend.append("heroImage", heroImageFile);
       }
       
       // Handle additional images
       if (imageFiles) {
         Array.from(imageFiles).forEach((file) => {
-          if (file.size > 5 * 1024 * 1024) {
-            toast.error(`Image ${file.name} is too large (max 5MB)`);
-            return;
+          if (file.size > 0 && file.size <= 5 * 1024 * 1024) {
+            formDataToSend.append("images", file);
           }
-          formDataToSend.append("images", file);
         });
       }
 
@@ -180,10 +271,16 @@ export default function DestinationsManager({
           )
         );
         setEditingDestination(null);
+        setIsEditDialogOpen(false);
         toast.success("Destination updated successfully");
         resetForm();
       } else {
-        toast.error("Failed to update destination");
+        const errorData = await response.json().catch(() => ({ error: "Failed to update destination" }));
+        if (response.status === 413) {
+          toast.error("Request too large. Please reduce image sizes or description length.");
+        } else {
+          toast.error(errorData.error || errorData.details || "Failed to update destination");
+        }
       }
     } catch (error) {
       console.error("Error:", error);
@@ -202,7 +299,7 @@ export default function DestinationsManager({
     });
     setHeroImageFile(null);
     setImageFiles(null);
-    // setIsEditDialogOpen(true); // Drawer removed
+    setIsEditDialogOpen(true);
   };
 
   const handleDelete = useCallback(async (id: string) => {
@@ -268,50 +365,79 @@ export default function DestinationsManager({
   const FormFields = () => (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label className="text-sm font-medium text-gray-200">Name *</Label>
-          <Input
-            value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
+      <div>
+        <Label className="text-sm font-medium text-gray-200">
+          Name * ({formData.name.length}/{MAX_NAME_LENGTH})
+        </Label>
+        <Input
+          value={formData.name}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value.length <= MAX_NAME_LENGTH) {
+              setFormData({ ...formData, name: value });
             }
-            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-            placeholder="Enter destination name"
-          />
-        </div>
-        <div>
-          <Label className="text-sm font-medium text-gray-200">Slug *</Label>
-          <Input
-            value={formData.slug}
-            onChange={(e) =>
-              setFormData({ ...formData, slug: e.target.value })
+          }}
+          className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+          placeholder="Enter destination name"
+          maxLength={MAX_NAME_LENGTH}
+        />
+      </div>
+      <div>
+        <Label className="text-sm font-medium text-gray-200">
+          Slug * ({formData.slug.length}/{MAX_SLUG_LENGTH})
+        </Label>
+        <Input
+          value={formData.slug}
+          onChange={(e) => {
+            const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+            if (value.length <= MAX_SLUG_LENGTH) {
+              setFormData({ ...formData, slug: value });
             }
-            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
-            placeholder="e.g., maasai-mara"
-          />
-        </div>
+          }}
+          className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
+          placeholder="e.g., maasai-mara"
+          maxLength={MAX_SLUG_LENGTH}
+        />
+      </div>
       </div>
 
       <div>
-        <Label className="text-sm font-medium text-gray-200">Tagline</Label>
+        <Label className="text-sm font-medium text-gray-200">
+          Tagline ({formData.tagline.length}/{MAX_TAGLINE_LENGTH})
+        </Label>
         <Input
           value={formData.tagline}
-          onChange={(e) =>
-            setFormData({ ...formData, tagline: e.target.value })
-          }
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value.length <= MAX_TAGLINE_LENGTH) {
+              setFormData({ ...formData, tagline: value });
+            }
+          }}
           className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500"
           placeholder="Short catchy description"
+          maxLength={MAX_TAGLINE_LENGTH}
         />
       </div>
 
       <div>
-        <Label className="text-sm font-medium text-gray-200">Description *</Label>
+        <Label className="text-sm font-medium text-gray-200">
+          Description * ({formData.description.length}/{MAX_DESCRIPTION_LENGTH} characters)
+        </Label>
         <ContentEditable
           placeholder="Detailed description of the destination"
           className="bg-zinc-800 border-zinc-700 text-white placeholder:text-gray-500 resize-none min-h-[120px] rounded-md px-3 py-2 mt-1"
           value={formData.description}
-          onChange={(value) => setFormData({ ...formData, description: value })}
+          onChange={(value) => {
+            if (value.length <= MAX_DESCRIPTION_LENGTH) {
+              setFormData({ ...formData, description: value });
+            }
+          }}
         />
+        {formData.description.length > MAX_DESCRIPTION_LENGTH * 0.9 && (
+          <p className="text-xs text-orange-500 mt-1">
+            Warning: Approaching character limit
+          </p>
+        )}
       </div>
 
       <div>
@@ -323,8 +449,15 @@ export default function DestinationsManager({
           className="bg-zinc-800 border-zinc-700 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600"
         />
         <p className="text-xs text-gray-500 mt-1">
-          {heroImageFile ? heroImageFile.name : "Select a hero image"}
+          {heroImageFile 
+            ? `${heroImageFile.name} (max 5MB)` 
+            : "Select a hero image (max 5MB)"}
         </p>
+        {heroImageFile && heroImageFile.size > 5 * 1024 * 1024 && (
+          <p className="text-xs text-red-500 mt-1">
+            ⚠️ File exceeds 5MB limit
+          </p>
+        )}
       </div>
 
       <div>
@@ -337,8 +470,15 @@ export default function DestinationsManager({
           className="bg-zinc-800 border-zinc-700 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600"
         />
         <p className="text-xs text-gray-500 mt-1">
-          {imageFiles ? `${imageFiles.length} file(s) selected` : "Select one or multiple images"}
+          {imageFiles 
+            ? `${imageFiles.length} file(s) selected (max 5MB per file, 10MB total)` 
+            : "Select one or multiple images (max 5MB per file, 10MB total)"}
         </p>
+        {imageFiles && Array.from(imageFiles).some(f => f.size > 5 * 1024 * 1024) && (
+          <p className="text-xs text-red-500 mt-1">
+            ⚠️ Some files exceed 5MB limit
+          </p>
+        )}
       </div>
 
       <div className="flex items-center space-x-2">
@@ -449,6 +589,40 @@ export default function DestinationsManager({
           </div>
         )}
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-zinc-900 border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-white">Edit Destination</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Update destination details. Changes will be saved immediately.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <FormFields />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setIsEditDialogOpen(false);
+                setEditingDestination(null);
+                resetForm();
+              }}
+              className="text-gray-300 hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEdit}
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
