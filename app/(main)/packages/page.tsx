@@ -32,14 +32,17 @@ const StaticShell = cache(() => {
 });
 
 // Dynamic function to fetch packages (streams in at runtime)
-// Using stable Next.js 16 pattern: cache: 'no-store' prevents build-time pre-rendering
+// Aggressive caching: prefetch on first load, cache for 1 hour, revalidate via tags
 async function getPackages() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
     const res = await fetch(`${baseUrl}/api/packages`, {
-      cache: 'no-store', // Stable API: prevents build-time pre-rendering, fetches at runtime
-      next: { tags: ['packages'] }, // Allows revalidation via revalidateTag() at runtime
-    });
+      cache: 'force-cache', // Cache aggressively - use cached data when available
+      next: { 
+        tags: ['packages'], // Allows revalidation via revalidateTag() at runtime
+        revalidate: 3600, // Revalidate every hour (3600 seconds)
+      },
+    } as RequestInit & { next?: { tags?: string[]; revalidate?: number } });
     
     if (!res.ok) {
       return [];
