@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { uploadToSupabase } from "@/lib/supabase";
 import { revalidateTag } from "next/cache";
 
-export const maxRequestBodySize = '20mb';
+export const maxRequestBodySize = '10mb'; // Reduced to prevent Vercel limits (4.5MB actual limit)
 
 // Previous body parser configuration is no longer needed.
 
@@ -129,10 +129,32 @@ export async function POST(request: NextRequest) {
       daysOfTravel = parseInt(formData.get("daysOfTravel") as string) || 1;
       isActive = formData.get("isActive") === "true";
       
-      // Handle image files - upload to Supabase
+      // Handle image files - upload to Supabase with size validation
       const imageFiles = formData.getAll("images") as File[];
+      let totalFileSize = 0;
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB per file
+      const MAX_TOTAL_SIZE = 10 * 1024 * 1024; // 10MB total
+      
       for (const imageFile of imageFiles) {
         if (imageFile instanceof File && imageFile.size > 0) {
+          // Validate individual file size
+          if (imageFile.size > MAX_FILE_SIZE) {
+            return NextResponse.json({ 
+              error: "File too large",
+              details: `Image ${imageFile.name} exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB limit`
+            }, { status: 400 });
+          }
+          
+          totalFileSize += imageFile.size;
+          
+          // Validate total size
+          if (totalFileSize > MAX_TOTAL_SIZE) {
+            return NextResponse.json({ 
+              error: "Total file size too large",
+              details: `Total image size exceeds ${MAX_TOTAL_SIZE / (1024 * 1024)}MB limit`
+            }, { status: 400 });
+          }
+          
           try {
             const imageUrl = await uploadToSupabase("packages", imageFile);
             uploadedImages.push(imageUrl);
@@ -161,11 +183,38 @@ export async function POST(request: NextRequest) {
       uploadedImages = body.images || [];
     }
 
+    // Character limits to prevent 413 errors
+    const MAX_DESCRIPTION_LENGTH = 5000;
+    const MAX_NAME_LENGTH = 200;
+    const MAX_SLUG_LENGTH = 100;
+
     // Validate required fields
     if (!name || !slug || !description || isNaN(pricing) || pricing < 0 || !daysOfTravel || daysOfTravel < 1) {
       return NextResponse.json({ 
         error: "Missing required fields",
         details: "Name, slug, description, pricing (>= 0), and daysOfTravel (>= 1) are required"
+      }, { status: 400 });
+    }
+
+    // Validate character limits
+    if (name.length > MAX_NAME_LENGTH) {
+      return NextResponse.json({ 
+        error: "Name too long",
+        details: `Name must be less than ${MAX_NAME_LENGTH} characters`
+      }, { status: 400 });
+    }
+
+    if (slug.length > MAX_SLUG_LENGTH) {
+      return NextResponse.json({ 
+        error: "Slug too long",
+        details: `Slug must be less than ${MAX_SLUG_LENGTH} characters`
+      }, { status: 400 });
+    }
+
+    if (description.length > MAX_DESCRIPTION_LENGTH) {
+      return NextResponse.json({ 
+        error: "Description too long",
+        details: `Description must be less than ${MAX_DESCRIPTION_LENGTH} characters`
       }, { status: 400 });
     }
 
@@ -201,14 +250,19 @@ export async function POST(request: NextRequest) {
       ? uploadedImages 
       : ["/images/default-package.jpg"];
 
+    // Truncate fields to limits before saving
+    const truncatedName = name.substring(0, MAX_NAME_LENGTH);
+    const truncatedSlug = slug.substring(0, MAX_SLUG_LENGTH);
+    const truncatedDescription = description.substring(0, MAX_DESCRIPTION_LENGTH);
+
     let packageData;
     try {
       packageData = await prisma.package.create({
         data: {
-          name,
-          slug,
+          name: truncatedName,
+          slug: truncatedSlug,
           packageType,
-          description,
+          description: truncatedDescription,
           pricing,
           daysOfTravel,
           images: finalImages,
@@ -228,6 +282,13 @@ export async function POST(request: NextRequest) {
       // Prisma/DB error logging
       if (dbError instanceof Error) {
         console.error("Prisma error creating package:", dbError.message, dbError.stack);
+        // Check for unique constraint violation (duplicate slug)
+        if (dbError.message.includes('Unique constraint') || dbError.message.includes('duplicate')) {
+          return NextResponse.json(
+            { error: "Duplicate slug", details: "A package with this slug already exists" },
+            { status: 409 }
+          );
+        }
       } else {
         console.error("Prisma error creating package:", dbError);
       }

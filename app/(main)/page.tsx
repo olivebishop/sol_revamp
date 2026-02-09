@@ -1,4 +1,5 @@
 import { Suspense, cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 import HeroSection from "@/components/shared/hero";
 import GrainOverlay from "@/components/shared/grain-overlay";
 import FeaturedPackages from "@/components/packages/featured-packages";
@@ -11,8 +12,13 @@ import { getApprovedTestimonials } from "@/lib/dal/testimonialDAL";
 import type { PackageData } from "@/data/packages";
 
 // Cached function to fetch packages directly from database
-// Using React cache() for request-level memoization - eliminates API route overhead
-const getCachedPackages = cache(async (): Promise<PackageData[]> => {
+// Using Next.js 'use cache' with cacheLife for cross-request caching
+// This provides persistent caching across requests, not just within a single request
+async function getCachedPackages(): Promise<PackageData[]> {
+  'use cache'
+  cacheLife('hours'); // Cache for hours - data doesn't change frequently
+  cacheTag('packages'); // Tag for manual revalidation
+  
   try {
     const packages = await getAllPackages();
     
@@ -46,18 +52,23 @@ const getCachedPackages = cache(async (): Promise<PackageData[]> => {
     console.error('Error fetching packages:', error);
     return [];
   }
-});
+}
 
 // Cached function to fetch testimonials directly from database
-// Using React cache() for request-level memoization - eliminates API route overhead
-const getCachedTestimonials = cache(async () => {
+// Using Next.js 'use cache' with cacheLife for cross-request caching
+// This provides persistent caching across requests, not just within a single request
+async function getCachedTestimonials() {
+  'use cache'
+  cacheLife('hours'); // Cache for hours - testimonials don't change frequently
+  cacheTag('testimonials'); // Tag for manual revalidation
+  
   try {
     return await getApprovedTestimonials(6);
   } catch (error) {
     console.error('Error fetching testimonials:', error);
     return [];
   }
-});
+}
 
 // Loading component for packages
 function PackagesLoading() {
