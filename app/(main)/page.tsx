@@ -23,29 +23,45 @@ async function getCachedPackages(): Promise<PackageData[]> {
     const packages = await getAllPackages();
     
     // Transform to PackageData format
-    const transformedPackages: PackageData[] = packages.map((pkg) => ({
-      id: pkg.id,
-      name: pkg.name,
-      slug: pkg.slug,
-      packageType: pkg.packageType || "safari",
-      description: pkg.description,
-      pricing: pkg.pricing,
-      daysOfTravel: pkg.daysOfTravel,
-      images: Array.isArray(pkg.images) && pkg.images.length > 0 
-        ? [pkg.images[0]] 
-        : (pkg.images || []),
-      maxCapacity: pkg.maxCapacity || 10,
-      currentBookings: pkg.currentBookings || 0,
-      isActive: pkg.isActive,
-      destination: (typeof pkg.destination === 'object' && pkg.destination !== null)
-        ? pkg.destination as { id: string; name: string; slug: string; bestTime: string }
-        : {
-            id: "default",
-            name: "Kenya",
-            slug: "kenya",
-            bestTime: "Year-round"
-          }
-    }));
+    const transformedPackages: PackageData[] = packages.map((pkg) => {
+      // Get images from packageImages relation (preferred) or fallback to images array
+      let packageImages: string[] = [];
+      
+      // Priority 1: Use packageImages relation if available
+      if (pkg.packageImages && Array.isArray(pkg.packageImages) && pkg.packageImages.length > 0) {
+        packageImages = pkg.packageImages.map((img) => img.url);
+      }
+      // Priority 2: Fallback to images array (backward compatibility)
+      else if (Array.isArray(pkg.images) && pkg.images.length > 0) {
+        packageImages = pkg.images;
+      }
+      // Priority 3: Default fallback
+      else {
+        packageImages = ["/images/default-package.jpg"];
+      }
+      
+      return {
+        id: pkg.id,
+        name: pkg.name,
+        slug: pkg.slug,
+        packageType: pkg.packageType || "safari",
+        description: pkg.description,
+        pricing: pkg.pricing,
+        daysOfTravel: pkg.daysOfTravel,
+        images: packageImages,
+        maxCapacity: pkg.maxCapacity || 10,
+        currentBookings: pkg.currentBookings || 0,
+        isActive: pkg.isActive,
+        destination: (typeof pkg.destination === 'object' && pkg.destination !== null)
+          ? pkg.destination as { id: string; name: string; slug: string; bestTime: string }
+          : {
+              id: "default",
+              name: "Kenya",
+              slug: "kenya",
+              bestTime: "Year-round"
+            }
+      };
+    });
     
     return transformedPackages;
   } catch (error) {

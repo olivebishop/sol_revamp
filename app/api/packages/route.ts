@@ -22,8 +22,34 @@ export async function GET(request: NextRequest) {
     if (slug) {
       const packageData = await prisma.package.findUnique({
         where: { slug, isActive: true },
+        include: {
+          packageImages: {
+            orderBy: [
+              { isHero: "desc" },
+              { displayOrder: "asc" },
+            ],
+          },
+        },
       });
-      return NextResponse.json(packageData ? [packageData] : []);
+      
+      if (!packageData) {
+        return NextResponse.json([]);
+      }
+      
+      // Merge images from packageImages and images array
+      const images: string[] = [];
+      if (packageData.packageImages && packageData.packageImages.length > 0) {
+        images.push(...packageData.packageImages.map(img => img.url));
+      } else if (Array.isArray(packageData.images) && packageData.images.length > 0) {
+        images.push(...packageData.images);
+      } else {
+        images.push("/images/default-package.jpg");
+      }
+      
+      return NextResponse.json([{
+        ...packageData,
+        images,
+      }]);
     }
 
     // Get related packages by type
@@ -36,8 +62,37 @@ export async function GET(request: NextRequest) {
         },
         orderBy: { createdAt: "desc" },
         take: limit ? parseInt(limit) : undefined,
+        include: {
+          packageImages: {
+            orderBy: [
+              { isHero: "desc" },
+              { displayOrder: "asc" },
+            ],
+            select: {
+              url: true,
+            },
+          },
+        },
       });
-      return NextResponse.json(packages, {
+      
+      // Merge images from packageImages and images array
+      const packagesWithImages = packages.map((pkg) => {
+        let images: string[] = [];
+        if (pkg.packageImages && pkg.packageImages.length > 0) {
+          images = pkg.packageImages.map(img => img.url);
+        } else if (Array.isArray(pkg.images) && pkg.images.length > 0) {
+          images = pkg.images;
+        } else {
+          images = ["/images/default-package.jpg"];
+        }
+        
+        return {
+          ...pkg,
+          images,
+        };
+      });
+      
+      return NextResponse.json(packagesWithImages, {
         headers: {
           'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
         },
@@ -56,22 +111,48 @@ export async function GET(request: NextRequest) {
         description: true,
         pricing: true,
         daysOfTravel: true,
-        images: true, // Get all images, but we'll optimize in transform
+        images: true, // Kept for backward compatibility
         maxCapacity: true,
         currentBookings: true,
         isActive: true,
         destination: true,
+        packageImages: {
+          orderBy: [
+            { isHero: "desc" },
+            { displayOrder: "asc" },
+          ],
+          select: {
+            url: true,
+            isHero: true,
+            displayOrder: true,
+          },
+        },
         // Exclude: createdAt, updatedAt, createdBy to reduce payload
       },
     });
     
-    // Transform images array to only include first image for list view (reduces payload size)
-    const optimizedPackages = packages.map((pkg) => ({
-      ...pkg,
-      images: Array.isArray(pkg.images) && pkg.images.length > 0 
-        ? [pkg.images[0]] 
-        : (pkg.images || []),
-    }));
+    // Transform images - prioritize packageImages, fallback to images array
+    const optimizedPackages = packages.map((pkg) => {
+      let finalImages: string[] = [];
+      
+      // Priority 1: Use packageImages relation if available
+      if (pkg.packageImages && pkg.packageImages.length > 0) {
+        finalImages = pkg.packageImages.map(img => img.url);
+      }
+      // Priority 2: Fallback to images array
+      else if (Array.isArray(pkg.images) && pkg.images.length > 0) {
+        finalImages = pkg.images;
+      }
+      // Priority 3: Default fallback
+      else {
+        finalImages = ["/images/default-package.jpg"];
+      }
+      
+      return {
+        ...pkg,
+        images: finalImages,
+      };
+    });
 
     return NextResponse.json(optimizedPackages, {
       headers: {
