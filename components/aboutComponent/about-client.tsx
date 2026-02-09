@@ -6,13 +6,8 @@ import {
   SustainabilityIcon,
 } from "@/components/shared/about-icons";
 import CTASection from "@/components/shared/cta-section";
-import type { TeamMember } from "@/data/about";
 
-interface AboutClientProps {
-  teamMembers: TeamMember[];
-}
-
-export function AboutClient({ teamMembers }: AboutClientProps) {
+export function AboutClient() {
   return (
     <>
       {/* Header Section */}
@@ -163,68 +158,6 @@ export function AboutClient({ teamMembers }: AboutClientProps) {
                 </div>
               </div>
             </motion.div>
-          </div>
-
-          {/* Team Section */}
-          <div className="space-y-12">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6 }}
-            >
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 tracking-tight">
-                Meet Our
-                <span className="text-orange-500"> Team</span>
-              </h2>
-              <p className="text-gray-400 text-lg max-w-2xl">
-                The passionate experts behind your unforgettable African
-                adventure
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {teamMembers.map((member, index) => (
-                <motion.div
-                  key={member.name}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.7, delay: index * 0.1 }}
-                  whileHover={{ y: -8 }}
-                  className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden group"
-                >
-                  <div className="relative h-80 overflow-hidden">
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      transition={{ duration: 0.6 }}
-                      className="absolute inset-0"
-                    >
-                      <Image
-                        src={member.image}
-                        alt={member.name}
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent" />
-                    </motion.div>
-                  </div>
-                  <div className="p-6 space-y-3">
-                    <div>
-                      <h3 className="text-xl font-bold font-['Cal_Sans','Oswald',sans-serif]">
-                        {member.name}
-                      </h3>
-                      <p className="text-orange-500 text-sm font-semibold">
-                        {member.role}
-                      </p>
-                    </div>
-                    <p className="text-gray-400 text-sm italic leading-relaxed">
-                      "{member.quote}"
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import HeroSection from "@/components/shared/hero";
 import GrainOverlay from "@/components/shared/grain-overlay";
 import FeaturedPackages from "@/components/packages/featured-packages";
 import VisualNarratives from "@/components/shared/visual-narratives";
-// import WhyChooseUs from "@/components/shared/why-choose-us";
+import WhyChooseUs from "@/components/shared/why-choose-us";
 import Testimonials from "@/components/shared/testimonials";
 import CTASectionWrapper from "@/components/shared/cta-section-wrapper";
 import type { PackageData } from "@/data/packages";
@@ -171,7 +171,7 @@ export default async function Page() {
       <VisualNarratives />
 
       {/* Why Choose Us Section - Part of static shell */}
-      {/* <WhyChooseUs /> */}
+      <WhyChooseUs />
 
       {/* Testimonials Section - Cached, streams in if needed */}
       <Suspense fallback={<TestimonialsLoading />}>
