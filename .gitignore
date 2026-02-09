@@ -41,3 +41,8 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+
+# Documentation and config files (don't track)
+*.md
+.cursor/
+.github/
