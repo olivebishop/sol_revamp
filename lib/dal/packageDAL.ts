@@ -19,11 +19,22 @@ export async function getAllPackages() {
         description: true,
         pricing: true,
         daysOfTravel: true,
-        images: true,
+        images: true, // Kept for backward compatibility
         maxCapacity: true,
         currentBookings: true,
         isActive: true,
         destination: true,
+        packageImages: { // Include related images from Image model
+          orderBy: [
+            { isHero: "desc" },
+            { displayOrder: "asc" },
+          ],
+          select: {
+            url: true,
+            isHero: true,
+            displayOrder: true,
+          },
+        },
         // Exclude: createdAt, updatedAt, createdBy to reduce payload
       },
     });
