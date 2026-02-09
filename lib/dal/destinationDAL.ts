@@ -1,12 +1,31 @@
 import { prisma } from "@/lib/prisma";
 import { Destination, Prisma } from "@prisma/client";
 
+/**
+ * Get all destinations optimized for list view
+ * Only fetches essential fields for fast loading
+ */
 export async function getAllDestinations() {
   try {
-    return await prisma.destination.findMany({ orderBy: { createdAt: "desc" } });
+    return await prisma.destination.findMany({
+      where: { isPublished: true },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        tagline: true,
+        description: true,
+        heroImage: true,
+        images: true,
+        location: true,
+        highlights: true,
+        isPublished: true,
+        // Exclude: overview, wildlife, bestTimeToVisit, thingsToKnow, whatToPack, accommodation, activities, funFacts, createdAt, updatedAt
+      },
+    });
   } catch (error) {
     console.error("Error fetching destinations:", error);
-    // Return empty array if database is not available
     return [];
   }
 }

@@ -147,6 +147,8 @@ model Destination {
   destinationImages Image[] // New relation to Image model
 
   @@index([slug])
+  @@index([isPublished]) // Fast filtering for published destinations
+  @@index([createdAt]) // Fast sorting by creation date
 }
 
 // Image model - Stores image metadata in database
@@ -211,6 +213,8 @@ model Package {
 
   @@index([slug])
   @@index([packageType])
+  @@index([isActive]) // Fast filtering for active packages
+  @@index([createdAt]) // Fast sorting by creation date
 }
 
 // Package Schedule/Calendar - Specific dates for packages
@@ -333,6 +337,7 @@ model Testimonial {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([isApproved])
-  @@index([createdAt])
+  @@index([isApproved]) // Fast filtering for approved testimonials
+  @@index([createdAt]) // Fast sorting by creation date
+  @@index([isApproved, createdAt]) // Composite index for common query pattern
 }

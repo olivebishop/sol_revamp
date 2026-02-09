@@ -1,6 +1,7 @@
 import { Suspense, cache } from 'react';
 import DestinationsClient from "@/components/destinations/destinations-client";
 import GrainOverlay from "@/components/shared/grain-overlay";
+import { getAllDestinations } from "@/lib/dal/destinationDAL";
 
 export const metadata = {
   title: "Destinations | Explore East Africa",
@@ -41,30 +42,18 @@ const StaticShell = cache(() => {
   );
 });
 
-// Dynamic function to fetch destinations (streams in at runtime)
-// Aggressive caching: prefetch on first load, cache for 1 hour, revalidate via tags
-async function getDestinations() {
+// Cached function to fetch destinations directly from database
+// Using React cache() for request-level memoization - much faster than API routes
+// This eliminates network overhead and queries DB directly
+const getCachedDestinations = cache(async () => {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-    const res = await fetch(`${baseUrl}/api/destinations?listView=true`, {
-      cache: 'force-cache', // Cache aggressively - use cached data when available
-      next: { 
-        tags: ['destinations'], // Allows revalidation via revalidateTag() at runtime
-        revalidate: 3600, // Revalidate every hour (3600 seconds)
-      },
-    } as RequestInit & { next?: { tags?: string[]; revalidate?: number } });
-    
-    if (!res.ok) {
-      return [];
-    }
-    
-    const data = await res.json();
-    return Array.isArray(data) ? data : [];
+    const destinations = await getAllDestinations();
+    return destinations;
   } catch (error) {
     console.error('Error fetching destinations:', error);
     return [];
   }
-}
+});
 
 // Skeleton loader for dynamic destinations content (only the dynamic part)
 function DestinationsLoading() {
@@ -112,8 +101,9 @@ function DestinationsLoading() {
 }
 
 // Dynamic destinations content component (streams in)
+// Uses cached direct database query - much faster than API routes
 async function DestinationsContent() {
-  const destinations = await getDestinations();
+  const destinations = await getCachedDestinations();
   return <DestinationsClient destinations={destinations} />;
 }
 
