@@ -51,14 +51,15 @@ async function getCachedPackages(): Promise<PackageData[]> {
       
       // Priority 1: Use packageImages relation if available
       if (pkg.packageImages && Array.isArray(pkg.packageImages) && pkg.packageImages.length > 0) {
-        packageImages = pkg.packageImages.map((img) => img.url);
+        packageImages = pkg.packageImages.map((img) => img.url).filter(url => url && url.length > 0);
       }
       // Priority 2: Fallback to images array (backward compatibility)
       else if (Array.isArray(pkg.images) && pkg.images.length > 0) {
-        packageImages = pkg.images;
+        packageImages = pkg.images.filter((url): url is string => typeof url === 'string' && url.length > 0);
       }
-      // Priority 3: Default fallback
-      else {
+      
+      // Priority 3: Default fallback if no valid images found
+      if (packageImages.length === 0) {
         packageImages = ["/images/default-package.jpg"];
       }
       

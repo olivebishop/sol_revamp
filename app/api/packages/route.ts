@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { uploadToSupabase } from "@/lib/supabase";
+import { createImages } from "@/lib/dal/images";
 import { revalidateTag } from "next/cache";
 
 export const maxRequestBodySize = '10mb'; // Reduced to prevent Vercel limits (4.5MB actual limit)
@@ -216,6 +217,13 @@ export async function POST(request: NextRequest) {
       const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB per file
       const MAX_TOTAL_SIZE = 10 * 1024 * 1024; // 10MB total
       
+      // Store image metadata for creating Image records
+      const imageMetadata: Array<{
+        url: string;
+        file: File;
+        filePath: string;
+      }> = [];
+      
       for (const imageFile of imageFiles) {
         if (imageFile instanceof File && imageFile.size > 0) {
           // Validate individual file size
@@ -239,6 +247,16 @@ export async function POST(request: NextRequest) {
           try {
             const imageUrl = await uploadToSupabase("packages", imageFile);
             uploadedImages.push(imageUrl);
+            
+            // Extract file path from URL for Image record
+            const urlParts = imageUrl.split(`/storage/v1/object/public/packages/`);
+            const filePath = urlParts.length > 1 ? urlParts[1] : imageFile.name;
+            
+            imageMetadata.push({
+              url: imageUrl,
+              file: imageFile,
+              filePath,
+            });
           } catch (uploadError) {
             console.error("Error uploading package image:", uploadError);
             // Continue with other images even if one fails
@@ -359,6 +377,28 @@ export async function POST(request: NextRequest) {
           createdBy: session.user.id,
         },
       });
+      
+      // Create Image records in database for packageImages relation
+      if (imageMetadata.length > 0 && packageData.id) {
+        try {
+          await createImages(
+            imageMetadata.map((img, index) => ({
+              url: img.url,
+              bucket: "packages",
+              filename: img.file.name,
+              filePath: img.filePath,
+              fileSize: img.file.size,
+              mimeType: img.file.type,
+              isHero: index === 0, // First image is hero
+              displayOrder: index,
+              packageId: packageData.id,
+            }))
+          );
+        } catch (imageError) {
+          console.error("Error creating image records:", imageError);
+          // Continue even if Image record creation fails - package is still created
+        }
+      }
     } catch (dbError) {
       // Prisma/DB error logging
       if (dbError instanceof Error) {
