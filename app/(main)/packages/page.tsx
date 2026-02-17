@@ -58,10 +58,7 @@ async function getCachedPackages(): Promise<PackageData[]> {
         packageImages = pkg.images.filter((url): url is string => typeof url === 'string' && url.length > 0);
       }
       
-      // Priority 3: Default fallback if no valid images found
-      if (packageImages.length === 0) {
-        packageImages = ["/images/default-package.jpg"];
-      }
+      // No default fallback - images must come from database/buckets
       
       return {
         id: pkg.id,

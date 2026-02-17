@@ -12,7 +12,10 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'dehakhyjxyadeogocxxi.supabase.co',
+        // Extract hostname from NEXT_PUBLIC_SUPABASE_URL or use default
+        hostname: process.env.NEXT_PUBLIC_SUPABASE_URL 
+          ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname 
+          : 'dehakhyjxyadeogocxxi.supabase.co', // Fallback to old hostname if env var not set
         pathname: '/storage/v1/object/public/**',
       },
     ],

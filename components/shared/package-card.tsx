@@ -13,7 +13,7 @@ interface PackageCardProps {
 
 export const PackageCard = memo(({ package: pkg }: PackageCardProps) => {
   const [imageError, setImageError] = useState(false);
-  const imageSrc = pkg.images?.[0] || "/images/default-package.jpg";
+  const imageSrc = pkg.images?.[0] || "";
   
   return (
     <motion.div
@@ -28,7 +28,7 @@ export const PackageCard = memo(({ package: pkg }: PackageCardProps) => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="w-full h-full"
         >
-          {!imageError ? (
+          {imageSrc && !imageError ? (
             <Image
               src={imageSrc}
               alt={pkg.name}
@@ -43,7 +43,7 @@ export const PackageCard = memo(({ package: pkg }: PackageCardProps) => {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-zinc-800">
-              <span className="text-gray-500 text-sm">Image not available</span>
+              <span className="text-gray-500 text-sm">No image available</span>
             </div>
           )}
         </motion.div>
