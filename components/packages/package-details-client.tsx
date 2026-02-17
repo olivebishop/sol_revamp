@@ -65,6 +65,7 @@ export default function PackageDetailsClient({
                 alt={pkg.name}
                 fill
                 className="object-cover"
+                unoptimized
               />
               <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"></div>
             </div>
@@ -88,6 +89,7 @@ export default function PackageDetailsClient({
                       alt={`${pkg.name} - View ${index + 1}`}
                       fill
                       className="object-cover"
+                      unoptimized
                     />
                   </button>
                 ))}
