@@ -46,3 +46,6 @@ next-env.d.ts
 *.md
 .cursor/
 .github/
+
+# Skills directory
+skills/

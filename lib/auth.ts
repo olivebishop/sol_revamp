@@ -7,6 +7,12 @@ export const auth = betterAuth({
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
   }),
+  // Allow both production and local development origins for auth flows
+  trustedOrigins: [
+    "https://sol-revamp.vercel.app",
+    "http://localhost:3000",
+    process.env.NEXT_PUBLIC_APP_URL || "",
+  ].filter(Boolean),
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || "",

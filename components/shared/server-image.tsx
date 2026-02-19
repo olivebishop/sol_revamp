@@ -24,7 +24,7 @@ interface ServerImageProps extends Omit<ImageProps, "src"> {
 export const ServerImage = cache(function ServerImage({
   src,
   alt,
-  fallback = "/images/default-image.jpg",
+  fallback = "/images/elephant.png",
   className,
   priority = false,
   sizes,

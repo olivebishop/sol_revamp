@@ -1,8 +1,8 @@
 "use client";
 import { motion } from "motion/react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { SupabaseImage } from "@/components/shared/supabase-image";
 
 interface CTASectionProps {
   title: string;
@@ -100,13 +100,12 @@ export default function CTASection({
                 transition={{ duration: 0.6 }}
                 className="absolute inset-0"
               >
-                <Image
+                <SupabaseImage
                   src={image}
                   alt={title}
-                  fill
-                  className="object-cover"
+                  className="w-full h-full"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 700px"
-                  priority={false}
+                  loading="lazy"
                 />
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-linear-to-r from-black/60 via-black/30 to-transparent lg:bg-linear-to-l" />

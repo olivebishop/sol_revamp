@@ -59,6 +59,7 @@ const FeaturedExperiences = () => {
                       alt={experience.title}
                       fill
                       className="object-cover"
+                      unoptimized
                     />
                   </motion.div>
 

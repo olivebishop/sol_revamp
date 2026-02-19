@@ -126,9 +126,6 @@ export function PackagesClient({ packages: initialPackages }: PackagesClientProp
         break;
     }
 
-    // Debug: Log filtered packages count
-    console.log('Filtered packages count:', result.length);
-    
     return result;
   }, [packages, filters]);
 

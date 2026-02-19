@@ -43,8 +43,6 @@ export async function GET(request: NextRequest) {
         images.push(...packageData.packageImages.map(img => img.url));
       } else if (Array.isArray(packageData.images) && packageData.images.length > 0) {
         images.push(...packageData.images);
-      } else {
-        images.push("/images/default-package.jpg");
       }
       
       return NextResponse.json([{
@@ -83,8 +81,6 @@ export async function GET(request: NextRequest) {
           images = pkg.packageImages.map(img => img.url);
         } else if (Array.isArray(pkg.images) && pkg.images.length > 0) {
           images = pkg.images;
-        } else {
-          images = ["/images/default-package.jpg"];
         }
         
         return {
@@ -143,10 +139,6 @@ export async function GET(request: NextRequest) {
       // Priority 2: Fallback to images array
       else if (Array.isArray(pkg.images) && pkg.images.length > 0) {
         finalImages = pkg.images;
-      }
-      // Priority 3: Default fallback
-      else {
-        finalImages = ["/images/default-package.jpg"];
       }
       
       return {
@@ -345,9 +337,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Use uploaded images if any, otherwise use default
-    const finalImages = uploadedImages.length > 0 
-      ? uploadedImages 
-      : ["/images/default-package.jpg"];
+    // Only use uploaded images from Supabase buckets - no default fallback
+    const finalImages = uploadedImages.length > 0 ? uploadedImages : [];
 
     // Truncate fields to limits before saving
     const truncatedName = name.substring(0, MAX_NAME_LENGTH);

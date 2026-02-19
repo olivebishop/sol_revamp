@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import PackageBookingDrawer from "@/components/packages/package-booking-drawer";
 import { PackageCard } from "@/components/shared/package-card";
 import CTASection from "@/components/shared/cta-section";
 import GrainOverlay from "@/components/shared/grain-overlay";
+import { SupabaseImage } from "@/components/shared/supabase-image";
 
 interface PackageDetailsClientProps {
   package: PackageData;
@@ -59,18 +59,21 @@ export default function PackageDetailsClient({
             transition={{ duration: 0.6 }}
             className="space-y-4"
           >
-            <div className="relative h-64 sm:h-80 md:h-96 lg:h-[500px] rounded overflow-hidden">
-              <Image
-                src={pkg.images[selectedImage]}
-                alt={pkg.name}
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"></div>
-            </div>
+            {pkg.images && Array.isArray(pkg.images) && pkg.images.length > 0 && pkg.images[selectedImage] ? (
+              <>
+                <div className="relative h-64 sm:h-80 md:h-96 lg:h-[500px] rounded overflow-hidden">
+                  <SupabaseImage
+                    src={pkg.images[selectedImage]}
+                    alt={pkg.name}
+                    className="w-full h-full"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"></div>
+                </div>
 
-            {/* Thumbnail Gallery */}
-            {pkg.images.length > 1 && (
+                {/* Thumbnail Gallery */}
+                {pkg.images.length > 1 && (
               <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
                 {pkg.images.map((image, index) => (
                   <button
@@ -83,14 +86,21 @@ export default function PackageDetailsClient({
                         : "opacity-60 hover:opacity-100"
                     }`}
                   >
-                    <Image
+                    <SupabaseImage
                       src={image}
                       alt={`${pkg.name} - View ${index + 1}`}
-                      fill
-                      className="object-cover"
+                      className="w-full h-full"
+                      sizes="(max-width: 768px) 25vw, 150px"
+                      loading="lazy"
                     />
                   </button>
                 ))}
+              </div>
+                )}
+              </>
+            ) : (
+              <div className="relative h-64 sm:h-80 md:h-96 lg:h-[500px] rounded overflow-hidden bg-zinc-900 flex items-center justify-center">
+                <p className="text-gray-500 text-sm">No images available</p>
               </div>
             )}
           </motion.div>

@@ -35,10 +35,7 @@ async function getCachedPackages(): Promise<PackageData[]> {
       else if (Array.isArray(pkg.images) && pkg.images.length > 0) {
         packageImages = pkg.images;
       }
-      // Priority 3: Default fallback
-      else {
-        packageImages = ["/images/default-package.jpg"];
-      }
+      // No default fallback - images must come from database/buckets
       
       return {
         id: pkg.id,

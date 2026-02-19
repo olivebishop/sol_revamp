@@ -1,12 +1,12 @@
 "use client";
 import { motion } from "motion/react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 import type { DestinationData } from "@/data/destinations";
 import { Badge } from "@/components/ui/badge";
 import GrainOverlay from "@/components/shared/grain-overlay";
 import CTASection from "@/components/shared/cta-section";
+import { SupabaseImage } from "@/components/shared/supabase-image";
 
 interface DestinationDetailClientProps {
   destination: DestinationData;
@@ -64,11 +64,11 @@ export default function DestinationDetailClient({
             {/* Right - Hero Image */}
             <div className="lg:col-span-5 order-first lg:order-last">
               <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] rounded overflow-hidden">
-                <Image
+                <SupabaseImage
                   src={destination.heroImage}
                   alt={destination.name}
-                  fill
-                  className="object-cover"
+                  className="w-full h-full"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
                   priority
                 />
               </div>
