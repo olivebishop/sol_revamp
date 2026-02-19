@@ -1,18 +1,17 @@
 "use client";
 import { memo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { MapPin, Calendar } from "lucide-react";
 import type { PackageData } from "@/data/packages";
+import { SupabaseImage } from "@/components/shared/supabase-image";
 
 interface PackageCardProps {
   package: PackageData;
 }
 
 export const PackageCard = memo(({ package: pkg }: PackageCardProps) => {
-  const [imageError, setImageError] = useState(false);
   const imageSrc = pkg.images?.[0] || "";
   
   return (
@@ -28,18 +27,13 @@ export const PackageCard = memo(({ package: pkg }: PackageCardProps) => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="w-full h-full"
         >
-          {imageSrc && !imageError ? (
-            <Image
+          {imageSrc ? (
+            <SupabaseImage
               src={imageSrc}
               alt={pkg.name}
-              fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover"
+              className="w-full h-full"
               loading="lazy"
-              placeholder="blur"
-              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-              onError={() => setImageError(true)}
-              unoptimized
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-zinc-800">

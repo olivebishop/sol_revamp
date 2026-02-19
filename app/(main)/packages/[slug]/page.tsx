@@ -56,6 +56,32 @@ async function getRelatedPackages(packageType: string, excludeId: string) {
 
 // Transform DB package to PackageData format
 function transformPackage(dbPackage: any): PackageData {
+  // Ensure images array is properly formatted
+  let images: string[] = [];
+  
+  // Priority 1: Use merged images array from API (already processed)
+  if (Array.isArray(dbPackage.images) && dbPackage.images.length > 0) {
+    images = dbPackage.images.filter((url: any): url is string => 
+      typeof url === 'string' && url.length > 0
+    );
+  }
+  // Priority 2: Fallback to packageImages relation if available
+  else if (dbPackage.packageImages && Array.isArray(dbPackage.packageImages) && dbPackage.packageImages.length > 0) {
+    images = dbPackage.packageImages
+      .map((img: any) => img.url)
+      .filter((url: string) => url && url.length > 0);
+  }
+  
+  // Log for debugging (remove in production)
+  if (process.env.NODE_ENV === 'development' && images.length === 0) {
+    console.warn(`Package ${dbPackage.slug} has no images`, {
+      hasImagesArray: Array.isArray(dbPackage.images),
+      imagesArrayLength: dbPackage.images?.length || 0,
+      hasPackageImages: !!dbPackage.packageImages,
+      packageImagesLength: dbPackage.packageImages?.length || 0,
+    });
+  }
+  
   return {
     id: dbPackage.id,
     name: dbPackage.name,
@@ -64,7 +90,7 @@ function transformPackage(dbPackage: any): PackageData {
     description: dbPackage.description,
     pricing: dbPackage.pricing,
     daysOfTravel: dbPackage.daysOfTravel,
-    images: dbPackage.images,
+    images,
     maxCapacity: dbPackage.maxCapacity,
     currentBookings: dbPackage.currentBookings,
     isActive: dbPackage.isActive,

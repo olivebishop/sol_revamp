@@ -1,11 +1,11 @@
 "use client";
 import { memo, useMemo } from "react";
 import { motion } from "motion/react";
-import Image from "next/image";
 import Link from "next/link";
 import { MapPin, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import GrainOverlay from "@/components/shared/grain-overlay";
+import { SupabaseImage } from "@/components/shared/supabase-image";
 
 
 interface DestinationsClientProps {
@@ -129,15 +129,13 @@ export default function DestinationsClient({ destinations: initialDestinations }
                       index % 2 === 1 ? "lg:order-2" : ""
                     }`}
                   >
-                    <Image
-                      src={destination.heroImage || "/images/default-destination.jpg"}
+                    <SupabaseImage
+                      src={destination.heroImage || ""}
                       alt={destination.name}
-                      fill
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
-                      className="object-cover group-hover:scale-105 transition-transform duration-700"
                       loading={index < 2 ? "eager" : "lazy"}
                       priority={index < 1}
-                      quality={85}
                     />
                     {destination.location?.country && (
                       <div className="absolute top-6 left-6">

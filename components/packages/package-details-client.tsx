@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import PackageBookingDrawer from "@/components/packages/package-booking-drawer";
 import { PackageCard } from "@/components/shared/package-card";
 import CTASection from "@/components/shared/cta-section";
 import GrainOverlay from "@/components/shared/grain-overlay";
+import { SupabaseImage } from "@/components/shared/supabase-image";
 
 interface PackageDetailsClientProps {
   package: PackageData;
@@ -59,15 +59,15 @@ export default function PackageDetailsClient({
             transition={{ duration: 0.6 }}
             className="space-y-4"
           >
-            {pkg.images && pkg.images.length > 0 ? (
+            {pkg.images && Array.isArray(pkg.images) && pkg.images.length > 0 && pkg.images[selectedImage] ? (
               <>
                 <div className="relative h-64 sm:h-80 md:h-96 lg:h-[500px] rounded overflow-hidden">
-                  <Image
+                  <SupabaseImage
                     src={pkg.images[selectedImage]}
                     alt={pkg.name}
-                    fill
-                    className="object-cover"
-                    unoptimized
+                    className="w-full h-full"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+                    priority
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"></div>
                 </div>
@@ -86,12 +86,12 @@ export default function PackageDetailsClient({
                         : "opacity-60 hover:opacity-100"
                     }`}
                   >
-                    <Image
+                    <SupabaseImage
                       src={image}
                       alt={`${pkg.name} - View ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      unoptimized
+                      className="w-full h-full"
+                      sizes="(max-width: 768px) 25vw, 150px"
+                      loading="lazy"
                     />
                   </button>
                 ))}

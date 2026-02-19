@@ -65,8 +65,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    // Validate file size (max 5MB to match Supabase bucket limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB (matches bucket configuration)
     if (file.size > maxSize) {
       return NextResponse.json(
         { error: "File size exceeds 10MB limit" },
